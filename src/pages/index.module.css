@@ -1,23 +1,307 @@
-/**
- * CSS files with the .module.css suffix will be treated as CSS modules
- * and scoped locally.
- */
+/* ── Hero ───────────────────────────────────────────────────────────────── */
 
-.heroBanner {
-  padding: 4rem 0;
+.hero {
+  background: linear-gradient(160deg, #0f172a 0%, #1e3a5f 100%);
+  padding: 7rem 0 6rem;
   text-align: center;
-  position: relative;
-  overflow: hidden;
+  color: #fff;
 }
 
-@media screen and (max-width: 996px) {
-  .heroBanner {
-    padding: 2rem;
-  }
+.heroEyebrow {
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin: 0 0 0.75rem;
 }
 
-.buttons {
+.heroName {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5rem;
+  color: #fff;
+}
+
+.heroTitle {
+  font-size: 1.35rem;
+  font-weight: 400;
+  color: #e2e8f0;
+  margin: 0 0 0.3rem;
+}
+
+.heroMeta {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  margin: 0 0 2.5rem;
+}
+
+.heroCtas {
   display: flex;
-  align-items: center;
+  gap: 1rem;
   justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ctaPrimary {
+  background: var(--ifm-color-primary);
+  border-color: var(--ifm-color-primary);
+}
+
+.ctaOutline {
+  color: #e2e8f0;
+  border-color: #475569;
+}
+
+.ctaOutline:hover {
+  color: #fff;
+  border-color: #e2e8f0;
+  background: transparent;
+}
+
+/* ── Sections ───────────────────────────────────────────────────────────── */
+
+.section {
+  padding: 5rem 0;
+}
+
+.sectionAlt {
+  background: #f8fafc;
+}
+
+[data-theme='dark'] .sectionAlt {
+  background: #0f172a;
+}
+
+.sectionTitle {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin: 0 0 2.5rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 3px solid var(--ifm-color-primary);
+  display: inline-block;
+}
+
+/* ── Experience ─────────────────────────────────────────────────────────── */
+
+.expCard {
+  position: relative;
+  border-left: 2px solid var(--ifm-color-emphasis-200);
+  padding-left: 2rem;
+  margin-bottom: 3rem;
+}
+
+.expCard:last-child {
+  margin-bottom: 0;
+}
+
+.expDot {
+  position: absolute;
+  left: -5px;
+  top: 8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ifm-color-primary);
+}
+
+.expHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.2rem;
+}
+
+.expTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.expPeriod {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-600);
+  white-space: nowrap;
+  padding-top: 0.2rem;
+}
+
+.expCompany {
+  font-size: 0.9rem;
+  color: var(--ifm-color-primary);
+  font-weight: 600;
+  margin: 0 0 0.9rem;
+}
+
+.expGroupLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ifm-color-emphasis-600);
+  margin: 0.8rem 0 0.3rem;
+}
+
+.expBullets {
+  margin: 0 0 0.25rem;
+  padding-left: 1.25rem;
+}
+
+.expBullets li {
+  font-size: 0.93rem;
+  line-height: 1.65;
+  margin-bottom: 0.4rem;
+  color: var(--ifm-font-color-base);
+}
+
+.techTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 1rem;
+}
+
+.techTag {
+  background: var(--ifm-color-primary);
+  color: #fff;
+  padding: 0.18rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.73rem;
+  font-weight: 600;
+}
+
+/* ── Skills ─────────────────────────────────────────────────────────────── */
+
+.skillsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 1.25rem;
+}
+
+.skillGroup {
+  background: var(--ifm-background-color);
+  border-radius: 10px;
+  padding: 1.25rem 1.25rem 1rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.skillGroupTitle {
+  font-size: 0.73rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ifm-color-primary);
+  margin: 0 0 0.75rem;
+}
+
+.skillPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.skillPill {
+  background: var(--ifm-color-emphasis-100);
+  color: var(--ifm-font-color-base);
+  padding: 0.22rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* ── Education ──────────────────────────────────────────────────────────── */
+
+.eduCard {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+  align-items: start;
+}
+
+.eduCardBorder {
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  margin-bottom: 2rem;
+}
+
+.eduMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-align: right;
+}
+
+.eduPeriod {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.eduGpa {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ifm-color-primary);
+}
+
+.eduDegree {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 0.3rem;
+}
+
+.eduSchool {
+  font-size: 0.9rem;
+  color: var(--ifm-color-emphasis-700);
+  margin: 0 0 0.25rem;
+}
+
+.eduDetail {
+  font-size: 0.83rem;
+  color: var(--ifm-color-emphasis-600);
+  font-style: italic;
+  margin: 0;
+}
+
+/* ── Publications ───────────────────────────────────────────────────────── */
+
+.pubCard {
+  background: var(--ifm-background-color);
+  border-radius: 10px;
+  padding: 1.5rem 1.75rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-left: 4px solid var(--ifm-color-primary);
+}
+
+.pubCitation {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  margin: 0 0 0.75rem;
+}
+
+.pubLink {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+
+@media screen and (max-width: 768px) {
+  .hero {
+    padding: 5rem 1.5rem 4rem;
+  }
+
+  .eduCard {
+    grid-template-columns: 1fr;
+  }
+
+  .eduMeta {
+    text-align: left;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
 }
