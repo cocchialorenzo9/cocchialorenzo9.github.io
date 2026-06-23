@@ -348,12 +348,37 @@ const SHOE_TIPS = [
   "Top picks 2026 for beginners: ASICS Superblast 3 (versatile top pick), ASICS Novablast 5 (value), Nike Vomero Plus (maximum comfort).",
 ];
 
+const typeColors = {
+  easy:  { bg: "#e8f5e9", color: "#2e7d32", border: "#a5d6a7" },
+  tempo: { bg: "#fff3e0", color: "#e65100", border: "#ffcc80" },
+  long:  { bg: "#e3f2fd", color: "#1565c0", border: "#90caf9" },
+  race:  { bg: "#f3e5f5", color: "#6a1b9a", border: "#ce93d8" },
+  swim:  { bg: "#e0f7fa", color: "#00695c", border: "#80deea" },
+  rest:  { bg: "#f5f5f5", color: "#616161", border: "#bdbdbd" },
+};
+
+function ReadinessBar({ value, label, color }) {
+  const pct = Math.max(0, Math.min(100, value ?? 0));
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#666", marginBottom: 3 }}>
+        <span>{label}</span><span style={{ fontWeight: 700, color }}>{value ?? "—"}</span>
+      </div>
+      <div style={{ height: 5, background: "#eee", borderRadius: 3, overflow: "hidden" }}>
+        <div style={{ height: "100%", width: `${pct}%`, background: color, borderRadius: 3, transition: "width 0.4s" }} />
+      </div>
+    </div>
+  );
+}
+
 export default function MarathonPage() {
   const [activeWeek, setActiveWeek] = useState(null);
   const [activePhase, setActivePhase] = useState(null);
   const [activeRes, setActiveRes] = useState(null);
-  const [view, setView] = useState("weeks");
+  const [view, setView] = useState("today");
   const [isMobile, setIsMobile] = useState(false);
+  const [coach, setCoach] = useState(null);
+  const [coachLoading, setCoachLoading] = useState(true);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 480);
@@ -362,7 +387,15 @@ export default function MarathonPage() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
+  useEffect(() => {
+    fetch('/data/coach.json')
+      .then(r => r.json())
+      .then(data => { setCoach(data); setCoachLoading(false); })
+      .catch(() => setCoachLoading(false));
+  }, []);
+
   const TABS = [
+    { id: "today", label: "🤖 Today" },
     { id: "weeks", label: "📅 Plan" },
     { id: "nutrition", label: "🥗 Nutrition" },
     { id: "resources", label: "📚 Resources" },
@@ -433,6 +466,126 @@ export default function MarathonPage() {
             </button>
           ))}
         </div>
+
+        {view === "today" && (
+          <div style={{ padding: pad }}>
+            {coachLoading && (
+              <div style={{ textAlign: "center", padding: "40px 0", color: "#999", fontSize: 13 }}>Loading coaching data…</div>
+            )}
+
+            {!coachLoading && !coach && (
+              <div style={{ background: "#fff3e0", border: "1.5px solid #ffcc80", borderRadius: 11, padding: 16, textAlign: "center" }}>
+                <div style={{ fontSize: 20, marginBottom: 8 }}>⚠️</div>
+                <div style={{ fontWeight: 700, color: "#e65100", marginBottom: 6 }}>No coaching data yet</div>
+                <div style={{ fontSize: 12, color: "#555" }}>Run <code style={{ background: "#fbe9e7", padding: "2px 6px", borderRadius: 4 }}>/update-coach</code> in Claude Code at the end of your training day to generate tomorrow's recommendation.</div>
+              </div>
+            )}
+
+            {!coachLoading && coach && (() => {
+              const rec = coach.recommendation || {};
+              const ready = coach.readiness || {};
+              const tc = typeColors[rec.type] || typeColors.easy;
+              const noData = ready.score == null;
+              const readyScore = ready.score ?? 0;
+              const readyColor = readyScore >= 70 ? "#22c55e" : readyScore >= 45 ? "#f59e0b" : "#ef4444";
+              const hrvDelta = ready.hrv?.delta_pct;
+              const hrvColor = hrvDelta == null ? "#999" : hrvDelta >= 0 ? "#22c55e" : hrvDelta >= -15 ? "#f59e0b" : "#ef4444";
+
+              return (
+                <>
+                  {/* Header card */}
+                  <div style={{ background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%)", borderRadius: 12, padding: isMobile ? "14px" : "18px", color: "white", marginBottom: 12 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+                      <div>
+                        <div style={{ fontSize: 10, letterSpacing: 2, opacity: 0.5, textTransform: "uppercase", marginBottom: 4 }}>Tomorrow's coaching</div>
+                        <div style={{ fontSize: isMobile ? 15 : 17, fontWeight: 800 }}>{rec.title || "—"}</div>
+                        <div style={{ fontSize: 10, opacity: 0.5, marginTop: 3 }}>Generated {coach.date} · {coach.daysToRace} days to race · {coach.phase} phase</div>
+                      </div>
+                      {!noData && (
+                        <div style={{ textAlign: "center", background: "rgba(255,255,255,0.08)", borderRadius: 10, padding: "8px 14px", flexShrink: 0 }}>
+                          <div style={{ fontSize: 26, fontWeight: 900, color: readyColor, lineHeight: 1 }}>{ready.score}</div>
+                          <div style={{ fontSize: 9, opacity: 0.6, marginTop: 2 }}>READINESS</div>
+                        </div>
+                      )}
+                    </div>
+
+                    {!noData && (
+                      <div style={{ display: "flex", gap: 6, marginTop: 12, flexWrap: "wrap" }}>
+                        {ready.hrv?.value && (
+                          <div style={{ background: "rgba(255,255,255,0.07)", borderRadius: 8, padding: "5px 10px", fontSize: 11 }}>
+                            <span style={{ opacity: 0.5 }}>HRV </span>
+                            <span style={{ fontWeight: 700, color: hrvColor }}>{ready.hrv.value}</span>
+                            {hrvDelta != null && <span style={{ opacity: 0.5 }}> ({hrvDelta > 0 ? "+" : ""}{hrvDelta}%)</span>}
+                          </div>
+                        )}
+                        {ready.restingHR?.value && (
+                          <div style={{ background: "rgba(255,255,255,0.07)", borderRadius: 8, padding: "5px 10px", fontSize: 11 }}>
+                            <span style={{ opacity: 0.5 }}>RHR </span>
+                            <span style={{ fontWeight: 700 }}>{ready.restingHR.value}</span>
+                          </div>
+                        )}
+                        {ready.sleep?.hours && (
+                          <div style={{ background: "rgba(255,255,255,0.07)", borderRadius: 8, padding: "5px 10px", fontSize: 11 }}>
+                            <span style={{ opacity: 0.5 }}>Sleep </span>
+                            <span style={{ fontWeight: 700 }}>{ready.sleep.hours}h</span>
+                            {ready.sleep.score && <span style={{ opacity: 0.5 }}> / {ready.sleep.score}</span>}
+                          </div>
+                        )}
+                        {ready.tsb != null && (
+                          <div style={{ background: "rgba(255,255,255,0.07)", borderRadius: 8, padding: "5px 10px", fontSize: 11 }}>
+                            <span style={{ opacity: 0.5 }}>TSB </span>
+                            <span style={{ fontWeight: 700, color: ready.tsb >= 0 ? "#4ade80" : ready.tsb >= -15 ? "#fbbf24" : "#f87171" }}>{ready.tsb > 0 ? "+" : ""}{Math.round(ready.tsb)}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Recommendation card */}
+                  <div style={{ border: `1.5px solid ${tc.border}`, background: tc.bg, borderRadius: 11, padding: isMobile ? "12px" : "16px", marginBottom: 10 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                      <span style={{ background: tc.color, color: "white", borderRadius: 8, padding: "3px 9px", fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>{rec.type || "—"}</span>
+                    </div>
+                    <div style={{ fontSize: 13, color: "#333", lineHeight: 1.6, marginBottom: 10 }}>{rec.sessionDetail}</div>
+                    {rec.reasoning && (
+                      <div style={{ background: "rgba(0,0,0,0.04)", borderRadius: 8, padding: "10px 12px", borderLeft: `3px solid ${tc.color}` }}>
+                        <div style={{ fontSize: 10, fontWeight: 700, color: tc.color, marginBottom: 4 }}>WHY</div>
+                        <div style={{ fontSize: 12, color: "#444", lineHeight: 1.5 }}>{rec.reasoning}</div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Bike + swim notes */}
+                  {rec.bikeNote && (
+                    <div style={{ background: "#f0faf2", border: "1.5px solid #b2ddd1", borderRadius: 9, padding: "10px 12px", marginBottom: 8 }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: "#2e7d32", marginBottom: 3 }}>🚲 Cycling</div>
+                      <div style={{ fontSize: 12, color: "#444" }}>{rec.bikeNote}</div>
+                    </div>
+                  )}
+                  {rec.swimNote && (
+                    <div style={{ background: "#e0f7fa", border: "1.5px solid #80deea", borderRadius: 9, padding: "10px 12px", marginBottom: 8 }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: "#00695c", marginBottom: 3 }}>🏊 Swimming</div>
+                      <div style={{ fontSize: 12, color: "#444" }}>{rec.swimNote}</div>
+                    </div>
+                  )}
+
+                  {/* Training load bars */}
+                  {(ready.ctl != null || ready.atl != null) && (
+                    <div style={{ background: "white", border: "1.5px solid #e0e0e0", borderRadius: 9, padding: "12px 14px", marginTop: 10 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "#1a1a2e", marginBottom: 10 }}>Training Load</div>
+                      <ReadinessBar value={Math.round(ready.ctl)} label="CTL — Fitness (42-day)" color="#3b82f6" />
+                      <ReadinessBar value={Math.round(ready.atl)} label="ATL — Fatigue (7-day)" color="#f59e0b" />
+                    </div>
+                  )}
+
+                  <div style={{ marginTop: 12, fontSize: 10, color: "#bbb", textAlign: "center" }}>
+                    Run <code>/update-coach</code> in Claude Code to refresh
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        )}
 
         {view === "weeks" && (
           <div style={{ padding: pad }}>
