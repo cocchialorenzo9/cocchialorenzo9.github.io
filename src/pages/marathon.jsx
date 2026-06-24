@@ -388,7 +388,7 @@ export default function MarathonPage() {
   }, []);
 
   useEffect(() => {
-    fetch('/data/coach.json')
+    fetch('https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/coach.json')
       .then(r => r.json())
       .then(data => { setCoach(data); setCoachLoading(false); })
       .catch(() => setCoachLoading(false));
