@@ -7,7 +7,7 @@ import {
 } from 'recharts';
 
 const COACH_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/coach.json';
-const HISTORY_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/history.json';
+const HISTORY_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/chart-data.json';
 
 const typeColors = {
   easy: "#4CAF93",
@@ -94,7 +94,6 @@ export default function VibeDashboard() {
   const scoreCol = scoreColor(readiness?.score);
 
   const last90 = history.slice(-90).map(e => ({ ...e, date: e.date?.slice(5) }));
-  const last30hrv = history.slice(-30).map(e => ({ date: e.date?.slice(5), hrv: e.hrv || null }));
   const weeklyVol = groupByWeek(history);
   const hasCharts = history.length > 0;
 
@@ -264,24 +263,6 @@ export default function VibeDashboard() {
                     <Line type="monotone" dataKey="ctl" stroke="#4CAF93" dot={false} name="CTL (Fitness)" strokeWidth={2} />
                     <Line type="monotone" dataKey="atl" stroke="#E8A838" dot={false} name="ATL (Fatigue)" strokeWidth={2} />
                     <Line type="monotone" dataKey="tsb" stroke="#7B68EE" dot={false} name="TSB (Form)" strokeWidth={1.5} strokeDasharray="4 2" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-
-            {/* HRV Trend */}
-            {hasCharts && last30hrv.some(e => e.hrv) && (
-              <div style={{ marginBottom: 32 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 12 }}>
-                  HRV Trend — last 30 days
-                </h3>
-                <ResponsiveContainer width="100%" height={160}>
-                  <LineChart data={last30hrv} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-                    <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={Math.floor(last30hrv.length / 5)} />
-                    <YAxis tick={{ fontSize: 10 }} />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="hrv" stroke="#E05C5C" dot={false} name="HRV" strokeWidth={2} connectNulls />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
