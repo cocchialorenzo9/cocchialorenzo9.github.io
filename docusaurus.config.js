@@ -46,6 +46,11 @@ const config = {
         hideOnScroll: true,
         items: [
           {
+            to: '/projects',
+            label: '🗂 Projects',
+            position: 'left',
+          },
+          {
             to: '/marathon',
             label: '🏃 Marathon',
             position: 'left',
