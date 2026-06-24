@@ -8,6 +8,7 @@ import {
 
 const COACH_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/coach.json';
 const HISTORY_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/chart-data.json';
+const PLAN_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/training-plan.json';
 
 const typeColors = {
   easy: "#4CAF93",
@@ -16,6 +17,15 @@ const typeColors = {
   race: "#E05C5C",
   swim: "#4FC3F7",
   rest: "#9E9E9E",
+};
+
+const typeLabels = {
+  easy: "Easy",
+  tempo: "Quality",
+  long: "Long Run",
+  race: "RACE",
+  swim: "Swim",
+  rest: "Rest",
 };
 
 const phaseColors = {
@@ -64,9 +74,115 @@ function groupByWeek(history) {
   return Object.values(weeks).slice(-12);
 }
 
+function getUpcomingDays(plan, n = 7) {
+  if (!plan?.weeks) return [];
+  const today = new Date().toISOString().slice(0, 10);
+  const upcoming = [];
+  for (const week of plan.weeks) {
+    for (const day of week.days || []) {
+      if (day.date > today && upcoming.length < n) {
+        upcoming.push({ ...day, phase: week.phase, weekLabel: week.label });
+      }
+    }
+  }
+  return upcoming;
+}
+
+function UpcomingDayCard({ day, isMobile }) {
+  const [open, setOpen] = useState(false);
+  const color = typeColors[day.training?.type] || "#9E9E9E";
+  const label = typeLabels[day.training?.type] || day.training?.type || "Rest";
+  const d = new Date(day.date + 'T00:00:00');
+  const dateStr = d.toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric' });
+
+  return (
+    <div style={{
+      border: `1.5px solid ${open ? color : "#e0e0e0"}`,
+      borderRadius: 12,
+      background: open ? `${color}08` : "#fff",
+      marginBottom: 8,
+      overflow: "hidden",
+      transition: "border-color 0.15s",
+    }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: "100%", textAlign: "left", background: "none", border: "none",
+          cursor: "pointer", padding: "12px 14px",
+          display: "flex", alignItems: "center", gap: 10,
+        }}
+      >
+        <div style={{ flexShrink: 0, textAlign: "center", minWidth: 44 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#1a1a2e" }}>{dateStr.split(' ')[0]}</div>
+          <div style={{ fontSize: 13, fontWeight: 800, color: "#1a1a2e" }}>{dateStr.split(' ').slice(1).join(' ')}</div>
+        </div>
+        <div style={{ flex: 1 }}>
+          {day.training ? (
+            <>
+              <span style={{
+                background: color, color: "white", borderRadius: 6,
+                padding: "2px 7px", fontSize: 10, fontWeight: 700,
+                textTransform: "uppercase", letterSpacing: "0.04em", marginRight: 7,
+              }}>{label}</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#1a1a2e" }}>
+                {day.training.title}
+              </span>
+            </>
+          ) : (
+            <span style={{ fontSize: 13, color: "#999" }}>Rest day</span>
+          )}
+          {day.bigPicture && (
+            <div style={{ fontSize: 11, color: "#888", marginTop: 2, lineHeight: 1.4 }}>
+              {day.bigPicture.slice(0, 80)}{day.bigPicture.length > 80 ? '…' : ''}
+            </div>
+          )}
+        </div>
+        <div style={{ fontSize: 11, color: "#ccc", transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s", flexShrink: 0 }}>▼</div>
+      </button>
+
+      {open && (
+        <div style={{ padding: "0 14px 14px 14px" }}>
+          {day.training?.detail && (
+            <div style={{
+              fontSize: 13, color: "#444", lineHeight: 1.55,
+              borderLeft: `3px solid ${color}`, paddingLeft: 10, marginBottom: 10,
+            }}>
+              {day.training.detail}
+            </div>
+          )}
+          {day.bigPicture && (
+            <p style={{ fontSize: 12, color: "#555", margin: "0 0 8px 0", lineHeight: 1.55 }}>
+              {day.bigPicture}
+            </p>
+          )}
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {day.movement && (
+              <div style={{
+                background: "#f0faf2", borderRadius: 8, padding: "6px 10px",
+                fontSize: 11, color: "#2e7d32", flex: "1 1 140px",
+              }}>
+                <span style={{ fontWeight: 700 }}>🚲 Move: </span>{day.movement}
+              </div>
+            )}
+            {day.food && (
+              <div style={{
+                background: "#fffbf0", borderRadius: 8, padding: "6px 10px",
+                fontSize: 11, color: "#7a5200", flex: "1 1 140px",
+              }}>
+                <span style={{ fontWeight: 700 }}>🍝 Food: </span>{day.food}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function VibeDashboard() {
   const [coach, setCoach] = useState(null);
   const [history, setHistory] = useState([]);
+  const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -81,9 +197,11 @@ export default function VibeDashboard() {
     Promise.all([
       fetch(COACH_URL).then(r => r.json()).catch(() => null),
       fetch(HISTORY_URL).then(r => r.json()).catch(() => []),
-    ]).then(([coachData, histData]) => {
+      fetch(PLAN_URL).then(r => r.json()).catch(() => null),
+    ]).then(([coachData, histData, planData]) => {
       setCoach(coachData);
       setHistory(Array.isArray(histData) ? histData : []);
+      setPlan(planData);
       setLoading(false);
     });
   }, []);
@@ -100,7 +218,8 @@ export default function VibeDashboard() {
   const weeklyVol = groupByWeek(history);
   const hasCharts = history.length > 0;
 
-  // Derive race date from coach.date + daysToRace
+  const upcomingDays = getUpcomingDays(plan, 7);
+
   const raceDate = (() => {
     if (!coach?.date || !coach?.daysToRace) return null;
     const d = new Date(coach.date + 'T00:00:00');
@@ -137,53 +256,55 @@ export default function VibeDashboard() {
           <div style={{ color: "#E05C5C", textAlign: "center", padding: 64 }}>Could not load coach data.</div>
         ) : notStarted ? (
           /* ── Pre-training state ── */
-          <div style={{ textAlign: "center", padding: isMobile ? "32px 0" : "56px 0" }}>
-            <div style={{ fontSize: 56, marginBottom: 16 }}>🗓️</div>
-            <div style={{
-              fontSize: isMobile ? 64 : 88,
-              fontWeight: 900,
-              color: "#1a1a2e",
-              lineHeight: 1,
-              marginBottom: 8,
-            }}>
-              {coach.daysToRace}
+          <>
+            <div style={{ textAlign: "center", padding: isMobile ? "32px 0 24px" : "48px 0 32px" }}>
+              <div style={{ fontSize: 56, marginBottom: 16 }}>🗓️</div>
+              <div style={{
+                fontSize: isMobile ? 64 : 88,
+                fontWeight: 900,
+                color: "#1a1a2e",
+                lineHeight: 1,
+                marginBottom: 8,
+              }}>
+                {coach.daysToRace}
+              </div>
+              <div style={{ fontSize: 18, fontWeight: 600, color: "#555", marginBottom: 4 }}>
+                days to race day
+              </div>
+              {raceDate && (
+                <div style={{ fontSize: 13, color: "#999", marginBottom: 28 }}>
+                  Munich Marathon · {raceDate}
+                </div>
+              )}
+              <div style={{
+                display: "inline-block",
+                background: "#f8f9fa",
+                border: "1.5px solid #e0e0e0",
+                borderRadius: 14,
+                padding: "18px 24px",
+                maxWidth: 420,
+                textAlign: "left",
+              }}>
+                <p style={{ fontSize: 14, color: "#444", margin: "0 0 0 0", lineHeight: 1.6 }}>
+                  Training hasn't started yet. This dashboard will come alive once daily coach
+                  updates begin — showing readiness scores, workout recommendations, and
+                  training load trends.
+                </p>
+              </div>
             </div>
-            <div style={{ fontSize: 18, fontWeight: 600, color: "#555", marginBottom: 4 }}>
-              days to race day
-            </div>
-            {raceDate && (
-              <div style={{ fontSize: 13, color: "#999", marginBottom: 32 }}>
-                Munich Marathon · {raceDate}
+
+            {/* Show upcoming plan even before training starts */}
+            {upcomingDays.length > 0 && (
+              <div style={{ marginBottom: 32 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 12 }}>
+                  Coming up — first 7 sessions
+                </h3>
+                {upcomingDays.map(day => (
+                  <UpcomingDayCard key={day.date} day={day} isMobile={isMobile} />
+                ))}
               </div>
             )}
-            <div style={{
-              display: "inline-block",
-              background: "#f8f9fa",
-              border: "1.5px solid #e0e0e0",
-              borderRadius: 14,
-              padding: "20px 28px",
-              maxWidth: 420,
-              textAlign: "left",
-            }}>
-              <p style={{ fontSize: 14, color: "#444", margin: "0 0 12px 0", lineHeight: 1.6 }}>
-                Training hasn't started yet. This dashboard will come alive once daily coach
-                updates begin — showing readiness scores, workout recommendations, and
-                training load trends.
-              </p>
-              <Link
-                to="/marathon"
-                style={{
-                  display: "inline-block",
-                  fontSize: 13,
-                  fontWeight: 700,
-                  color: "#4CAF93",
-                  textDecoration: "none",
-                }}
-              >
-                View the training plan →
-              </Link>
-            </div>
-          </div>
+          </>
         ) : (
           <>
             {/* Hero */}
@@ -353,6 +474,7 @@ export default function VibeDashboard() {
                 padding: "28px 24px",
                 textAlign: "center",
                 background: "#fafafa",
+                marginBottom: 32,
               }}>
                 <div style={{ fontSize: 36, marginBottom: 12 }}>📈</div>
                 <div style={{ fontWeight: 700, fontSize: 15, color: "#1a1a2e", marginBottom: 6 }}>
@@ -364,14 +486,31 @@ export default function VibeDashboard() {
                 </p>
               </div>
             )}
+
+            {/* Upcoming Days */}
+            {upcomingDays.length > 0 && (
+              <div style={{ marginBottom: 32 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 12 }}>
+                  Next 7 sessions
+                </h3>
+                {upcomingDays.map(day => (
+                  <UpcomingDayCard key={day.date} day={day} isMobile={isMobile} />
+                ))}
+              </div>
+            )}
           </>
         )}
 
-        <div style={{ fontSize: 11, color: "#bbb", textAlign: "center", marginTop: 40 }}>
+        {/* Footer */}
+        <div style={{ fontSize: 11, color: "#bbb", textAlign: "center", marginTop: 20, paddingTop: 20, borderTop: "1px solid #f0f0f0" }}>
           Updated daily via{' '}
           <a href="https://github.com/cocchialorenzo9/vibe-marathon" style={{ color: "#bbb" }}>
             vibe-marathon
           </a>
+          {' · '}
+          <Link to="/marathon" style={{ color: "#bbb" }}>
+            view full base plan
+          </Link>
         </div>
       </div>
     </Layout>
