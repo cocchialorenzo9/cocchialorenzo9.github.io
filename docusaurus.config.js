@@ -51,11 +51,6 @@ const config = {
             position: 'left',
           },
           {
-            to: '/marathon',
-            label: '🏃 Marathon',
-            position: 'left',
-          },
-          {
             href: 'mailto:cocchialorenzo@gmail.com',
             label: 'Email',
             position: 'right',
