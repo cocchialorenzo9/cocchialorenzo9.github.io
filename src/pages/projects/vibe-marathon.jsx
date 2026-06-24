@@ -93,9 +93,20 @@ export default function VibeDashboard() {
   const recColor = typeColors[rec?.type] || "#9E9E9E";
   const scoreCol = scoreColor(readiness?.score);
 
+  const notStarted = readiness?.score == null && history.length === 0;
+  const noHistory = readiness?.score != null && history.length === 0;
+
   const last90 = history.slice(-90).map(e => ({ ...e, date: e.date?.slice(5) }));
   const weeklyVol = groupByWeek(history);
   const hasCharts = history.length > 0;
+
+  // Derive race date from coach.date + daysToRace
+  const raceDate = (() => {
+    if (!coach?.date || !coach?.daysToRace) return null;
+    const d = new Date(coach.date + 'T00:00:00');
+    d.setDate(d.getDate() + coach.daysToRace);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  })();
 
   const px = isMobile ? "12px 14px" : "32px 28px";
 
@@ -124,6 +135,55 @@ export default function VibeDashboard() {
           <div style={{ color: "#888", textAlign: "center", padding: 64, fontSize: 15 }}>Loading…</div>
         ) : !coach ? (
           <div style={{ color: "#E05C5C", textAlign: "center", padding: 64 }}>Could not load coach data.</div>
+        ) : notStarted ? (
+          /* ── Pre-training state ── */
+          <div style={{ textAlign: "center", padding: isMobile ? "32px 0" : "56px 0" }}>
+            <div style={{ fontSize: 56, marginBottom: 16 }}>🗓️</div>
+            <div style={{
+              fontSize: isMobile ? 64 : 88,
+              fontWeight: 900,
+              color: "#1a1a2e",
+              lineHeight: 1,
+              marginBottom: 8,
+            }}>
+              {coach.daysToRace}
+            </div>
+            <div style={{ fontSize: 18, fontWeight: 600, color: "#555", marginBottom: 4 }}>
+              days to race day
+            </div>
+            {raceDate && (
+              <div style={{ fontSize: 13, color: "#999", marginBottom: 32 }}>
+                Munich Marathon · {raceDate}
+              </div>
+            )}
+            <div style={{
+              display: "inline-block",
+              background: "#f8f9fa",
+              border: "1.5px solid #e0e0e0",
+              borderRadius: 14,
+              padding: "20px 28px",
+              maxWidth: 420,
+              textAlign: "left",
+            }}>
+              <p style={{ fontSize: 14, color: "#444", margin: "0 0 12px 0", lineHeight: 1.6 }}>
+                Training hasn't started yet. This dashboard will come alive once daily coach
+                updates begin — showing readiness scores, workout recommendations, and
+                training load trends.
+              </p>
+              <Link
+                to="/marathon"
+                style={{
+                  display: "inline-block",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: "#4CAF93",
+                  textDecoration: "none",
+                }}
+              >
+                View the training plan →
+              </Link>
+            </div>
+          </div>
         ) : (
           <>
             {/* Hero */}
@@ -286,16 +346,22 @@ export default function VibeDashboard() {
               </div>
             )}
 
-            {!hasCharts && (
+            {noHistory && (
               <div style={{
+                border: "1.5px solid #e0e0e0",
+                borderRadius: 14,
+                padding: "28px 24px",
                 textAlign: "center",
-                color: "#aaa",
-                fontSize: 13,
-                padding: "32px 0",
-                border: "1.5px dashed #e0e0e0",
-                borderRadius: 12,
+                background: "#fafafa",
               }}>
-                Charts will appear after the first <code>/update-coach</code> run populates history data.
+                <div style={{ fontSize: 36, marginBottom: 12 }}>📈</div>
+                <div style={{ fontWeight: 700, fontSize: 15, color: "#1a1a2e", marginBottom: 6 }}>
+                  Training has started — charts building up
+                </div>
+                <p style={{ fontSize: 13, color: "#888", margin: 0, lineHeight: 1.6 }}>
+                  Today's data is in. Training load, weekly volume, and trend charts will
+                  appear here as daily updates accumulate over the coming days.
+                </p>
               </div>
             )}
           </>
