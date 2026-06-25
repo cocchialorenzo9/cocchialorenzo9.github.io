@@ -1,0 +1,93 @@
+{
+  "timeline": [
+    { "id": "t1", "date": "2026-07-10", "time": "8:00 AM", "emoji": "🔑", "label": "Key handover" },
+    { "id": "t2", "date": "2026-07-12", "emoji": "📦", "label": "Moving weekend" },
+    { "id": "t3", "date": "2026-07-15", "emoji": "🌐", "label": "Internet setup" },
+    { "id": "t4", "date": "2026-08-01", "emoji": "🎉", "label": "Housewarming party" }
+  ],
+  "rooms": [
+    {
+      "id": "living",
+      "name": "Living Room",
+      "emoji": "🛋️",
+      "items": [
+        { "id": "lr_desk", "label": "Standing desk", "priority": "high", "reportUrl": "/reports/standing-desk.html", "deliveryHint": "3–5 days · free" },
+        { "id": "lr2", "label": "Coffee table", "priority": "high" },
+        { "id": "lr3", "label": "TV unit / cabinet", "priority": "high" },
+        { "id": "lr5", "label": "Floor lamp", "priority": "medium" },
+        { "id": "lr7", "label": "Bookshelf", "priority": "low" },
+        { "id": "lr_sofa", "label": "Sofa", "owned": true }
+      ]
+    },
+    {
+      "id": "bedroom",
+      "name": "Bedroom",
+      "emoji": "🛏️",
+      "items": [
+        { "id": "br1", "label": "Bed frame", "priority": "high" },
+        { "id": "br_desk", "label": "Standing desk", "priority": "high", "reportUrl": "/reports/standing-desk.html", "deliveryHint": "3–5 days · free" },
+        { "id": "br4", "label": "Curtains / blackout blinds", "priority": "high" },
+        { "id": "br5", "label": "Bedside tables (×2)", "priority": "medium" },
+        { "id": "br6", "label": "Bedside lamps (×2)", "priority": "medium" },
+        { "id": "br_mattress", "label": "Mattress", "owned": true },
+        { "id": "br_wardrobe", "label": "Wardrobe", "owned": true }
+      ]
+    },
+    {
+      "id": "kitchen",
+      "name": "Kitchen",
+      "emoji": "🍳",
+      "items": [
+        { "id": "kt_fridge", "label": "Fridge", "priority": "high", "reportUrl": "/reports/fridge-guide.html", "deliveryHint": "from 2 days · free–€39.90" },
+        { "id": "kt1", "label": "Gio's like table", "priority": "high" },
+        { "id": "kt2", "label": "Chairs (×4)", "priority": "high" },
+        { "id": "kt5", "label": "Dish rack", "priority": "medium" },
+        { "id": "kt3", "label": "Pots & pans set", "owned": true },
+        { "id": "kt4", "label": "Knife block & knives", "owned": true },
+        { "id": "kt6", "label": "Cutting boards", "owned": true },
+        { "id": "kt7", "label": "Storage containers", "owned": true }
+      ]
+    },
+    {
+      "id": "bathroom",
+      "name": "Bathroom",
+      "emoji": "🚿",
+      "items": [
+        { "id": "ba2", "label": "Towel rack / hooks", "priority": "high" },
+        { "id": "ba7", "label": "Shower caddy", "priority": "high" },
+        { "id": "ba8", "label": "Sink organiser", "priority": "high" },
+        { "id": "ba5", "label": "Shower curtain (if needed)", "priority": "medium" },
+        { "id": "ba1", "label": "Towels (×4+)", "owned": true },
+        { "id": "ba3", "label": "Bath mat", "owned": true },
+        { "id": "ba4", "label": "Mirror / cabinet", "owned": true }
+      ]
+    },
+    {
+      "id": "hallway",
+      "name": "Entrance / Hallway",
+      "emoji": "🚪",
+      "items": [
+        { "id": "ha1", "label": "Shoe rack", "priority": "medium" },
+        { "id": "ha2", "label": "Coat hooks / rack", "priority": "medium" },
+        { "id": "ha3", "label": "Doormat", "priority": "medium" },
+        { "id": "ha4", "label": "Mirror", "priority": "low" }
+      ]
+    },
+    {
+      "id": "balcony",
+      "name": "Balcony",
+      "emoji": "🌿",
+      "items": [
+        { "id": "bl3", "label": "Bee hotel", "priority": "low" },
+        { "id": "bl1", "label": "Outdoor table", "owned": true },
+        { "id": "bl2", "label": "Outdoor chairs", "owned": true }
+      ]
+    }
+  ],
+  "utilities": [
+    { "id": "u1", "label": "Water", "note": "Included in Fernwärme", "status": "included" },
+    { "id": "u2", "label": "Heating", "note": "Included in Fernwärme", "status": "included" },
+    { "id": "u3", "label": "Internet", "note": "On track", "status": "in-progress" },
+    { "id": "u4", "label": "Electricity", "note": "", "status": "todo", "reportUrl": "/reports/electricity-munich.html" }
+  ]
+}

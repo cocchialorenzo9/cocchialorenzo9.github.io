@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Electricity Providers Munich 2026 – Comparison by Tariff Type</title>
+<style>
+  :root {
+    --paper:   #F1F0EB;
+    --ink:     #1B1B19;
+    --muted:   #71706A;
+    --border:  #CAC7BE;
+    --surface: #E8E6DF;
+
+    --t1: #3A5F8A;
+    --t1-light: #D8E5F3;
+    --t2: #1A5438;
+    --t2-light: #D3EAE0;
+    --t3: #7A5A14;
+    --t3-light: #F0E4C4;
+    --t4: #6B2D6B;
+    --t4-light: #EDD8ED;
+
+    --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --mono: "SF Mono", "Cascadia Code", "Fira Mono", "Courier New", monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: var(--paper); }
+
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    background: var(--paper);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+
+  .page { max-width: 960px; margin: 0 auto; padding: 56px 32px 80px; }
+
+  /* ── HEADER ── */
+  .report-header {
+    display: flex; flex-direction: column; gap: 0;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 24px; margin-bottom: 32px;
+  }
+  .report-meta {
+    font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 14px; font-weight: 500;
+  }
+  .report-title {
+    font-size: clamp(30px, 5vw, 48px); font-weight: 700;
+    letter-spacing: -.025em; line-height: 1.05; text-wrap: balance; margin-bottom: 14px;
+  }
+  .report-subtitle { font-size: 15px; color: var(--muted); max-width: 620px; line-height: 1.55; }
+
+  /* ── SUMMARY STRIP ── */
+  .summary-strip {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    border: 1px solid var(--border); background: var(--surface); margin-bottom: 48px;
+  }
+  .stat { padding: 18px 20px; border-right: 1px solid var(--border); }
+  .stat:last-child { border-right: none; }
+  .stat-value {
+    font-family: var(--mono); font-size: 22px; font-weight: 600;
+    letter-spacing: -.02em; font-variant-numeric: tabular-nums;
+    color: var(--ink); display: block; margin-bottom: 3px;
+  }
+  .stat-label { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+
+  /* ── TIER SECTION ── */
+  .tier {
+    margin-bottom: 40px; display: grid;
+    grid-template-columns: 28px 1fr; gap: 0 20px;
+  }
+  .tier-rail { display: flex; align-items: flex-start; padding-top: 4px; }
+  .tier-code {
+    writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg);
+    font-size: 9px; letter-spacing: .16em; text-transform: uppercase;
+    font-weight: 700; color: white; background: var(--tier-color);
+    padding: 10px 6px; white-space: nowrap; height: fit-content;
+  }
+  .tier-body { min-width: 0; }
+  .tier-head {
+    display: flex; align-items: baseline; gap: 14px; padding: 14px 20px;
+    background: var(--tier-bg); border-left: 4px solid var(--tier-color); margin-bottom: 2px;
+  }
+  .tier-name { font-size: 20px; font-weight: 700; letter-spacing: -.02em; color: var(--tier-color); }
+  .tier-band {
+    font-family: var(--mono); font-size: 13px; font-weight: 600;
+    color: var(--tier-color); font-variant-numeric: tabular-nums; opacity: .75;
+  }
+  .tier-desc {
+    font-size: 13px; color: var(--muted); padding: 10px 20px;
+    border-left: 4px solid var(--tier-color); background: var(--tier-bg);
+    margin-bottom: 8px; line-height: 1.5;
+  }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; border-left: 4px solid var(--tier-color); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 700px; }
+  thead tr { background: var(--ink); color: var(--paper); }
+  thead th {
+    padding: 9px 12px; text-align: left; font-size: 10px;
+    letter-spacing: .10em; text-transform: uppercase; font-weight: 600; white-space: nowrap;
+  }
+  thead th:first-child { padding-left: 16px; }
+  thead th.col-center { text-align: center; }
+  tbody tr { border-bottom: 1px solid var(--border); background: white; }
+  tbody tr:nth-child(even) { background: var(--paper); }
+  tbody tr:hover { background: var(--tier-bg); }
+  tbody td { padding: 11px 12px; vertical-align: middle; }
+  tbody td:first-child { padding-left: 16px; }
+
+  .provider-name { font-weight: 600; font-size: 13.5px; color: var(--ink); display: block; }
+  .provider-name a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+  .provider-name a:hover { color: var(--tier-color); }
+  .provider-brand { font-size: 11px; color: var(--muted); display: block; margin-top: 1px; }
+  .provider-note  { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; font-style: italic; }
+
+  .dim, .price-val {
+    font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12.5px; white-space: nowrap;
+  }
+  .price-val { font-weight: 700; font-size: 14px; color: var(--ink); }
+  .price-note { font-size: 10px; color: var(--muted); display: block; margin-top: 1px; font-family: var(--sans); }
+
+  .pick-badge {
+    display: inline-block; font-size: 10px; font-weight: 700; color: #7a5a14;
+    background: #f0e4c4; border-radius: 2px; padding: 1px 6px; margin-top: 3px;
+    letter-spacing: .04em; text-transform: uppercase;
+  }
+
+  /* ── STATUS BADGES ── */
+  .badge {
+    display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px;
+    border-radius: 2px; letter-spacing: .04em; white-space: nowrap;
+  }
+  .green-badge   { background: #d3eae0; color: #1a5438; }
+  .dynamic-badge { background: #d8e5f3; color: #3a5f8a; }
+  .nolock-badge  { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+  .warn-badge    { background: #ffe5cc; color: #8a3a14; }
+
+  .col-center { text-align: center; }
+
+  /* ── TIER VARS ── */
+  .t1 { --tier-color: var(--t1); --tier-bg: var(--t1-light); }
+  .t2 { --tier-color: var(--t2); --tier-bg: var(--t2-light); }
+  .t3 { --tier-color: var(--t3); --tier-bg: var(--t3-light); }
+  .t4 { --tier-color: var(--t4); --tier-bg: var(--t4-light); }
+
+  /* ── NOTES ── */
+  .notes { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); }
+  .notes-title {
+    font-size: 11px; letter-spacing: .10em; text-transform: uppercase;
+    font-weight: 700; color: var(--muted); margin-bottom: 14px;
+  }
+  .notes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .note-block { padding: 14px 16px; background: var(--surface); border-left: 3px solid var(--border); }
+  .note-block strong { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: var(--ink); }
+  .note-block p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── SOURCES ── */
+  .sources { margin-top: 28px; font-size: 11px; color: var(--muted); }
+  .sources strong { display: block; letter-spacing: .08em; text-transform: uppercase; font-size: 10px; font-weight: 700; margin-bottom: 6px; }
+  .sources ul { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 16px; }
+  .sources li::before { content: "→ "; color: var(--border); }
+  .sources a { text-decoration: underline; text-underline-offset: 2px; }
+  .sources a:hover { color: var(--ink); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .page { padding: 32px 16px 60px; }
+    .summary-strip { grid-template-columns: 1fr; }
+    .stat { border-right: none; border-bottom: 1px solid var(--border); }
+    .tier { grid-template-columns: 1fr; }
+    .tier-rail { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="report-header">
+    <div class="report-meta">Munich, Germany &nbsp;·&nbsp; As of June 2026 &nbsp;·&nbsp; Prices incl. 19% VAT &nbsp;·&nbsp; Basis: 2,500 kWh/year</div>
+    <h1 class="report-title">Electricity Providers<br>in Munich</h1>
+    <p class="report-subtitle">
+      Four tariff tiers — from the expensive automatic default to cheapest fixed-rate deals, flexible digital providers, and certified Ökostrom specialists. For a typical 1–2 person household in Munich.
+    </p>
+  </header>
+
+  <div class="summary-strip">
+    <div class="stat">
+      <span class="stat-value">€632 – €961</span>
+      <span class="stat-label">Annual cost range @ 2,500 kWh</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">10 providers</span>
+      <span class="stat-label">Across 4 tariff tiers</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">6 certified ✓</span>
+      <span class="stat-label">Ökostrom options</span>
+    </div>
+  </div>
+
+  <!-- TIER 1: GRUNDVERSORGUNG -->
+  <section class="tier t1">
+    <div class="tier-rail"><div class="tier-code">Tier 01</div></div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Grundversorgung</span>
+        <span class="tier-band">~€961/year</span>
+      </div>
+      <p class="tier-desc">
+        The statutory fallback: if you move into a flat and don't actively choose a provider, SWM automatically supplies you at this rate. Price-regulated by law but consistently the most expensive option — every other tier is cheaper. You can leave Grundversorgung with just 2 weeks' notice, no penalty.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Provider</th>
+              <th>Tariff</th>
+              <th>Grundpreis (€/mo)</th>
+              <th>Arbeitspreis (ct/kWh)</th>
+              <th>Est. annual cost</th>
+              <th>Min. term</th>
+              <th>Price guarantee</th>
+              <th class="col-center">Ökostrom</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="provider-name"><a href="https://www.swm.de/privatkunden/strom" target="_blank" rel="noopener noreferrer">SWM Stadtwerke München</a></span>
+                <span class="provider-note">Designated local grid operator for Munich</span>
+              </td>
+              <td><span class="dim">Grundversorgung</span></td>
+              <td><span class="dim">€12.48</span></td>
+              <td><span class="dim">32.44 ct</span></td>
+              <td>
+                <span class="price-val">€961</span>
+                <span class="price-note"><span class="warn-badge badge">most expensive</span></span>
+              </td>
+              <td><span class="dim">None</span><span class="provider-note">statutory supply</span></td>
+              <td><span class="dim">None</span></td>
+              <td class="col-center">—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIER 2: BEST FIXED-TERM -->
+  <section class="tier t2">
+    <div class="tier-rail"><div class="tier-code">Tier 02</div></div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Best Fixed-Term Contracts</span>
+        <span class="tier-band">~€820 – €857/year</span>
+      </div>
+      <p class="tier-desc">
+        Standard 12–24 month contracts with a locked price — the simplest way to save €100+ over Grundversorgung with no surprises. eprimo (an E.ON brand) is the cheapest conventional option. Elli (owned by VW Group) offers TÜV-certified green electricity at a small premium with a 24-month lock-in.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Provider</th>
+              <th>Tariff</th>
+              <th>Grundpreis (€/mo)</th>
+              <th>Arbeitspreis (ct/kWh)</th>
+              <th>Est. annual cost</th>
+              <th>Min. term</th>
+              <th>Price guarantee</th>
+              <th class="col-center">Ökostrom</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="provider-name"><a href="https://www.eprimo.de" target="_blank" rel="noopener noreferrer">eprimo</a></span>
+                <span class="provider-brand">E.ON discount brand</span>
+                <span class="pick-badge">Best value conventional</span>
+              </td>
+              <td><span class="dim">PrimaKlima Pur</span></td>
+              <td><span class="dim">€10.93</span></td>
+              <td><span class="dim">27.54 ct</span></td>
+              <td>
+                <span class="price-val">€820</span>
+                <span class="price-note">−€141 vs. SWM</span>
+              </td>
+              <td><span class="dim">12 months</span></td>
+              <td><span class="dim">12 months</span></td>
+              <td class="col-center">—</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="provider-name"><a href="https://www.elli.eco/de/strom" target="_blank" rel="noopener noreferrer">Elli</a></span>
+                <span class="provider-brand">Volkswagen Group Energy</span>
+              </td>
+              <td><span class="dim">Classic24</span></td>
+              <td><span class="dim">€8.80</span></td>
+              <td><span class="dim">30.06 ct</span></td>
+              <td>
+                <span class="price-val">€857</span>
+                <span class="price-note">−€104 vs. SWM</span>
+              </td>
+              <td><span class="dim">24 months</span></td>
+              <td><span class="dim">24 months</span></td>
+              <td class="col-center"><span class="badge green-badge">TÜV</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIER 3: FLEXIBLE / DIGITAL -->
+  <section class="tier t3">
+    <div class="tier-rail"><div class="tier-code">Tier 03</div></div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Flexible &amp; Digital</span>
+        <span class="tier-band">€638/year (or variable)</span>
+      </div>
+      <p class="tier-desc">
+        App-first providers with monthly-cancellation options or smart dynamic pricing. Ostrom SimplyFair is the cheapest tariff in Munich at €638/year — but that rate adjusts monthly with the market. Tibber tracks hourly spot prices and rewards load-shifting to cheap hours, but requires a smart meter and discipline.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Provider</th>
+              <th>Tariff</th>
+              <th>Grundpreis (€/mo)</th>
+              <th>Arbeitspreis (ct/kWh)</th>
+              <th>Est. annual cost</th>
+              <th>Min. term</th>
+              <th>Price guarantee</th>
+              <th class="col-center">Ökostrom</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="provider-name"><a href="https://www.ostrom.de/en/our-tariff" target="_blank" rel="noopener noreferrer">Ostrom SimplyFair</a></span>
+                <span class="provider-brand">Ostrom</span>
+                <span class="pick-badge">Cheapest overall</span>
+                <span class="badge nolock-badge" style="margin-top:3px;display:inline-block;">No lock-in</span>
+              </td>
+              <td><span class="dim">SimplyFair (monthly)</span></td>
+              <td><span class="dim">€6.00</span></td>
+              <td><span class="dim">22.62 ct</span></td>
+              <td>
+                <span class="price-val">€638</span>
+                <span class="price-note">rate adjusts monthly</span>
+              </td>
+              <td><span class="dim">None</span></td>
+              <td><span class="dim">1 month</span></td>
+              <td class="col-center">—</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="provider-name"><a href="https://www.ostrom.de/en/our-tariff" target="_blank" rel="noopener noreferrer">Ostrom SimplyFair12</a></span>
+                <span class="provider-brand">Ostrom</span>
+              </td>
+              <td><span class="dim">SimplyFair12</span></td>
+              <td><span class="dim">€18.14</span></td>
+              <td><span class="dim">29.16 ct</span></td>
+              <td>
+                <span class="price-val">€947</span>
+                <span class="price-note">rate locked 12 months</span>
+              </td>
+              <td><span class="dim">12 months</span></td>
+              <td><span class="dim">12 months</span></td>
+              <td class="col-center">—</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="provider-name"><a href="https://tibber.com/de/strompreise" target="_blank" rel="noopener noreferrer">Tibber</a></span>
+                <span class="provider-brand">Tibber GmbH</span>
+                <span class="badge dynamic-badge" style="margin-top:3px;display:inline-block;">Hourly pricing</span>
+                <span class="badge nolock-badge" style="margin-top:3px;display:inline-block;">No lock-in</span>
+              </td>
+              <td><span class="dim">Tibber Power</span></td>
+              <td><span class="dim">€5.99</span></td>
+              <td>
+                <span class="dim">Spot market</span>
+                <span class="provider-note">+ 2.15 ct markup · avg ~35.71 ct (Jun 2026)</span>
+              </td>
+              <td>
+                <span class="price-val">€760–€1,020</span>
+                <span class="price-note">low end = ~20% load shifted to cheap hours</span>
+              </td>
+              <td><span class="dim">None</span></td>
+              <td><span class="dim">None</span><span class="provider-note">hourly market rate</span></td>
+              <td class="col-center">—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIER 4: CERTIFIED ÖKOSTROM -->
+  <section class="tier t4">
+    <div class="tier-rail"><div class="tier-code">Tier 04</div></div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Certified Ökostrom</span>
+        <span class="tier-band">~€632 – €1,015/year</span>
+      </div>
+      <p class="tier-desc">
+        Providers where renewable certification is the core offering. The surprise: immergrün's all-in tariff is the single cheapest option in the entire comparison — certified green electricity beats most conventional providers on price. Polarstern is Munich-headquartered and carries the Grüner Strom Label. Green Planet Energy is the only provider holding all three major certifications simultaneously. Naturstrom costs slightly more than SWM but offers the strictest label combination.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Provider</th>
+              <th>Tariff</th>
+              <th>Grundpreis (€/mo)</th>
+              <th>Arbeitspreis (ct/kWh)</th>
+              <th>Est. annual cost</th>
+              <th>Min. term</th>
+              <th>Price guarantee</th>
+              <th class="col-center">Certification</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="provider-name"><a href="https://www.immergruen.de" target="_blank" rel="noopener noreferrer">immergrün! Energie</a></span>
+                <span class="provider-brand">immergrün! Energie GmbH</span>
+                <span class="pick-badge">Cheapest certified green</span>
+              </td>
+              <td><span class="dim">Spar Smart FairMax</span></td>
+              <td><span class="dim">incl. in AP</span></td>
+              <td><span class="dim">25.26 ct</span></td>
+              <td>
+                <span class="price-val">~€632</span>
+                <span class="price-note">all-in rate · no separate GP</span>
+              </td>
+              <td><span class="dim">12 months</span></td>
+              <td><span class="dim">12 months</span></td>
+              <td class="col-center"><span class="badge green-badge">TÜV SÜD</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="provider-name"><a href="https://www.polarstern-energie.de/oekostrom-muenchen/" target="_blank" rel="noopener noreferrer">Polarstern</a></span>
+                <span class="provider-brand">Polarstern GmbH · Munich-headquartered</span>
+                <span class="badge nolock-badge" style="margin-top:3px;display:inline-block;">No lock-in</span>
+              </td>
+              <td><span class="dim">Wirklich Ökostrom Klassik</span></td>
+              <td><span class="dim">€15.95</span></td>
+              <td><span class="dim">30.05 ct</span></td>
+              <td>
+                <span class="price-val">€943</span>
+                <span class="price-note">local Munich provider</span>
+              </td>
+              <td><span class="dim">None</span></td>
+              <td><span class="dim">4 weeks</span></td>
+              <td class="col-center">
+                <span class="badge green-badge" style="display:block;margin-bottom:3px;">Grüner Strom</span>
+                <span class="badge green-badge">TÜV Nord</span>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <span class="provider-name"><a href="https://green-planet-energy.de/privatkunden/oekostrom/tarif-oekostrom-aktiv" target="_blank" rel="noopener noreferrer">Green Planet Energy</a></span>
+                <span class="provider-brand">Green Planet Energy eG (fmr. Greenpeace Energy)</span>
+                <span class="pick-badge">All 3 major certifications</span>
+                <span class="badge nolock-badge" style="margin-top:3px;display:inline-block;">No lock-in</span>
+              </td>
+              <td><span class="dim">Ökostrom aktiv</span></td>
+              <td><span class="dim">€13.90</span></td>
+              <td><span class="dim">31.63 ct</span></td>
+              <td>
+                <span class="price-val">€958</span>
+                <span class="price-note">only triple-certified provider</span>
+              </td>
+              <td><span class="dim">None</span></td>
+              <td><span class="dim">4–6 weeks</span></td>
+              <td class="col-center">
+                <span class="badge green-badge" style="display:block;margin-bottom:3px;">ok-power+</span>
+                <span class="badge green-badge" style="display:block;margin-bottom:3px;">Grüner Strom</span>
+                <span class="badge green-badge">TÜV Nord</span>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <span class="provider-name"><a href="https://www.lichtblick.de/strom/oekostrom/" target="_blank" rel="noopener noreferrer">LichtBlick</a></span>
+                <span class="provider-brand">LichtBlick SE</span>
+                <span class="badge nolock-badge" style="margin-top:3px;display:inline-block;">No lock-in</span>
+              </td>
+              <td><span class="dim">ÖkoStrom Vario</span></td>
+              <td><span class="dim">€9.78</span></td>
+              <td><span class="dim">33.66 ct</span></td>
+              <td>
+                <span class="price-val">€959</span>
+                <span class="price-note">monthly cancellation</span>
+              </td>
+              <td><span class="dim">None</span></td>
+              <td><span class="dim">1 month</span></td>
+              <td class="col-center"><span class="badge green-badge">TÜV SÜD</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="provider-name"><a href="https://www.naturstrom.de/privatkunden/oekostrom/" target="_blank" rel="noopener noreferrer">Naturstrom</a></span>
+                <span class="provider-brand">Naturstrom AG</span>
+                <span class="badge nolock-badge" style="margin-top:3px;display:inline-block;">No lock-in</span>
+              </td>
+              <td><span class="dim">naturstrom</span></td>
+              <td><span class="dim">€11.90</span></td>
+              <td><span class="dim">34.90 ct</span></td>
+              <td>
+                <span class="price-val">€1,015</span>
+                <span class="price-note">strictest certification · no lock-in</span>
+              </td>
+              <td><span class="dim">None</span></td>
+              <td><span class="dim">~12 months</span></td>
+              <td class="col-center">
+                <span class="badge green-badge" style="display:block;margin-bottom:3px;">ok-power</span>
+                <span class="badge green-badge">Grüner Strom</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- NOTES -->
+  <div class="notes">
+    <p class="notes-title">Notes &amp; Context</p>
+    <div class="notes-grid">
+      <div class="note-block">
+        <strong>What is Grundversorgung?</strong>
+        <p>The statutory fallback that every German grid operator must provide. In Munich, SWM is the designated Grundversorger. If you move in and do nothing, you land here automatically. It's reliable — just overpriced. You can exit with only 2 weeks' notice and no cancellation fee.</p>
+      </div>
+      <div class="note-block">
+        <strong>How to switch providers</strong>
+        <p>Sign up online with any new provider — they handle the switch paperwork with SWM and your grid operator automatically. The process takes 2–4 weeks; you don't need to contact SWM yourself. For competitive contracts, check the Kündigungsfrist (usually 6 weeks before the Mindestlaufzeit ends) to avoid auto-renewal into a new term.</p>
+      </div>
+      <div class="note-block">
+        <strong>Ökostrom certification hierarchy</strong>
+        <p><strong>1. Grüner Strom Label &amp; ok-power</strong> (best): require direct investment in new German renewable plants — Naturstrom uses both. <strong>2. TÜV SÜD/Nord</strong>: certifies renewable origin but no new-plant investment required — most providers here. <strong>3. Self-declared "100% renewable"</strong>: no third-party audit, weakest claim. Only labels 1 and 2 are independently verified.</p>
+      </div>
+      <div class="note-block">
+        <strong>Tibber &amp; dynamic pricing</strong>
+        <p>Prices update every hour based on the European Day-Ahead market. You need a smart meter (Intelligentes Messsystem / iMSys) — ask your landlord if one is installed. Without one, Tibber temporarily puts you on a provisional fixed rate. Smart meters are mandatory for new builds and properties drawing ≥10 kW, but many older Munich flats don't have one yet.</p>
+      </div>
+      <div class="note-block">
+        <strong>Ostrom's monthly rate can change</strong>
+        <p>The SimplyFair (monthly) rate of 22.62 ct/kWh reflects June 2026 market conditions. Ostrom adjusts this monthly — it was higher in 2024/2025 and can rise in winter when spot prices increase. Their SimplyFair12 locks in a rate for 12 months at a higher per-kWh price; use it if you want predictability.</p>
+      </div>
+      <div class="note-block">
+        <strong>Hidden caveats to watch</strong>
+        <p>New-customer bonuses (Neukundenbonus) are often paid only after 12 months — cancel early and you forfeit them. Check whether the price guarantee covers taxes and levies (Steuern &amp; Abgaben) or only the energy component; most guarantees cover energy only, so surcharges can still rise. Always compare with your exact Munich postal code on Check24 or Verivox — prices vary by network zone.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOURCES -->
+  <div class="sources">
+    <strong>Sources</strong>
+    <ul>
+      <li><a href="https://www.swm.de/strom/preisanpassung" target="_blank" rel="noopener noreferrer">SWM Preisanpassung 2026</a></li>
+      <li><a href="https://www.swm.de/dam/doc/strom/preise-strom-2026-02.pdf" target="_blank" rel="noopener noreferrer">SWM Preisblatt Feb 2026 (PDF)</a></li>
+      <li><a href="https://support.ostrom.de/de/articles/14499089-preisanpassung-2026-simplyfair" target="_blank" rel="noopener noreferrer">Ostrom Preisanpassung 2026</a></li>
+      <li><a href="https://www.ostrom.de/en/our-tariff" target="_blank" rel="noopener noreferrer">Ostrom tariff page</a></li>
+      <li><a href="https://tibber.com/de/strompreise" target="_blank" rel="noopener noreferrer">Tibber Strompreise</a></li>
+      <li><a href="https://www.eprimo.de" target="_blank" rel="noopener noreferrer">eprimo.de</a></li>
+      <li><a href="https://www.elli.eco/de/strom" target="_blank" rel="noopener noreferrer">Elli Strom</a></li>
+      <li><a href="https://www.lichtblick.de/strom/oekostrom/" target="_blank" rel="noopener noreferrer">LichtBlick Ökostrom</a></li>
+      <li><a href="https://www.naturstrom.de/privatkunden/oekostrom/" target="_blank" rel="noopener noreferrer">Naturstrom</a></li>
+      <li><a href="https://www.immergruen.de" target="_blank" rel="noopener noreferrer">immergrün! Energie</a></li>
+      <li><a href="https://www.polarstern-energie.de/oekostrom-muenchen/" target="_blank" rel="noopener noreferrer">Polarstern München</a></li>
+      <li><a href="https://green-planet-energy.de/privatkunden/oekostrom/tarif-oekostrom-aktiv" target="_blank" rel="noopener noreferrer">Green Planet Energy</a></li>
+      <li><a href="https://strom-report.com/stromvergleich-muenchen/" target="_blank" rel="noopener noreferrer">Strom-Report München</a></li>
+      <li><a href="https://www.check24.de/strom-gas/stadt/muenchen/" target="_blank" rel="noopener noreferrer">CHECK24 München</a></li>
+      <li><a href="https://www.verivox.de/strom/" target="_blank" rel="noopener noreferrer">Verivox Stromvergleich</a></li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

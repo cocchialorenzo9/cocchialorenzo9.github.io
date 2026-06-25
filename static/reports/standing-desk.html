@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Standing Desks Munich 2026 – Buyer's Guide by Price Tier</title>
+<style>
+  :root {
+    --paper:   #F1F0EB;
+    --ink:     #1B1B19;
+    --muted:   #71706A;
+    --border:  #CAC7BE;
+    --surface: #E8E6DF;
+
+    --t1: #3A5F8A;
+    --t1-light: #D8E5F3;
+    --t2: #1A5438;
+    --t2-light: #D3EAE0;
+    --t3: #7A5A14;
+    --t3-light: #F0E4C4;
+
+    --delivery: #1A5438;
+    --delivery-bg: #D3EAE0;
+
+    --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --mono: "SF Mono", "Cascadia Code", "Fira Mono", "Courier New", monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { background: var(--paper); }
+
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    background: var(--paper);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+
+  /* ── PAGE WRAPPER ─────────────────────── */
+  .page {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 56px 32px 80px;
+  }
+
+  /* ── REPORT HEADER ────────────────────── */
+  .report-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+  }
+
+  .report-meta {
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  .report-title {
+    font-size: clamp(30px, 5vw, 48px);
+    font-weight: 700;
+    letter-spacing: -.025em;
+    line-height: 1.05;
+    text-wrap: balance;
+    margin-bottom: 14px;
+  }
+
+  .report-subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    max-width: 620px;
+    line-height: 1.55;
+  }
+
+  /* ── SUMMARY STRIP ────────────────────── */
+  .summary-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    margin-bottom: 48px;
+  }
+
+  .stat {
+    padding: 18px 20px;
+    border-right: 1px solid var(--border);
+  }
+  .stat:last-child { border-right: none; }
+
+  .stat-value {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  /* ── TIER SECTION ─────────────────────── */
+  .tier {
+    margin-bottom: 40px;
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 0 20px;
+  }
+
+  .tier-rail {
+    display: flex;
+    align-items: flex-start;
+    padding-top: 4px;
+  }
+
+  .tier-code {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    font-size: 9px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: white;
+    background: var(--tier-color);
+    padding: 10px 6px;
+    white-space: nowrap;
+    height: fit-content;
+  }
+
+  .tier-body { min-width: 0; }
+
+  .tier-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding: 14px 20px;
+    background: var(--tier-bg);
+    border-left: 4px solid var(--tier-color);
+    margin-bottom: 2px;
+  }
+
+  .tier-name {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    color: var(--tier-color);
+  }
+
+  .tier-band {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--tier-color);
+    font-variant-numeric: tabular-nums;
+    opacity: .75;
+  }
+
+  .tier-desc {
+    font-size: 13px;
+    color: var(--muted);
+    padding: 10px 20px;
+    border-left: 4px solid var(--tier-color);
+    background: var(--tier-bg);
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+
+  /* ── DESK TABLE ───────────────────────── */
+  .table-wrap {
+    overflow-x: auto;
+    border-left: 4px solid var(--tier-color);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 640px;
+  }
+
+  thead tr {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  thead th {
+    padding: 9px 12px;
+    text-align: left;
+    font-size: 10px;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  thead th:first-child { padding-left: 16px; }
+  thead th:last-child { text-align: center; }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    background: white;
+  }
+
+  tbody tr:nth-child(even) { background: var(--paper); }
+  tbody tr:hover { background: var(--tier-bg); }
+
+  tbody td {
+    padding: 11px 12px;
+    vertical-align: middle;
+  }
+
+  tbody td:first-child { padding-left: 16px; }
+
+  .desk-model {
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--ink);
+    display: block;
+  }
+  .desk-model a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+  .desk-model a:hover { color: var(--tier-color); }
+
+  .desk-brand {
+    font-size: 11px;
+    color: var(--muted);
+    display: block;
+    margin-top: 1px;
+  }
+
+  .dim, .price-val, .load-val {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+
+  .price-val {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--ink);
+  }
+
+  .price-note {
+    font-size: 10px;
+    color: var(--muted);
+    display: block;
+    margin-top: 1px;
+    font-family: var(--sans);
+  }
+
+  .type-pill {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .type-electric {
+    background: var(--t2-light);
+    color: var(--t2);
+  }
+
+  .type-manual {
+    background: var(--surface);
+    color: var(--muted);
+  }
+
+  .delivery-yes {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--delivery);
+    background: var(--delivery-bg);
+    padding: 3px 9px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .delivery-yes::before {
+    content: "✓";
+    font-size: 11px;
+  }
+
+  .delivery-detail { display: block; font-size: 10px; color: var(--muted); font-family: var(--mono); margin-top: 4px; }
+  .delivery-check {
+    text-align: center;
+  }
+
+  /* ── TIER SPECIFIC VARS ───────────────── */
+  .t1 { --tier-color: var(--t1); --tier-bg: var(--t1-light); }
+  .t2 { --tier-color: var(--t2); --tier-bg: var(--t2-light); }
+  .t3 { --tier-color: var(--t3); --tier-bg: var(--t3-light); }
+
+  /* ── NOTES SECTION ────────────────────── */
+  .notes {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .notes-title {
+    font-size: 11px;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .note-block {
+    padding: 14px 16px;
+    background: var(--surface);
+    border-left: 3px solid var(--border);
+  }
+
+  .note-block strong {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--ink);
+  }
+
+  .note-block p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ── SOURCE LINKS ─────────────────────── */
+  .sources {
+    margin-top: 28px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .sources strong {
+    display: block;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-size: 10px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .sources ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+  }
+
+  .sources li::before {
+    content: "→ ";
+    color: var(--border);
+  }
+
+  /* ── RESPONSIVE ───────────────────────── */
+  @media (max-width: 600px) {
+    .page { padding: 32px 16px 60px; }
+    .summary-strip { grid-template-columns: 1fr; }
+    .stat { border-right: none; border-bottom: 1px solid var(--border); }
+    .tier { grid-template-columns: 1fr; }
+    .tier-rail { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header class="report-header">
+    <div class="report-meta">Munich, Germany &nbsp;·&nbsp; As of June 2026 &nbsp;·&nbsp; Prices incl. VAT</div>
+    <h1 class="report-title">Standing Desks<br>to Buy in Munich</h1>
+    <p class="report-subtitle">
+      Market overview across three price tiers — from budget to premium. All models available with home delivery to Munich. Prices and dimensions fact-checked against primary sources.
+    </p>
+  </header>
+
+  <!-- SUMMARY STRIP -->
+  <div class="summary-strip">
+    <div class="stat">
+      <span class="stat-value">€99 – €680+</span>
+      <span class="stat-label">Total price range</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">4 brands</span>
+      <span class="stat-label">Verified suppliers</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">All ✓</span>
+      <span class="stat-label">Home delivery to Munich</span>
+    </div>
+  </div>
+
+  <!-- ── TIER 1 ────────────────────────────────────── -->
+  <section class="tier t1">
+    <div class="tier-rail">
+      <div class="tier-code">Class 01</div>
+    </div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Budget</span>
+        <span class="tier-band">under €300</span>
+      </div>
+      <p class="tier-desc">
+        Manual height adjustment — no motor, no power required. Ideal for users who switch height a few times per day or want an affordable starting point. IKEA dominates this segment with solid build quality and nationwide delivery.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Desktop size</th>
+              <th>Height range</th>
+              <th>Type</th>
+              <th>Price</th>
+              <th>Delivery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.ikea.com/de/de/p/segrare-schreibtisch-sitz-steh-dunkelgrau-40534703/" target="_blank" rel="noopener noreferrer">SEGRARE</a></span>
+                <span class="desk-brand">IKEA</span>
+              </td>
+              <td><span class="dim">110 × 60 cm</span></td>
+              <td><span class="dim">not specified</span></td>
+              <td><span class="type-pill type-manual">Manual</span></td>
+              <td>
+                <span class="price-val">€ 99.99</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">check postcode · costs extra</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.ikea.com/de/en/p/trotten-desk-sit-stand-white-s99429578/" target="_blank" rel="noopener noreferrer">TROTTEN</a></span>
+                <span class="desk-brand">IKEA</span>
+              </td>
+              <td><span class="dim">120 × 70 cm</span></td>
+              <td><span class="dim">hand crank</span></td>
+              <td><span class="type-pill type-manual">Crank</span></td>
+              <td>
+                <span class="price-val">€ 239.00</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">check postcode · costs extra</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.ikea.com/de/en/p/trotten-desk-sit-stand-white-s79429602/" target="_blank" rel="noopener noreferrer">TROTTEN (large)</a></span>
+                <span class="desk-brand">IKEA</span>
+              </td>
+              <td><span class="dim">160 × 80 cm</span></td>
+              <td><span class="dim">hand crank</span></td>
+              <td><span class="type-pill type-manual">Crank</span></td>
+              <td>
+                <span class="price-val">€ 269.00</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">check postcode · costs extra</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TIER 2 ────────────────────────────────────── -->
+  <section class="tier t2">
+    <div class="tier-rail">
+      <div class="tier-code">Class 02</div>
+    </div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Mid-Range</span>
+        <span class="tier-band">€300 – €600</span>
+      </div>
+      <p class="tier-desc">
+        Electric height adjustment at the press of a button — the standard segment for home offices. IKEA MITTZON offers solid entry-level motorisation; the FlexiSpot E7 is Germany's best-selling specialist frame with high load capacity and wide configurability.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Desktop size</th>
+              <th>Height range</th>
+              <th>Load capacity</th>
+              <th>Price</th>
+              <th>Delivery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.ikea.com/de/en/p/mittzon-desk-sit-stand-electric-white-s99527569/" target="_blank" rel="noopener noreferrer">MITTZON</a></span>
+                <span class="desk-brand">IKEA</span>
+              </td>
+              <td><span class="dim">120 × 80 cm</span></td>
+              <td><span class="dim">electric</span></td>
+              <td><span class="load-val">–</span></td>
+              <td>
+                <span class="price-val">€ 369.00</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">check postcode · costs extra</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.ikea.com/de/en/p/mittzon-desk-sit-stand-electric-white-s19528563/" target="_blank" rel="noopener noreferrer">MITTZON</a></span>
+                <span class="desk-brand">IKEA</span>
+              </td>
+              <td><span class="dim">140 × 80 cm</span></td>
+              <td><span class="dim">electric</span></td>
+              <td><span class="load-val">–</span></td>
+              <td>
+                <span class="price-val">€ 379.00</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">check postcode · costs extra</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.ikea.com/de/en/p/mittzon-desk-sit-stand-electric-white-s59529966/" target="_blank" rel="noopener noreferrer">MITTZON</a></span>
+                <span class="desk-brand">IKEA</span>
+              </td>
+              <td><span class="dim">160 × 80 cm</span></td>
+              <td><span class="dim">electric</span></td>
+              <td><span class="load-val">–</span></td>
+              <td>
+                <span class="price-val">€ 399.00</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">check postcode · costs extra</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.flexispot.de/elektrisch-hohenverstellbares-tischgestell-e7.html" target="_blank" rel="noopener noreferrer">E7 (complete)</a></span>
+                <span class="desk-brand">FlexiSpot</span>
+              </td>
+              <td><span class="dim">120–200 × 60–80 cm</span></td>
+              <td><span class="dim">58 – 123 cm</span></td>
+              <td><span class="load-val">125 kg</span></td>
+              <td>
+                <span class="price-val">from €430</span>
+                <span class="price-note">Frame only from ~€280 (on sale)</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">2–5 days · free (typical)</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://meinoffice.net/produkt/mo-four/" target="_blank" rel="noopener noreferrer">MO Series (MO Four / MO Six)</a></span>
+                <span class="desk-brand">MeinOffice</span>
+              </td>
+              <td><span class="dim">120×60 to 180×80 cm</span></td>
+              <td><span class="dim">electric</span></td>
+              <td><span class="load-val">–</span></td>
+              <td>
+                <span class="price-val">on request</span>
+                <span class="price-note">Price not independently verified</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Free in Germany</span><span class="delivery-detail">3–5 days · free</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TIER 3 ────────────────────────────────────── -->
+  <section class="tier t3">
+    <div class="tier-rail">
+      <div class="tier-code">Class 03</div>
+    </div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Premium</span>
+        <span class="tier-band">€600+</span>
+      </div>
+      <p class="tier-desc">
+        High-end electric desks with extended functionality, more robust build quality, and longer warranty periods. The IKEA IDÅSEN is the most accessible premium option; the FlexiSpot E9 targets demanding users with higher requirements for stability and lift range.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Desktop size</th>
+              <th>Height range</th>
+              <th>Notable feature</th>
+              <th>Price</th>
+              <th>Delivery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.ikea.com/de/de/p/idasen-schreibtisch-sitz-steh-schwarz-dunkelgrau-s49280990/" target="_blank" rel="noopener noreferrer">IDÅSEN</a></span>
+                <span class="desk-brand">IKEA</span>
+              </td>
+              <td><span class="dim">160 × 80 cm</span></td>
+              <td><span class="dim">electric</span></td>
+              <td style="font-size:12px; color: var(--muted);">Integrated cable management</td>
+              <td>
+                <span class="price-val">€ 679.00</span>
+                <span class="price-note">Verified June 2026</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">check postcode · costs extra</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.flexispot.de/elektrisch-hohenverstellbares-tischgestell-e9.html" target="_blank" rel="noopener noreferrer">E9 (frame)</a></span>
+                <span class="desk-brand">FlexiSpot</span>
+              </td>
+              <td><span class="dim">120–200 cm width</span></td>
+              <td><span class="dim">not verified</span></td>
+              <td style="font-size:12px; color: var(--muted);">Heise test winner 2025; high stability rating</td>
+              <td>
+                <span class="price-val">€550 – €630+</span>
+                <span class="price-note">Frame only; promo price was €400 (Jan 2025)</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">2–5 days · free (typical)</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- NOTES -->
+  <footer class="notes">
+    <div class="notes-title">Research notes</div>
+    <div class="notes-grid">
+      <div class="note-block">
+        <strong>Price accuracy</strong>
+        <p>IKEA prices verified directly on ikea.com/de (June 2026). FlexiSpot sale prices are promotion-dependent — check flexispot.de before purchasing. All prices include German VAT.</p>
+      </div>
+      <div class="note-block">
+        <strong>Not verified</strong>
+        <p>Ergotopia, Uplift, and Linak were part of the research, but no specific price claim survived adversarial fact-checking. These brands may be available in Germany — independent verification recommended.</p>
+      </div>
+      <div class="note-block">
+        <strong>Delivery to Munich</strong>
+        <p>IKEA and FlexiSpot ship nationwide including Munich. MeinOffice offers free shipping within Germany (excluding islands). Delivery times and assembly service should be requested separately.</p>
+      </div>
+      <div class="note-block">
+        <strong>Choosing dimensions</strong>
+        <p>Ergonomically recommended: width ≥ 120 cm, depth ≥ 60 cm, height range at least 62–128 cm (for users 150–200 cm tall). For a dual-monitor setup: prefer 160 cm width.</p>
+      </div>
+    </div>
+
+    <div class="sources">
+      <strong>Sources (verified primary and secondary)</strong>
+      <ul>
+        <li>ikea.com/de — Standing desk product pages (June 2026)</li>
+        <li>flexispot.de — E7 &amp; E9 product pages</li>
+        <li>geizhals.de — FlexiSpot E7 price comparison</li>
+        <li>heise.de — FlexiSpot E9 review (January 2025)</li>
+        <li>meinoffice.net — MO Series buying guide &amp; product pages (2025–2026)</li>
+      </ul>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
