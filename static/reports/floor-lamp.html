@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Floor Lamps Munich 2026 – Buyer's Guide by Price Tier</title>
+<style>
+  :root {
+    --paper:   #F1F0EB;
+    --ink:     #1B1B19;
+    --muted:   #71706A;
+    --border:  #CAC7BE;
+    --surface: #E8E6DF;
+
+    --t1: #3A5F8A;
+    --t1-light: #D8E5F3;
+    --t2: #1A5438;
+    --t2-light: #D3EAE0;
+    --t3: #7A5A14;
+    --t3-light: #F0E4C4;
+
+    --delivery: #1A5438;
+    --delivery-bg: #D3EAE0;
+
+    --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --mono: "SF Mono", "Cascadia Code", "Fira Mono", "Courier New", monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: var(--paper); }
+  body { font-family: var(--sans); color: var(--ink); background: var(--paper); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  .page { max-width: 960px; margin: 0 auto; padding: 56px 32px 80px; }
+
+  .report-header { display: flex; flex-direction: column; gap: 0; border-bottom: 2px solid var(--ink); padding-bottom: 24px; margin-bottom: 32px; }
+  .report-meta { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; font-weight: 500; }
+  .report-title { font-size: clamp(30px, 5vw, 48px); font-weight: 700; letter-spacing: -.025em; line-height: 1.05; text-wrap: balance; margin-bottom: 14px; }
+  .report-subtitle { font-size: 15px; color: var(--muted); max-width: 620px; line-height: 1.55; }
+
+  .summary-strip { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--border); background: var(--surface); margin-bottom: 48px; }
+  .stat { padding: 18px 20px; border-right: 1px solid var(--border); }
+  .stat:last-child { border-right: none; }
+  .stat-value { font-family: var(--mono); font-size: 22px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--ink); display: block; margin-bottom: 3px; }
+  .stat-label { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+
+  .tier { margin-bottom: 40px; display: grid; grid-template-columns: 28px 1fr; gap: 0 20px; }
+  .tier-rail { display: flex; align-items: flex-start; padding-top: 4px; }
+  .tier-code { writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; color: white; background: var(--tier-color); padding: 10px 6px; white-space: nowrap; height: fit-content; }
+  .tier-body { min-width: 0; }
+  .tier-head { display: flex; align-items: baseline; gap: 14px; padding: 14px 20px; background: var(--tier-bg); border-left: 4px solid var(--tier-color); margin-bottom: 2px; }
+  .tier-name { font-size: 20px; font-weight: 700; letter-spacing: -.02em; color: var(--tier-color); }
+  .tier-band { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--tier-color); font-variant-numeric: tabular-nums; opacity: .75; }
+  .tier-desc { font-size: 13px; color: var(--muted); padding: 10px 20px; border-left: 4px solid var(--tier-color); background: var(--tier-bg); margin-bottom: 8px; line-height: 1.5; }
+
+  .table-wrap { overflow-x: auto; border-left: 4px solid var(--tier-color); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 520px; }
+  thead tr { background: var(--ink); color: var(--paper); }
+  thead th { padding: 9px 12px; text-align: left; font-size: 10px; letter-spacing: .10em; text-transform: uppercase; font-weight: 600; white-space: nowrap; }
+  thead th:first-child { padding-left: 16px; }
+  thead th:last-child { text-align: center; }
+  tbody tr { border-bottom: 1px solid var(--border); background: white; }
+  tbody tr:nth-child(even) { background: var(--paper); }
+  tbody tr:hover { background: var(--tier-bg); }
+  tbody td { padding: 11px 12px; vertical-align: middle; }
+  tbody td:first-child { padding-left: 16px; }
+
+  .desk-model { font-weight: 600; font-size: 13.5px; color: var(--ink); display: block; }
+  .desk-model a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+  .desk-model a:hover { color: var(--tier-color); }
+  .desk-brand { font-size: 11px; color: var(--muted); display: block; margin-top: 1px; }
+  .desk-note { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; font-style: italic; }
+
+  .dim, .price-val { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12.5px; white-space: nowrap; }
+  .price-val { font-weight: 700; font-size: 14px; color: var(--ink); }
+  .price-note { font-size: 10px; color: var(--muted); display: block; margin-top: 1px; font-family: var(--sans); }
+
+  .style-pill {
+    display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px;
+    border-radius: 2px; background: var(--surface); color: var(--muted);
+  }
+
+  .delivery-yes { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--delivery); background: var(--delivery-bg); padding: 3px 9px; border-radius: 2px; white-space: nowrap; }
+  .delivery-yes::before { content: "✓"; font-size: 11px; }
+  .delivery-check { text-align: center; }
+  .delivery-detail { display: block; font-size: 10px; color: var(--muted); font-family: var(--mono); margin-top: 4px; }
+
+  .pick-badge { display: inline-block; font-size: 10px; font-weight: 700; color: #7a5a14; background: #f0e4c4; border-radius: 2px; padding: 1px 6px; margin-top: 3px; letter-spacing: .04em; text-transform: uppercase; }
+
+  .t1 { --tier-color: var(--t1); --tier-bg: var(--t1-light); }
+  .t2 { --tier-color: var(--t2); --tier-bg: var(--t2-light); }
+  .t3 { --tier-color: var(--t3); --tier-bg: var(--t3-light); }
+
+  .notes { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); }
+  .notes-title { font-size: 11px; letter-spacing: .10em; text-transform: uppercase; font-weight: 700; color: var(--muted); margin-bottom: 14px; }
+  .notes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .note-block { padding: 14px 16px; background: var(--surface); border-left: 3px solid var(--border); }
+  .note-block strong { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: var(--ink); }
+  .note-block p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  .sources { margin-top: 28px; font-size: 11px; color: var(--muted); }
+  .sources strong { display: block; letter-spacing: .08em; text-transform: uppercase; font-size: 10px; font-weight: 700; margin-bottom: 6px; }
+  .sources ul { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 16px; }
+  .sources li::before { content: "→ "; color: var(--border); }
+
+  @media (max-width: 600px) {
+    .page { padding: 32px 16px 60px; }
+    .summary-strip { grid-template-columns: 1fr; }
+    .stat { border-right: none; border-bottom: 1px solid var(--border); }
+    .tier { grid-template-columns: 1fr; }
+    .tier-rail { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="report-header">
+    <div class="report-meta">Munich, Germany &nbsp;·&nbsp; As of June 2026 &nbsp;·&nbsp; Prices incl. VAT &nbsp;·&nbsp; Retailers: IKEA · Lampenwelt · Amazon.de</div>
+    <h1 class="report-title">Floor Lamps<br>for the Living Room</h1>
+    <p class="report-subtitle">
+      Three price tiers for a Stehlampe — needed for ambient lighting in the living room alongside the standing desk setup. Links go to the product page or closest category where a direct URL was unavailable.
+    </p>
+  </header>
+
+  <div class="summary-strip">
+    <div class="stat">
+      <span class="stat-value">€25 – €180+</span>
+      <span class="stat-label">Total price range</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">6 options</span>
+      <span class="stat-label">Across 3 tiers</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">E27 / GU10</span>
+      <span class="stat-label">Common bulb types</span>
+    </div>
+  </div>
+
+  <!-- TIER 1 -->
+  <section class="tier t1">
+    <div class="tier-rail"><div class="tier-code">Tier 01</div></div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Budget</span>
+        <span class="tier-band">under €40</span>
+      </div>
+      <p class="tier-desc">
+        Simple fabric or metal shade lamps with an E27 socket. Good for ambient lighting without spending much. ALÄNG is IKEA's classic upright floor lamp — nickel base, textile shade. RINGSTA is a minimal arc option.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Style</th>
+              <th>Height</th>
+              <th>Bulb</th>
+              <th>Price</th>
+              <th>Delivery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.ikea.com/de/de/cat/stehleuchten-10732/" target="_blank" rel="noopener noreferrer">ALÄNG</a></span>
+                <span class="desk-brand">IKEA</span>
+                <span class="desk-note">Nickel-plated steel base · white textile shade · uplight</span>
+                <span class="pick-badge">Best value</span>
+              </td>
+              <td><span class="style-pill">Upright</span></td>
+              <td><span class="dim">150 cm</span></td>
+              <td>E27</td>
+              <td><span class="price-val">~€ 30</span></td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">3–5 days · free</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.ikea.com/de/de/cat/stehleuchten-10732/" target="_blank" rel="noopener noreferrer">RINGSTA</a></span>
+                <span class="desk-brand">IKEA</span>
+                <span class="desk-note">Slim profile · fabric shade · minimal footprint</span>
+              </td>
+              <td><span class="style-pill">Upright</span></td>
+              <td><span class="dim">150 cm</span></td>
+              <td>E14</td>
+              <td><span class="price-val">~€ 25</span></td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">3–5 days · free</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIER 2 -->
+  <section class="tier t2">
+    <div class="tier-rail"><div class="tier-code">Tier 02</div></div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Mid-Range</span>
+        <span class="tier-band">€40 – €120</span>
+      </div>
+      <p class="tier-desc">
+        Adjustable reading or arc lamps with better build quality. HEKTAR is IKEA's most popular adjustable spot — dark grey metal, angled head, good for task lighting next to a sofa. NYMÅNE combines uplighting and a reading arm in one.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Style</th>
+              <th>Height</th>
+              <th>Bulb</th>
+              <th>Price</th>
+              <th>Delivery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.ikea.com/de/de/cat/stehleuchten-10732/" target="_blank" rel="noopener noreferrer">HEKTAR</a></span>
+                <span class="desk-brand">IKEA</span>
+                <span class="desk-note">Dark grey · adjustable head · 4.8/5 on IKEA · industrial look</span>
+                <span class="pick-badge">Top pick</span>
+              </td>
+              <td><span class="style-pill">Adjustable spot</span></td>
+              <td><span class="dim">179 cm</span></td>
+              <td>E27</td>
+              <td><span class="price-val">~€ 60</span></td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">3–5 days · free</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.ikea.com/de/de/cat/stehleuchten-10732/" target="_blank" rel="noopener noreferrer">NYMÅNE</a></span>
+                <span class="desk-brand">IKEA</span>
+                <span class="desk-note">Uplight + reading arm combo · white or anthracite</span>
+              </td>
+              <td><span class="style-pill">Uplight + arm</span></td>
+              <td><span class="dim">150 cm</span></td>
+              <td>E14 + E27</td>
+              <td><span class="price-val">~€ 70</span></td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">3–5 days · free</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.lampenwelt.de/stehlampen.html" target="_blank" rel="noopener noreferrer">Stehlampen Kategorie</a></span>
+                <span class="desk-brand">Lampenwelt.de</span>
+                <span class="desk-note">Wide selection of mid-range arc and tripod lamps · filter by price</span>
+              </td>
+              <td><span class="style-pill">Various</span></td>
+              <td>—</td>
+              <td>Various</td>
+              <td><span class="price-val">€40 – €120</span></td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">2–5 days · from free</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIER 3 -->
+  <section class="tier t3">
+    <div class="tier-rail"><div class="tier-code">Tier 03</div></div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Premium</span>
+        <span class="tier-band">€120+</span>
+      </div>
+      <p class="tier-desc">
+        Designer arc or tripod lamps that make a statement. SYMFONISK from IKEA × Sonos doubles as a Wi-Fi speaker. For purely visual options, Lampenwelt and Amazon.de offer arc lamps with marble bases and brass finishes in this range.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Style</th>
+              <th>Height</th>
+              <th>Notable feature</th>
+              <th>Price</th>
+              <th>Delivery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.ikea.com/de/de/cat/stehleuchten-10732/" target="_blank" rel="noopener noreferrer">SYMFONISK</a></span>
+                <span class="desk-brand">IKEA × Sonos</span>
+                <span class="desk-note">Floor lamp + Wi-Fi speaker · pairs with existing Sonos setup</span>
+              </td>
+              <td><span class="style-pill">Lamp + speaker</span></td>
+              <td><span class="dim">145 cm</span></td>
+              <td>Built-in speaker</td>
+              <td><span class="price-val">~€ 179</span></td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">3–5 days · free</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.lampenwelt.de/stehlampen.html" target="_blank" rel="noopener noreferrer">Designer arc lamps</a></span>
+                <span class="desk-brand">Lampenwelt.de</span>
+                <span class="desk-note">Filter: Bogenlampen / arc · marble base options available</span>
+              </td>
+              <td><span class="style-pill">Arc</span></td>
+              <td>—</td>
+              <td>Statement piece</td>
+              <td><span class="price-val">€120 – €300</span></td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">2–5 days · from free</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <footer class="notes">
+    <div class="notes-title">Research notes</div>
+    <div class="notes-grid">
+      <div class="note-block">
+        <strong>Product links</strong>
+        <p>IKEA floor lamp URLs link to the Stehleuchten category page — the IKEA site restructures product URLs frequently. Use the model name as a search term on ikea.com/de to find the direct page.</p>
+      </div>
+      <div class="note-block">
+        <strong>Bulb types</strong>
+        <p>E27 (large Edison screw) is the most common — use any standard LED bulb (warm white 2700K recommended for living rooms). E14 (small screw) needs a smaller LED. Both are widely available at dm, Rossmann, or any hardware store in Munich.</p>
+      </div>
+      <div class="note-block">
+        <strong>Arc lamps</strong>
+        <p>Arc lamps require a heavy base to not tip over. Check the base weight before ordering — cheaper arc lamps can be unstable. Marble or concrete bases are best; thin plastic bases are a safety risk.</p>
+      </div>
+      <div class="note-block">
+        <strong>Where to browse in Munich</strong>
+        <p>IKEA OEZ has a large lighting section — best to see lamps in person before buying. Lampenwelt.de is online-only but has the widest range. Depot and XXXLutz in Munich also stock floor lamps in the mid-range.</p>
+      </div>
+    </div>
+    <div class="sources">
+      <strong>Sources</strong>
+      <ul>
+        <li>ikea.com/de — Stehleuchten category (June 2026)</li>
+        <li>lampenwelt.de — Stehlampen category (June 2026)</li>
+      </ul>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

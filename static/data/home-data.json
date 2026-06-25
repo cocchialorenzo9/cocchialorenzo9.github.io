@@ -12,9 +12,9 @@
       "emoji": "🛋️",
       "items": [
         { "id": "lr_desk", "label": "Standing desk", "priority": "high", "reportUrl": "/reports/standing-desk.html", "deliveryHint": "3–5 days · free" },
-        { "id": "lr2", "label": "Coffee table", "priority": "high" },
-        { "id": "lr3", "label": "TV unit / cabinet", "priority": "high" },
-        { "id": "lr5", "label": "Floor lamp", "priority": "medium" },
+        { "id": "lr2", "label": "Coffee table", "priority": "medium" },
+        { "id": "lr3", "label": "TV unit / cabinet", "priority": "medium" },
+        { "id": "lr5", "label": "Floor lamp", "priority": "high", "reportUrl": "/reports/floor-lamp.html" },
         { "id": "lr7", "label": "Bookshelf", "priority": "low" },
         { "id": "lr_sofa", "label": "Sofa", "owned": true }
       ]
@@ -24,9 +24,9 @@
       "name": "Bedroom",
       "emoji": "🛏️",
       "items": [
-        { "id": "br1", "label": "Bed frame", "priority": "high" },
+        { "id": "br1", "label": "Bed frame", "priority": "high", "reportUrl": "/reports/bed-frame.html" },
         { "id": "br_desk", "label": "Standing desk", "priority": "high", "reportUrl": "/reports/standing-desk.html", "deliveryHint": "3–5 days · free" },
-        { "id": "br4", "label": "Curtains / blackout blinds", "priority": "high" },
+        { "id": "br4", "label": "Curtains / blackout blinds", "priority": "high", "reportUrl": "/reports/curtains.html" },
         { "id": "br5", "label": "Bedside tables (×2)", "priority": "medium" },
         { "id": "br6", "label": "Bedside lamps (×2)", "priority": "medium" },
         { "id": "br_mattress", "label": "Mattress", "owned": true },
@@ -39,8 +39,8 @@
       "emoji": "🍳",
       "items": [
         { "id": "kt_fridge", "label": "Fridge", "priority": "high", "reportUrl": "/reports/fridge-guide.html", "deliveryHint": "from 2 days · free–€39.90" },
-        { "id": "kt1", "label": "Gio's like table", "priority": "high" },
-        { "id": "kt2", "label": "Chairs (×4)", "priority": "high" },
+        { "id": "kt1", "label": "Extendable dining table (Gio's)", "priority": "medium" },
+        { "id": "kt2", "label": "Chairs (×4)", "priority": "high", "reportUrl": "/reports/chairs.html" },
         { "id": "kt5", "label": "Dish rack", "priority": "medium" },
         { "id": "kt3", "label": "Pots & pans set", "owned": true },
         { "id": "kt4", "label": "Knife block & knives", "owned": true },
@@ -53,8 +53,8 @@
       "name": "Bathroom",
       "emoji": "🚿",
       "items": [
-        { "id": "ba2", "label": "Towel rack / hooks", "priority": "high" },
-        { "id": "ba7", "label": "Shower caddy", "priority": "high" },
+        { "id": "ba2", "label": "Towel rack / hooks", "priority": "medium" },
+        { "id": "ba7", "label": "Shower caddy", "priority": "medium" },
         { "id": "ba8", "label": "Sink organiser", "priority": "high" },
         { "id": "ba5", "label": "Shower curtain (if needed)", "priority": "medium" },
         { "id": "ba1", "label": "Towels (×4+)", "owned": true },
@@ -88,6 +88,6 @@
     { "id": "u1", "label": "Water", "note": "Included in Fernwärme", "status": "included" },
     { "id": "u2", "label": "Heating", "note": "Included in Fernwärme", "status": "included" },
     { "id": "u3", "label": "Internet", "note": "On track", "status": "in-progress" },
-    { "id": "u4", "label": "Electricity", "note": "", "status": "todo", "reportUrl": "/reports/electricity-munich.html" }
+    { "id": "u4", "label": "Electricity", "note": "Sign up now — switch takes 2–4 weeks. Best: immergrün! ~€632 or Ostrom ~€638 (no lock-in)", "status": "todo", "reportUrl": "/reports/electricity-munich.html" }
   ]
 }
