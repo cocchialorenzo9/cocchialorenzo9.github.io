@@ -37,3 +37,7 @@ All CV data lives as TypeScript arrays (`EXPERIENCE`, `SKILLS`, `EDUCATION`, `PU
 ### Color palette
 
 Light green theme: primary `#22c55e` (light mode) / `#4ade80` (dark mode). The navbar is always dark (`#0f172a`) regardless of color mode, controlled in `src/css/custom.css`.
+
+### Reports (`static/reports/`)
+
+Every report hosted in `static/reports/` must include a clickable link for each product row pointing to the product's actual page on the retailer's website. Where no direct product page is available, link to the closest category or search page on that retailer. Links must open in a new tab (`target="_blank" rel="noopener noreferrer"`). Never leave a product row with no link.
