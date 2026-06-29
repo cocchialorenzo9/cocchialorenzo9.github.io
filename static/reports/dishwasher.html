@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dishwashers Munich 2026 – Buyer's Guide + Single Water Connection Research</title>
+<style>
+  :root {
+    --paper:   #F1F0EB;
+    --ink:     #1B1B19;
+    --muted:   #71706A;
+    --border:  #CAC7BE;
+    --surface: #E8E6DF;
+
+    --t1: #3A5F8A;
+    --t1-light: #D8E5F3;
+    --t2: #1A5438;
+    --t2-light: #D3EAE0;
+    --t3: #7A5A14;
+    --t3-light: #F0E4C4;
+    --t4: #6B2D6B;
+    --t4-light: #EDD8ED;
+
+    --delivery: #1A5438;
+    --delivery-bg: #D3EAE0;
+
+    --warn: #92400e;
+    --warn-bg: #fef3c7;
+    --warn-border: #d97706;
+
+    --info: #1e3a5f;
+    --info-bg: #dbeafe;
+    --info-border: #3b82f6;
+
+    --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --mono: "SF Mono", "Cascadia Code", "Fira Mono", "Courier New", monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: var(--paper); }
+
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    background: var(--paper);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+
+  .page { max-width: 960px; margin: 0 auto; padding: 56px 32px 80px; }
+
+  /* ── HEADER ── */
+  .report-header {
+    display: flex; flex-direction: column; gap: 0;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 24px; margin-bottom: 32px;
+  }
+  .report-meta {
+    font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 14px; font-weight: 500;
+  }
+  .report-title {
+    font-size: clamp(30px, 5vw, 48px); font-weight: 700;
+    letter-spacing: -.025em; line-height: 1.05; text-wrap: balance; margin-bottom: 14px;
+  }
+  .report-subtitle { font-size: 15px; color: var(--muted); max-width: 620px; line-height: 1.55; }
+
+  /* ── SUMMARY STRIP ── */
+  .summary-strip {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    border: 1px solid var(--border); background: var(--surface); margin-bottom: 48px;
+  }
+  .stat { padding: 18px 20px; border-right: 1px solid var(--border); }
+  .stat:last-child { border-right: none; }
+  .stat-value {
+    font-family: var(--mono); font-size: 22px; font-weight: 600;
+    letter-spacing: -.02em; font-variant-numeric: tabular-nums;
+    color: var(--ink); display: block; margin-bottom: 3px;
+  }
+  .stat-label { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+
+  /* ── TIER SECTION ── */
+  .tier {
+    margin-bottom: 40px; display: grid;
+    grid-template-columns: 28px 1fr; gap: 0 20px;
+  }
+  .tier-rail { display: flex; align-items: flex-start; padding-top: 4px; }
+  .tier-code {
+    writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg);
+    font-size: 9px; letter-spacing: .16em; text-transform: uppercase;
+    font-weight: 700; color: white; background: var(--tier-color);
+    padding: 10px 6px; white-space: nowrap; height: fit-content;
+  }
+  .tier-body { min-width: 0; }
+  .tier-head {
+    display: flex; align-items: baseline; gap: 14px; padding: 14px 20px;
+    background: var(--tier-bg); border-left: 4px solid var(--tier-color); margin-bottom: 2px;
+  }
+  .tier-name { font-size: 20px; font-weight: 700; letter-spacing: -.02em; color: var(--tier-color); }
+  .tier-band {
+    font-family: var(--mono); font-size: 13px; font-weight: 600;
+    color: var(--tier-color); font-variant-numeric: tabular-nums; opacity: .75;
+  }
+  .tier-desc {
+    font-size: 13px; color: var(--muted); padding: 10px 20px;
+    border-left: 4px solid var(--tier-color); background: var(--tier-bg);
+    margin-bottom: 8px; line-height: 1.5;
+  }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; border-left: 4px solid var(--tier-color); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 640px; }
+  thead tr { background: var(--ink); color: var(--paper); }
+  thead th {
+    padding: 9px 12px; text-align: left; font-size: 10px;
+    letter-spacing: .10em; text-transform: uppercase; font-weight: 600; white-space: nowrap;
+  }
+  thead th:first-child { padding-left: 16px; }
+  thead th:last-child { text-align: center; }
+  tbody tr { border-bottom: 1px solid var(--border); background: white; }
+  tbody tr:nth-child(even) { background: var(--paper); }
+  tbody tr:hover { background: var(--tier-bg); }
+  tbody td { padding: 11px 12px; vertical-align: middle; }
+  tbody td:first-child { padding-left: 16px; }
+
+  .desk-model { font-weight: 600; font-size: 13.5px; color: var(--ink); display: block; }
+  .desk-model a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+  .desk-model a:hover { color: var(--tier-color); }
+  .desk-brand { font-size: 11px; color: var(--muted); display: block; margin-top: 1px; }
+  .desk-note  { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; font-style: italic; }
+
+  .dim, .price-val, .load-val {
+    font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12.5px; white-space: nowrap;
+  }
+  .price-val { font-weight: 700; font-size: 14px; color: var(--ink); }
+  .price-note { font-size: 10px; color: var(--muted); display: block; margin-top: 1px; font-family: var(--sans); }
+
+  .energy-badge {
+    display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px;
+    border-radius: 2px; letter-spacing: .04em;
+  }
+  .energy-a { background: #d3eae0; color: #1a5438; }
+  .energy-b { background: #d8e5f3; color: #3a5f8a; }
+  .energy-c { background: #fff3cd; color: #7a5a14; }
+  .energy-d { background: #ffe5cc; color: #8a3a14; }
+  .energy-e { background: #f3d8d8; color: #8a1414; }
+
+  .delivery-yes {
+    display: inline-flex; align-items: center; gap: 4px; font-size: 11px;
+    font-weight: 600; color: var(--delivery); background: var(--delivery-bg);
+    padding: 3px 9px; border-radius: 2px; white-space: nowrap;
+  }
+  .delivery-yes::before { content: "✓"; font-size: 11px; }
+  .delivery-check { text-align: center; }
+  .delivery-detail { display: block; font-size: 10px; color: var(--muted); font-family: var(--mono); margin-top: 4px; }
+
+  .pick-badge {
+    display: inline-block; font-size: 10px; font-weight: 700; color: #7a5a14;
+    background: #f0e4c4; border-radius: 2px; padding: 1px 6px; margin-top: 3px;
+    letter-spacing: .04em; text-transform: uppercase;
+  }
+
+  /* ── TIER VARS ── */
+  .t1 { --tier-color: var(--t1); --tier-bg: var(--t1-light); }
+  .t2 { --tier-color: var(--t2); --tier-bg: var(--t2-light); }
+  .t3 { --tier-color: var(--t3); --tier-bg: var(--t3-light); }
+  .t4 { --tier-color: var(--t4); --tier-bg: var(--t4-light); }
+
+  /* ── WATER CONNECTION RESEARCH ── */
+  .research-section {
+    margin: 56px 0 48px;
+    border-top: 2px solid var(--ink);
+    padding-top: 28px;
+  }
+  .research-section-title {
+    font-size: clamp(22px, 3vw, 30px); font-weight: 700;
+    letter-spacing: -.02em; margin-bottom: 6px;
+  }
+  .research-section-subtitle {
+    font-size: 14px; color: var(--muted); margin-bottom: 28px; max-width: 600px; line-height: 1.5;
+  }
+
+  .callout {
+    padding: 16px 20px; border-left: 4px solid var(--warn-border);
+    background: var(--warn-bg); margin-bottom: 24px; border-radius: 0 4px 4px 0;
+  }
+  .callout-info { border-left-color: var(--info-border); background: var(--info-bg); }
+  .callout strong {
+    display: block; font-size: 12px; font-weight: 700; letter-spacing: .04em;
+    text-transform: uppercase; color: var(--warn); margin-bottom: 6px;
+  }
+  .callout-info strong { color: var(--info); }
+  .callout p { font-size: 13px; line-height: 1.6; color: var(--ink); }
+
+  .solution-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 24px; }
+  .solution-card {
+    border: 1px solid var(--border); background: white;
+    padding: 18px 20px;
+  }
+  .solution-card-header {
+    display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px;
+  }
+  .solution-tag {
+    font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 2px;
+  }
+  .tag-rec  { background: #d3eae0; color: #1a5438; }
+  .tag-ok   { background: #fff3cd; color: #7a5a14; }
+  .tag-skip { background: #f3d8d8; color: #8a1414; }
+  .solution-card h4 { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .solution-card p { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 8px; }
+  .solution-card .cost {
+    font-family: var(--mono); font-size: 12px; font-weight: 600;
+    color: var(--ink); padding: 4px 8px; background: var(--surface);
+    display: inline-block; margin-top: 4px;
+  }
+
+  .steps-list { list-style: none; counter-reset: steps; margin: 20px 0; }
+  .steps-list li {
+    counter-increment: steps;
+    display: grid; grid-template-columns: 32px 1fr;
+    gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border);
+    align-items: start; font-size: 13px;
+  }
+  .steps-list li:last-child { border-bottom: none; }
+  .steps-list li::before {
+    content: counter(steps);
+    font-family: var(--mono); font-weight: 700; font-size: 13px;
+    color: white; background: var(--ink);
+    width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; flex-shrink: 0; margin-top: 1px;
+  }
+  .steps-list li strong { display: block; font-size: 13px; margin-bottom: 2px; }
+  .steps-list li span { color: var(--muted); line-height: 1.5; }
+
+  .parts-table-wrap { overflow-x: auto; }
+  .parts-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 16px; }
+  .parts-table thead tr { background: var(--ink); color: var(--paper); }
+  .parts-table thead th { padding: 9px 14px; text-align: left; font-size: 10px; letter-spacing: .10em; text-transform: uppercase; }
+  .parts-table tbody tr { border-bottom: 1px solid var(--border); background: white; }
+  .parts-table tbody tr:nth-child(even) { background: var(--paper); }
+  .parts-table tbody td { padding: 10px 14px; font-size: 13px; }
+  .parts-table .part-name a { text-decoration: underline; text-underline-offset: 2px; }
+
+  /* ── NOTES ── */
+  .notes { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); }
+  .notes-title {
+    font-size: 11px; letter-spacing: .10em; text-transform: uppercase;
+    font-weight: 700; color: var(--muted); margin-bottom: 14px;
+  }
+  .notes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .note-block { padding: 14px 16px; background: var(--surface); border-left: 3px solid var(--border); }
+  .note-block strong { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: var(--ink); }
+  .note-block p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── SOURCES ── */
+  .sources { margin-top: 28px; font-size: 11px; color: var(--muted); }
+  .sources strong { display: block; letter-spacing: .08em; text-transform: uppercase; font-size: 10px; font-weight: 700; margin-bottom: 6px; }
+  .sources ul { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 16px; }
+  .sources li::before { content: "→ "; color: var(--border); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .page { padding: 32px 16px 60px; }
+    .summary-strip { grid-template-columns: 1fr; }
+    .stat { border-right: none; border-bottom: 1px solid var(--border); }
+    .tier { grid-template-columns: 1fr; }
+    .tier-rail { display: none; }
+    .solution-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="report-header">
+    <div class="report-meta">Munich, Germany &nbsp;·&nbsp; As of June 2026 &nbsp;·&nbsp; Prices incl. VAT &nbsp;·&nbsp; Retailer: MediaMarkt DE</div>
+    <h1 class="report-title">Dishwashers<br>to Buy in Munich</h1>
+    <p class="report-subtitle">
+      Four price tiers — freestanding 60 cm models, from basic budget machines to quiet premium units. Includes a dedicated research section on sharing a single cold-water tap with a washing machine.
+    </p>
+  </header>
+
+  <div class="summary-strip">
+    <div class="stat">
+      <span class="stat-value">€249 – €1,199</span>
+      <span class="stat-label">Total price range</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">8 models</span>
+      <span class="stat-label">Across 4 tiers</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">All ✓</span>
+      <span class="stat-label">Home delivery to Munich</span>
+    </div>
+  </div>
+
+  <!-- TIER 1 -->
+  <section class="tier t1">
+    <div class="tier-rail"><div class="tier-code">Tier 01</div></div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Budget</span>
+        <span class="tier-band">under €320</span>
+      </div>
+      <p class="tier-desc">
+        Entry-level full-size (60 cm) freestanding dishwashers. 12–14 place settings, 5–6 programmes, no third rack. Energy class D/E on the 2021+ EU scale is standard at this price — older A+++ machines listed second-hand may use the old scale (do not compare directly).
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Place settings</th>
+              <th>Dimensions (W×H×D)</th>
+              <th>Energy class</th>
+              <th>Water/cycle</th>
+              <th>Noise</th>
+              <th>Price</th>
+              <th>Delivery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/search.html?query=KOENIC+KDW+8622" target="_blank" rel="noopener noreferrer">KDW 8622 A</a></span>
+                <span class="desk-brand">KOENIC</span>
+                <span class="desk-note">MediaMarkt house brand · 5 programmes</span>
+              </td>
+              <td><span class="dim">14</span></td>
+              <td><span class="dim">60 × 85 × 60 cm</span></td>
+              <td><span class="energy-badge energy-e">E</span></td>
+              <td><span class="dim">9.9 L</span></td>
+              <td><span class="dim">49 dB</span></td>
+              <td><span class="price-val">~€ 249</span></td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~2 days · +€39.90</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/search.html?query=Beko+BDFN26430W" target="_blank" rel="noopener noreferrer">BDFN26430W</a></span>
+                <span class="desk-brand">Beko</span>
+                <span class="desk-note">HygieneShield 70°C cycle · AquaIntense lower spray</span>
+              </td>
+              <td><span class="dim">14</span></td>
+              <td><span class="dim">60 × 86 × 60 cm</span></td>
+              <td><span class="energy-badge energy-d">D</span></td>
+              <td><span class="dim">9.5 L</span></td>
+              <td><span class="dim">47 dB</span></td>
+              <td><span class="price-val">~€ 299</span></td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~3 days · +€39.90</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIER 2 -->
+  <section class="tier t2">
+    <div class="tier-rail"><div class="tier-code">Tier 02</div></div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Mid-Range</span>
+        <span class="tier-band">€320 – €550</span>
+      </div>
+      <p class="tier-desc">
+        Better noise performance (42–46 dB), flexible cutlery trays, and faster intensive cycles. The Bosch SMS2ITI48E is the workhorse choice — dependable, widely available, and backed by Bosch service. The AEG adds a flexible third rack.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Place settings</th>
+              <th>Dimensions (W×H×D)</th>
+              <th>Energy class</th>
+              <th>Water/cycle</th>
+              <th>Noise</th>
+              <th>Price</th>
+              <th>Delivery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/search.html?query=Bosch+SMS2ITI48E" target="_blank" rel="noopener noreferrer">SMS2ITI48E Series 2</a></span>
+                <span class="desk-brand">Bosch</span>
+                <span class="desk-note">VarioFlex basket · SpeedPerfect · EcoSilence</span>
+                <span class="pick-badge">Best value</span>
+              </td>
+              <td><span class="dim">14</span></td>
+              <td><span class="dim">60 × 86 × 60 cm</span></td>
+              <td><span class="energy-badge energy-e">E</span></td>
+              <td><span class="dim">9.5 L</span></td>
+              <td><span class="dim">46 dB</span></td>
+              <td>
+                <span class="price-val">~€ 399</span>
+                <span class="price-note">4.5/5 on MediaMarkt</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~2 days · free</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/search.html?query=AEG+FSS54200Z0" target="_blank" rel="noopener noreferrer">FSS54200Z0</a></span>
+                <span class="desk-brand">AEG</span>
+                <span class="desk-note">ComfortLift upper basket · 3rd rack cutlery tray</span>
+              </td>
+              <td><span class="dim">14</span></td>
+              <td><span class="dim">60 × 85 × 63 cm</span></td>
+              <td><span class="energy-badge energy-d">D</span></td>
+              <td><span class="dim">9.0 L</span></td>
+              <td><span class="dim">44 dB</span></td>
+              <td>
+                <span class="price-val">~€ 479</span>
+                <span class="price-note">4.4/5 on MediaMarkt</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~3 days · free</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIER 3 -->
+  <section class="tier t3">
+    <div class="tier-rail"><div class="tier-code">Tier 03</div></div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Upper Mid-Range</span>
+        <span class="tier-band">€550 – €900</span>
+      </div>
+      <p class="tier-desc">
+        Near-silent machines (39–42 dB) with water-soft auto-dosing, third rack, and better drying. The Siemens SN23EC14CE uses zeolite drying (no residual moisture, no rinse aid smell). The AEG FSK96740P is the top-rated pick at this tier with Comfort Lift and ProDry.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Place settings</th>
+              <th>Dimensions (W×H×D)</th>
+              <th>Energy class</th>
+              <th>Water/cycle</th>
+              <th>Noise</th>
+              <th>Price</th>
+              <th>Delivery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/search.html?query=Siemens+SN23EC14CE" target="_blank" rel="noopener noreferrer">SN23EC14CE iQ300</a></span>
+                <span class="desk-brand">Siemens</span>
+                <span class="desk-note">Zeolith drying · Home Connect app · aquaStop</span>
+              </td>
+              <td><span class="dim">14</span></td>
+              <td><span class="dim">60 × 86 × 60 cm</span></td>
+              <td><span class="energy-badge energy-c">C</span></td>
+              <td><span class="dim">9.0 L</span></td>
+              <td><span class="dim">42 dB</span></td>
+              <td>
+                <span class="price-val">~€ 599</span>
+                <span class="price-note">4.6/5 on MediaMarkt</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~5 days · free</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/search.html?query=AEG+FSK96740P" target="_blank" rel="noopener noreferrer">FSK96740P</a></span>
+                <span class="desk-brand">AEG</span>
+                <span class="desk-note">ProDry · ComfortLift · AirDry auto-door opening</span>
+                <span class="pick-badge">Top pick</span>
+              </td>
+              <td><span class="dim">15</span></td>
+              <td><span class="dim">60 × 86 × 55 cm</span></td>
+              <td><span class="energy-badge energy-b">B</span></td>
+              <td><span class="dim">8.5 L</span></td>
+              <td><span class="dim">40 dB</span></td>
+              <td>
+                <span class="price-val">~€ 699</span>
+                <span class="price-note">4.7/5 on MediaMarkt</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~5 days · free</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIER 4 -->
+  <section class="tier t4">
+    <div class="tier-rail"><div class="tier-code">Tier 04</div></div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Premium</span>
+        <span class="tier-band">€900 – €1,200</span>
+      </div>
+      <p class="tier-desc">
+        Miele and Bosch flagship freestanding models. Whisper-quiet below 38 dB, auto-dosing detergent, brilliant drying, and 20-year engineering. Justified if you cook daily and run the dishwasher every day for 10+ years.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Place settings</th>
+              <th>Dimensions (W×H×D)</th>
+              <th>Energy class</th>
+              <th>Water/cycle</th>
+              <th>Noise</th>
+              <th>Price</th>
+              <th>Delivery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/search.html?query=Miele+G7210SC" target="_blank" rel="noopener noreferrer">G7210SC</a></span>
+                <span class="desk-brand">Miele</span>
+                <span class="desk-note">AutoDos · Cutlery tray · 20-yr lifespan tested</span>
+              </td>
+              <td><span class="dim">14</span></td>
+              <td><span class="dim">60 × 86 × 60 cm</span></td>
+              <td><span class="energy-badge energy-b">B</span></td>
+              <td><span class="dim">7.5 L</span></td>
+              <td><span class="dim">37 dB</span></td>
+              <td>
+                <span class="price-val">~€ 999</span>
+                <span class="price-note">4.8/5 · 10-yr warranty option</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~5 days · free</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/search.html?query=Bosch+SMS8YCI01E" target="_blank" rel="noopener noreferrer">SMS8YCI01E Series 8</a></span>
+                <span class="desk-brand">Bosch</span>
+                <span class="desk-note">PerfectDry zeolite · 3rd rack · EcoSilence motor</span>
+              </td>
+              <td><span class="dim">14</span></td>
+              <td><span class="dim">60 × 86 × 60 cm</span></td>
+              <td><span class="energy-badge energy-b">B</span></td>
+              <td><span class="dim">8.0 L</span></td>
+              <td><span class="dim">38 dB</span></td>
+              <td>
+                <span class="price-val">~€ 1,099</span>
+                <span class="price-note">4.7/5 · Free shipping</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~3 days · free</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <!-- SINGLE WATER CONNECTION RESEARCH                                   -->
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+
+  <section class="research-section">
+    <h2 class="research-section-title">Single Water Connection — How to Share It</h2>
+    <p class="research-section-subtitle">
+      Many Munich apartments have exactly one cold-water tap (Waschmaschinenanschluss) for kitchen appliances. Here is how to connect both a washing machine and a dishwasher to it without a plumber.
+    </p>
+
+    <div class="callout">
+      <strong>The problem</strong>
+      <p>A standard German kitchen washing-machine tap (G 3/4" angle valve) outputs one cold-water connection. A dishwasher also requires a G 3/4" cold-water inlet. You cannot plug both hoses into a single valve — you need either a splitter or a manual swap arrangement.</p>
+    </div>
+
+    <div class="callout callout-info">
+      <strong>Key constraint</strong>
+      <p>Both appliances should <em>never run simultaneously</em> on a split connection — shared water pressure reduces flow to each machine, which can trigger error codes and poor wash results. A good Y-splitter includes individual shut-off valves so exactly one appliance runs at a time.</p>
+    </div>
+
+    <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 16px;">Your options</h3>
+    <div class="solution-grid">
+      <div class="solution-card">
+        <div class="solution-card-header">
+          <span class="solution-tag tag-rec">Recommended</span>
+          <h4>Y-Splitter with isolation valves</h4>
+        </div>
+        <p>A T-piece angle-valve splitter (Winkelventil-Verteiler, G 3/4" × 2) screws directly onto the existing tap. Each outlet has its own shut-off lever — open one, close the other. Both appliance hoses stay permanently connected. Takes 10 minutes to install, zero plumbing skill required.</p>
+        <p><strong>Where to buy:</strong> Bauhaus, OBI, Amazon.de — search for <em>Waschmaschine Verteiler 3/4 Doppelventil</em>. Brands: Schell, Sanha, Gardena.</p>
+        <span class="cost">~€15 – €35</span>
+      </div>
+      <div class="solution-card">
+        <div class="solution-card-header">
+          <span class="solution-tag tag-ok">Workable</span>
+          <h4>Manual hose swap</h4>
+        </div>
+        <p>Unscrew the active machine's inlet hose from the tap, attach the other machine's hose, and run the programme. Free and requires no additional parts. Practical only if one appliance runs infrequently (e.g. the dishwasher is used weekly). Daily swapping is impractical and wears out the hose connector seal over time.</p>
+        <span class="cost">€0</span>
+      </div>
+      <div class="solution-card">
+        <div class="solution-card-header">
+          <span class="solution-tag tag-skip">Avoid</span>
+          <h4>Run both simultaneously without splitter</h4>
+        </div>
+        <p>Both machines drawing from a single valve without isolation causes pressure drops. Most dishwashers will trigger an E1/E3 water intake error within the first fill cycle. Washing machines may show similar errors or simply produce poor wash results due to insufficient water.</p>
+        <span class="cost">Not viable</span>
+      </div>
+    </div>
+
+    <h3 style="font-size: 16px; font-weight: 700; margin: 28px 0 14px;">What to buy — shopping list</h3>
+
+    <div class="parts-table-wrap">
+      <table class="parts-table">
+        <thead>
+          <tr>
+            <th>Part</th>
+            <th>What it does</th>
+            <th>Where to get it</th>
+            <th>Approx. cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="part-name"><a href="https://www.obi.de/suche/waschmaschine+verteiler+3+4/" target="_blank" rel="noopener noreferrer">Y-splitter / double-outlet angle valve (G 3/4")</a></td>
+            <td>Splits one cold-water tap into two outlets; each with its own lever shut-off</td>
+            <td>OBI, Bauhaus, Amazon.de</td>
+            <td><span class="dim">€15 – €35</span></td>
+          </tr>
+          <tr>
+            <td class="part-name"><a href="https://www.obi.de/suche/siphon+waschmaschine+geschirrspuler/" target="_blank" rel="noopener noreferrer">Dual-inlet siphon (Doppel-Siphon / Y-Siphon)</a></td>
+            <td>Splits the single drain under the sink between both appliance drain hoses</td>
+            <td>OBI, Bauhaus, Hornbach</td>
+            <td><span class="dim">€15 – €30</span></td>
+          </tr>
+          <tr>
+            <td class="part-name"><a href="https://www.obi.de/suche/ablaufschlauch+verlaengerung/" target="_blank" rel="noopener noreferrer">Drain hose extension (if needed)</a></td>
+            <td>Extends drain hose to reach the dual-inlet siphon from a distance</td>
+            <td>OBI, Bauhaus</td>
+            <td><span class="dim">€5 – €12</span></td>
+          </tr>
+          <tr>
+            <td class="part-name">Teflon tape (Gewindedichtband)</td>
+            <td>Seals threaded connections — wrap 3–4 turns before screwing in the splitter</td>
+            <td>Any hardware store</td>
+            <td><span class="dim">€1 – €3</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="font-size: 16px; font-weight: 700; margin: 28px 0 14px;">Installation steps</h3>
+    <ol class="steps-list">
+      <li>
+        <div>
+          <strong>Turn off the water</strong>
+          <span>Close the existing angle valve fully (clockwise). Place a towel under the tap to catch residual water.</span>
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>Unscrew the existing hose</strong>
+          <span>Remove the washing machine inlet hose from the angle valve. Dry the valve thread and wrap 3–4 layers of Teflon tape clockwise around the thread.</span>
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>Screw on the Y-splitter</strong>
+          <span>Hand-tighten the Y-splitter onto the tap, then tighten one more turn with a wrench. Both outlet levers should be in the closed (off) position.</span>
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>Connect both inlet hoses</strong>
+          <span>Screw the washing machine hose onto outlet A and the dishwasher hose onto outlet B. Hand-tighten plus a quarter turn — do not over-tighten nylon-sealed connectors.</span>
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>Install the dual-inlet siphon</strong>
+          <span>Replace the existing drain siphon under the sink with a Doppel-Siphon. Connect the washing machine drain hose to one inlet and the dishwasher drain hose to the other. The dishwasher drain hose must loop up behind the machine (anti-siphon loop) before entering the siphon — follow the appliance manual.</span>
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>Test for leaks</strong>
+          <span>Open the main valve and one outlet lever at a time. Run a short cycle on each machine and check all connections for drips. The dual-inlet siphon should be checked during the drain phase of each machine.</span>
+        </div>
+      </li>
+    </ol>
+
+    <div class="callout" style="margin-top: 24px;">
+      <strong>Reminder — one at a time</strong>
+      <p>Stick a note on the splitter or the machines: <em>always check that the other lever is closed before starting a programme</em>. This is the only operational change from having two separate connections.</p>
+    </div>
+  </section>
+
+
+  <footer class="notes">
+    <div class="notes-title">Research notes</div>
+    <div class="notes-grid">
+      <div class="note-block">
+        <strong>Price accuracy</strong>
+        <p>All prices verified at mediamarkt.de on 28 June 2026. Prices include German VAT and may change. Promotions not factored in.</p>
+      </div>
+      <div class="note-block">
+        <strong>Place settings vs. household size</strong>
+        <p>For 2 people: 14 place settings is comfortably sized — you can run every 2–3 days without overflowing. A full cycle costs roughly €0.60–0.80 in electricity and water in Munich (including heating).</p>
+      </div>
+      <div class="note-block">
+        <strong>Noise levels</strong>
+        <p>Under 44 dB: inaudible from the next room. 46–50 dB: faint hum — fine in a closed kitchen. 50+ dB: noticeable while watching TV in an open plan space. Tier 3+ machines all stay under 44 dB.</p>
+      </div>
+      <div class="note-block">
+        <strong>60 cm vs. 45 cm (slimline)</strong>
+        <p>Slimline models (~45 cm wide, 9–10 place settings) are only worth it if you have genuine space constraints. For a 2-person household, a full 60 cm machine running every 3 days uses less water/energy than a slimline running daily.</p>
+      </div>
+      <div class="note-block">
+        <strong>Zeolite drying (Tier 3+)</strong>
+        <p>Zeolite drying absorbs moisture and releases it as heat — dishes emerge completely dry, no towel needed, no rinse-aid smell. Standard on Siemens iQ300/500 and some AEG/Bosch models. The mineral lasts the machine's lifetime.</p>
+      </div>
+      <div class="note-block">
+        <strong>Munich water hardness</strong>
+        <p>Munich tap water is very hard (14–15° dH). Always fill the rinse-aid and salt dispensers — even if the machine says "no salt required". Hard water leaves white deposits on glasses without regular salt. Use Calgon or equivalent every 2–3 months.</p>
+      </div>
+    </div>
+    <div class="sources">
+      <strong>Sources (verified primary)</strong>
+      <ul>
+        <li>mediamarkt.de — All product pages (28 June 2026)</li>
+        <li>obi.de — Plumbing parts and prices (28 June 2026)</li>
+        <li>Stadtwerke München — Munich water hardness (swm.de)</li>
+        <li>EU Energy Label database — water consumption figures</li>
+      </ul>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
