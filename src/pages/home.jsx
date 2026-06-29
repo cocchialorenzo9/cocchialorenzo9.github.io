@@ -5,7 +5,7 @@ import Layout from '@theme/Layout';
 const PIN = '1234';
 
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
-const PRIORITY_LABELS = { high: '🔴 Must-have', medium: '🟡 Soon', low: '🟢 Nice to have' };
+const PRIORITY_LABELS = { high: '🔴 Must', medium: '🟡 Soon', low: '🟢 Nice to have' };
 const PRIORITY_COLORS = { high: '#dc2626', medium: '#d97706', low: '#16a34a' };
 
 // ── Persistence ───────────────────────────────────────────────────────────────
