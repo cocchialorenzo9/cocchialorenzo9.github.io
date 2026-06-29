@@ -41,6 +41,8 @@
         { "id": "kt_fridge", "label": "Fridge", "priority": "high", "reportUrl": "/reports/fridge-guide.html", "deliveryHint": "from 2 days · free–€39.90" },
         { "id": "kt1", "label": "Extendable dining table (Gio's)", "priority": "medium" },
         { "id": "kt2", "label": "Chairs (×4)", "priority": "high", "reportUrl": "/reports/chairs.html" },
+        { "id": "kt_washer", "label": "Washing machine", "priority": "high", "reportUrl": "/reports/washing-machine.html" },
+        { "id": "kt_dishwasher", "label": "Dishwasher", "priority": "medium", "reportUrl": "/reports/dishwasher.html" },
         { "id": "kt5", "label": "Dish rack", "priority": "medium" },
         { "id": "kt3", "label": "Pots & pans set", "owned": true },
         { "id": "kt4", "label": "Knife block & knives", "owned": true },

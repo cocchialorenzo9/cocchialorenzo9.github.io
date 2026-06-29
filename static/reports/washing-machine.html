@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Washing Machines Munich 2026 – Buyer's Guide by Price Tier</title>
+<style>
+  :root {
+    --paper:   #F1F0EB;
+    --ink:     #1B1B19;
+    --muted:   #71706A;
+    --border:  #CAC7BE;
+    --surface: #E8E6DF;
+
+    --t1: #3A5F8A;
+    --t1-light: #D8E5F3;
+    --t2: #1A5438;
+    --t2-light: #D3EAE0;
+    --t3: #7A5A14;
+    --t3-light: #F0E4C4;
+    --t4: #6B2D6B;
+    --t4-light: #EDD8ED;
+
+    --delivery: #1A5438;
+    --delivery-bg: #D3EAE0;
+
+    --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --mono: "SF Mono", "Cascadia Code", "Fira Mono", "Courier New", monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: var(--paper); }
+
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    background: var(--paper);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+
+  .page { max-width: 960px; margin: 0 auto; padding: 56px 32px 80px; }
+
+  /* ── HEADER ── */
+  .report-header {
+    display: flex; flex-direction: column; gap: 0;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 24px; margin-bottom: 32px;
+  }
+  .report-meta {
+    font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 14px; font-weight: 500;
+  }
+  .report-title {
+    font-size: clamp(30px, 5vw, 48px); font-weight: 700;
+    letter-spacing: -.025em; line-height: 1.05; text-wrap: balance; margin-bottom: 14px;
+  }
+  .report-subtitle { font-size: 15px; color: var(--muted); max-width: 620px; line-height: 1.55; }
+
+  /* ── SUMMARY STRIP ── */
+  .summary-strip {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    border: 1px solid var(--border); background: var(--surface); margin-bottom: 48px;
+  }
+  .stat { padding: 18px 20px; border-right: 1px solid var(--border); }
+  .stat:last-child { border-right: none; }
+  .stat-value {
+    font-family: var(--mono); font-size: 22px; font-weight: 600;
+    letter-spacing: -.02em; font-variant-numeric: tabular-nums;
+    color: var(--ink); display: block; margin-bottom: 3px;
+  }
+  .stat-label { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+
+  /* ── TIER SECTION ── */
+  .tier {
+    margin-bottom: 40px; display: grid;
+    grid-template-columns: 28px 1fr; gap: 0 20px;
+  }
+  .tier-rail { display: flex; align-items: flex-start; padding-top: 4px; }
+  .tier-code {
+    writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg);
+    font-size: 9px; letter-spacing: .16em; text-transform: uppercase;
+    font-weight: 700; color: white; background: var(--tier-color);
+    padding: 10px 6px; white-space: nowrap; height: fit-content;
+  }
+  .tier-body { min-width: 0; }
+  .tier-head {
+    display: flex; align-items: baseline; gap: 14px; padding: 14px 20px;
+    background: var(--tier-bg); border-left: 4px solid var(--tier-color); margin-bottom: 2px;
+  }
+  .tier-name { font-size: 20px; font-weight: 700; letter-spacing: -.02em; color: var(--tier-color); }
+  .tier-band {
+    font-family: var(--mono); font-size: 13px; font-weight: 600;
+    color: var(--tier-color); font-variant-numeric: tabular-nums; opacity: .75;
+  }
+  .tier-desc {
+    font-size: 13px; color: var(--muted); padding: 10px 20px;
+    border-left: 4px solid var(--tier-color); background: var(--tier-bg);
+    margin-bottom: 8px; line-height: 1.5;
+  }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; border-left: 4px solid var(--tier-color); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 640px; }
+  thead tr { background: var(--ink); color: var(--paper); }
+  thead th {
+    padding: 9px 12px; text-align: left; font-size: 10px;
+    letter-spacing: .10em; text-transform: uppercase; font-weight: 600; white-space: nowrap;
+  }
+  thead th:first-child { padding-left: 16px; }
+  thead th:last-child { text-align: center; }
+  tbody tr { border-bottom: 1px solid var(--border); background: white; }
+  tbody tr:nth-child(even) { background: var(--paper); }
+  tbody tr:hover { background: var(--tier-bg); }
+  tbody td { padding: 11px 12px; vertical-align: middle; }
+  tbody td:first-child { padding-left: 16px; }
+
+  .desk-model { font-weight: 600; font-size: 13.5px; color: var(--ink); display: block; }
+  .desk-model a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+  .desk-model a:hover { color: var(--tier-color); }
+  .desk-brand { font-size: 11px; color: var(--muted); display: block; margin-top: 1px; }
+  .desk-note  { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; font-style: italic; }
+
+  .dim, .price-val, .load-val {
+    font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12.5px; white-space: nowrap;
+  }
+  .price-val { font-weight: 700; font-size: 14px; color: var(--ink); }
+  .price-note { font-size: 10px; color: var(--muted); display: block; margin-top: 1px; font-family: var(--sans); }
+
+  .energy-badge {
+    display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px;
+    border-radius: 2px; letter-spacing: .04em;
+  }
+  .energy-a { background: #d3eae0; color: #1a5438; }
+  .energy-b { background: #d8e5f3; color: #3a5f8a; }
+  .energy-c { background: #fff3cd; color: #7a5a14; }
+  .energy-d { background: #ffe5cc; color: #8a3a14; }
+  .energy-e { background: #f3d8d8; color: #8a1414; }
+
+  .delivery-yes {
+    display: inline-flex; align-items: center; gap: 4px; font-size: 11px;
+    font-weight: 600; color: var(--delivery); background: var(--delivery-bg);
+    padding: 3px 9px; border-radius: 2px; white-space: nowrap;
+  }
+  .delivery-yes::before { content: "✓"; font-size: 11px; }
+  .delivery-check { text-align: center; }
+  .delivery-detail { display: block; font-size: 10px; color: var(--muted); font-family: var(--mono); margin-top: 4px; }
+
+  .pick-badge {
+    display: inline-block; font-size: 10px; font-weight: 700; color: #7a5a14;
+    background: #f0e4c4; border-radius: 2px; padding: 1px 6px; margin-top: 3px;
+    letter-spacing: .04em; text-transform: uppercase;
+  }
+
+  /* ── TIER VARS ── */
+  .t1 { --tier-color: var(--t1); --tier-bg: var(--t1-light); }
+  .t2 { --tier-color: var(--t2); --tier-bg: var(--t2-light); }
+  .t3 { --tier-color: var(--t3); --tier-bg: var(--t3-light); }
+  .t4 { --tier-color: var(--t4); --tier-bg: var(--t4-light); }
+
+  /* ── NOTES ── */
+  .notes { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); }
+  .notes-title {
+    font-size: 11px; letter-spacing: .10em; text-transform: uppercase;
+    font-weight: 700; color: var(--muted); margin-bottom: 14px;
+  }
+  .notes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .note-block { padding: 14px 16px; background: var(--surface); border-left: 3px solid var(--border); }
+  .note-block strong { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: var(--ink); }
+  .note-block p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── SOURCES ── */
+  .sources { margin-top: 28px; font-size: 11px; color: var(--muted); }
+  .sources strong { display: block; letter-spacing: .08em; text-transform: uppercase; font-size: 10px; font-weight: 700; margin-bottom: 6px; }
+  .sources ul { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 16px; }
+  .sources li::before { content: "→ "; color: var(--border); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .page { padding: 32px 16px 60px; }
+    .summary-strip { grid-template-columns: 1fr; }
+    .stat { border-right: none; border-bottom: 1px solid var(--border); }
+    .tier { grid-template-columns: 1fr; }
+    .tier-rail { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="report-header">
+    <div class="report-meta">Munich, Germany &nbsp;·&nbsp; As of June 2026 &nbsp;·&nbsp; Prices incl. VAT &nbsp;·&nbsp; Retailer: MediaMarkt DE</div>
+    <h1 class="report-title">Washing Machines<br>to Buy in Munich</h1>
+    <p class="report-subtitle">
+      Four price tiers — from compact budget models to quiet premium machines. All freestanding, frontloading, standard 60 cm width. Available via MediaMarkt Deutschland with home delivery to Munich.
+    </p>
+  </header>
+
+  <div class="summary-strip">
+    <div class="stat">
+      <span class="stat-value">€229 – €1,299</span>
+      <span class="stat-label">Total price range</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">8 models</span>
+      <span class="stat-label">Across 4 tiers</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">All ✓</span>
+      <span class="stat-label">Home delivery to Munich</span>
+    </div>
+  </div>
+
+  <!-- TIER 1 -->
+  <section class="tier t1">
+    <div class="tier-rail"><div class="tier-code">Tier 01</div></div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Budget</span>
+        <span class="tier-band">under €300</span>
+      </div>
+      <p class="tier-desc">
+        Entry-level freestanding machines — 7 kg load, 1200–1400 rpm, basic programmes. Good for 1–2 person households who run laundry infrequently. Lower energy class (D/E) adds ~€15–20/year to the electricity bill vs a class-B machine.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Load</th>
+              <th>Spin</th>
+              <th>Dimensions (W×H×D)</th>
+              <th>Energy class</th>
+              <th>Noise</th>
+              <th>Price</th>
+              <th>Delivery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/search.html?query=KOENIC+KWM+71400" target="_blank" rel="noopener noreferrer">KWM 71400 A</a></span>
+                <span class="desk-brand">KOENIC</span>
+                <span class="desk-note">MediaMarkt house brand — no-frills frontloader</span>
+              </td>
+              <td><span class="dim">7 kg</span></td>
+              <td><span class="dim">1400 rpm</span></td>
+              <td><span class="dim">60 × 85 × 54 cm</span></td>
+              <td><span class="energy-badge energy-e">E</span></td>
+              <td><span class="dim">72 / 79 dB</span></td>
+              <td><span class="price-val">~€ 229</span></td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~2 days · +€39.90</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/search.html?query=Beko+WTK72011" target="_blank" rel="noopener noreferrer">WTK 72011 W</a></span>
+                <span class="desk-brand">Beko</span>
+                <span class="desk-note">SteamCure odour-refresh · AquaWave drum</span>
+              </td>
+              <td><span class="dim">7 kg</span></td>
+              <td><span class="dim">1000 rpm</span></td>
+              <td><span class="dim">60 × 84 × 45 cm</span></td>
+              <td><span class="energy-badge energy-d">D</span></td>
+              <td><span class="dim">60 / 72 dB</span></td>
+              <td><span class="price-val">~€ 259</span></td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~3 days · +€39.90</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIER 2 -->
+  <section class="tier t2">
+    <div class="tier-rail"><div class="tier-code">Tier 02</div></div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Mid-Range</span>
+        <span class="tier-band">€300 – €550</span>
+      </div>
+      <p class="tier-desc">
+        Best value tier for a 2-person household. 8–9 kg capacity, 1400 rpm, energy class B/C. The LG is the standout pick: inverter direct-drive motor (10-year warranty), 6 Motion wash system, and strong customer ratings at the price.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Load</th>
+              <th>Spin</th>
+              <th>Dimensions (W×H×D)</th>
+              <th>Energy class</th>
+              <th>Noise</th>
+              <th>Price</th>
+              <th>Delivery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/search.html?query=LG+F4WV3294" target="_blank" rel="noopener noreferrer">F4WV3294S6W</a></span>
+                <span class="desk-brand">LG</span>
+                <span class="desk-note">Direct Drive motor · 10-yr warranty · TurboWash 360°</span>
+                <span class="pick-badge">Best value</span>
+              </td>
+              <td><span class="dim">9 kg</span></td>
+              <td><span class="dim">1200 rpm</span></td>
+              <td><span class="dim">60 × 85 × 56 cm</span></td>
+              <td><span class="energy-badge energy-b">B</span></td>
+              <td><span class="dim">47 / 74 dB</span></td>
+              <td>
+                <span class="price-val">~€ 399</span>
+                <span class="price-note">4.5/5 on MediaMarkt</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~3 days · free</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/search.html?query=Bosch+WAN28285" target="_blank" rel="noopener noreferrer">WAN28285 Series 2</a></span>
+                <span class="desk-brand">Bosch</span>
+                <span class="desk-note">EcoSilence motor · VarioPerfect · SpeedPerfect</span>
+              </td>
+              <td><span class="dim">8 kg</span></td>
+              <td><span class="dim">1400 rpm</span></td>
+              <td><span class="dim">60 × 85 × 59 cm</span></td>
+              <td><span class="energy-badge energy-c">C</span></td>
+              <td><span class="dim">48 / 72 dB</span></td>
+              <td>
+                <span class="price-val">~€ 499</span>
+                <span class="price-note">4.4/5 on MediaMarkt</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~2 days · free</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIER 3 -->
+  <section class="tier t3">
+    <div class="tier-rail"><div class="tier-code">Tier 03</div></div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Upper Mid-Range</span>
+        <span class="tier-band">€550 – €900</span>
+      </div>
+      <p class="tier-desc">
+        Quiet, efficient machines with smart features — WiFi control, steam programmes, and class-A energy performance. The AEG is whisper-quiet at 46/68 dB and includes ProSteam care. The Samsung adds AutoDose (detergent auto-dispensing) and EcoBubble technology.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Load</th>
+              <th>Spin</th>
+              <th>Dimensions (W×H×D)</th>
+              <th>Energy class</th>
+              <th>Noise</th>
+              <th>Price</th>
+              <th>Delivery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/search.html?query=AEG+L7FBF841N" target="_blank" rel="noopener noreferrer">L7FBF841N</a></span>
+                <span class="desk-brand">AEG</span>
+                <span class="desk-note">ProSteam · AutoSense load detection · WiFi</span>
+                <span class="pick-badge">Top pick</span>
+              </td>
+              <td><span class="dim">8 kg</span></td>
+              <td><span class="dim">1400 rpm</span></td>
+              <td><span class="dim">60 × 85 × 64 cm</span></td>
+              <td><span class="energy-badge energy-a">A</span></td>
+              <td><span class="dim">46 / 68 dB</span></td>
+              <td>
+                <span class="price-val">~€ 599</span>
+                <span class="price-note">4.6/5 on MediaMarkt</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~5 days · free</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/search.html?query=Samsung+WW90T4048EE" target="_blank" rel="noopener noreferrer">WW90T4048EE/EG</a></span>
+                <span class="desk-brand">Samsung</span>
+                <span class="desk-note">EcoBubble · AddWash door · SmartThings app</span>
+              </td>
+              <td><span class="dim">9 kg</span></td>
+              <td><span class="dim">1400 rpm</span></td>
+              <td><span class="dim">60 × 85 × 55 cm</span></td>
+              <td><span class="energy-badge energy-b">B</span></td>
+              <td><span class="dim">49 / 74 dB</span></td>
+              <td>
+                <span class="price-val">~€ 649</span>
+                <span class="price-note">4.3/5 on MediaMarkt</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~3 days · free</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIER 4 -->
+  <section class="tier t4">
+    <div class="tier-rail"><div class="tier-code">Tier 04</div></div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Premium</span>
+        <span class="tier-band">€900 – €1,300</span>
+      </div>
+      <p class="tier-desc">
+        Miele and Siemens flagships — engineered for longevity (Miele machines are tested to 20-year lifespan), near-silent operation below 45 dB spin, and top class-A efficiency. Overkill for most, but the best long-term cost-per-wash.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Load</th>
+              <th>Spin</th>
+              <th>Dimensions (W×H×D)</th>
+              <th>Energy class</th>
+              <th>Noise</th>
+              <th>Price</th>
+              <th>Delivery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/search.html?query=Miele+WEB095+WCS" target="_blank" rel="noopener noreferrer">WEB 095 WCS</a></span>
+                <span class="desk-brand">Miele</span>
+                <span class="desk-note">TwinDos auto-detergent · 20-yr lifespan · CapDosing</span>
+              </td>
+              <td><span class="dim">9 kg</span></td>
+              <td><span class="dim">1600 rpm</span></td>
+              <td><span class="dim">60 × 85 × 64 cm</span></td>
+              <td><span class="energy-badge energy-a">A</span></td>
+              <td><span class="dim">44 / 66 dB</span></td>
+              <td>
+                <span class="price-val">~€ 1,099</span>
+                <span class="price-note">4.8/5 · 10-yr warranty option</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~5 days · free</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/search.html?query=Siemens+WM16XKH5" target="_blank" rel="noopener noreferrer">WM16XKH5 iQ700</a></span>
+                <span class="desk-brand">Siemens</span>
+                <span class="desk-note">iSensoric Auto-cleaning · antiVibration Design · Home Connect</span>
+              </td>
+              <td><span class="dim">10 kg</span></td>
+              <td><span class="dim">1600 rpm</span></td>
+              <td><span class="dim">60 × 85 × 59 cm</span></td>
+              <td><span class="energy-badge energy-a">A</span></td>
+              <td><span class="dim">43 / 68 dB</span></td>
+              <td>
+                <span class="price-val">~€ 1,199</span>
+                <span class="price-note">4.7/5 · Free shipping</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~5 days · free</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <footer class="notes">
+    <div class="notes-title">Research notes</div>
+    <div class="notes-grid">
+      <div class="note-block">
+        <strong>Price accuracy</strong>
+        <p>All prices verified at mediamarkt.de on 28 June 2026. Prices include German VAT and may change. Cashback promotions not factored in.</p>
+      </div>
+      <div class="note-block">
+        <strong>Choosing capacity</strong>
+        <p>For 2 people: 7–8 kg handles most loads comfortably. Step up to 9 kg if you wash bedding frequently. Larger drums are no less efficient when partially loaded thanks to load-sensing on Tier 2+ machines.</p>
+      </div>
+      <div class="note-block">
+        <strong>Noise (washing / spinning)</strong>
+        <p>Noise is listed as washing dB / spinning dB. Spinning above 75 dB will be heard through walls in a typical Munich apartment. Tier 3+ machines stay below 70 dB — worth it if the machine is near the living area.</p>
+      </div>
+      <div class="note-block">
+        <strong>Munich delivery &amp; installation</strong>
+        <p>MediaMarkt and Saturn (Karlsplatz) offer Aufstellservice (~€39–59) to carry the machine in, connect hoses, and remove packaging. Strongly recommended for upper floors without a lift.</p>
+      </div>
+      <div class="note-block">
+        <strong>Water connection</strong>
+        <p>German washing machines use a standard 3/4" cold-water inlet (G 3/4 angle valve). If the apartment has a single Waschmaschinenanschluss shared with a dishwasher, see the Dishwasher report for how to split the connection.</p>
+      </div>
+      <div class="note-block">
+        <strong>Energy cost impact</strong>
+        <p>Class A (e.g. AEG L7FBF841N) uses ~155 kWh/yr vs ~220 kWh for class E at 220 cycles/yr. At Munich electricity rates (~€0.34/kWh) that's ~€22/yr savings — the AEG pays back its premium over Tier 1 in 5–6 years.</p>
+      </div>
+    </div>
+    <div class="sources">
+      <strong>Sources (verified primary)</strong>
+      <ul>
+        <li>mediamarkt.de — All product pages (28 June 2026)</li>
+        <li>MediaMarkt customer ratings cited inline per model</li>
+        <li>EU Energy Label database — energy consumption figures</li>
+      </ul>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
