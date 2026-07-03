@@ -71,6 +71,64 @@
   }
   .stat-label { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
 
+  /* ── DASHBOARD ── */
+  .dashboard { margin-bottom: 48px; }
+  .dashboard-title { font-size: 20px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 4px; }
+  .dashboard-range { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--muted); margin-left: 8px; }
+  .dashboard-sub { font-size: 13px; color: var(--muted); margin-bottom: 18px; line-height: 1.5; max-width: 640px; }
+  .chart-figure { border: 1px solid var(--border); background: white; padding: 20px 20px 18px; }
+  .kwh-control { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+  .kwh-control label { font-size: 12px; color: var(--muted); display: flex; align-items: baseline; gap: 6px; white-space: nowrap; }
+  .kwh-control strong { font-family: var(--mono); font-size: 14px; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .kwh-slider { flex: 1 1 220px; max-width: 380px; accent-color: var(--t1); height: 4px; cursor: pointer; }
+  .chart-wrap { position: relative; }
+  .chart-svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .chart-grid line { stroke: var(--border); stroke-width: 1; }
+  .chart-axis-label { font-family: var(--mono); font-size: 10px; fill: var(--muted); }
+  .chart-line { fill: none; stroke: var(--series-color); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .chart-line--dashed { stroke-dasharray: 6 4; }
+  .series.is-reference .chart-line { opacity: .5; }
+  .chart-marker { fill: var(--series-color); stroke: white; stroke-width: 2; }
+  .series.is-hidden { display: none; }
+  .crosshair-line { stroke: var(--muted); stroke-width: 1; opacity: 0; pointer-events: none; }
+  .chart-hit { fill: transparent; cursor: crosshair; }
+  .chart-tooltip {
+    position: absolute; z-index: 5; pointer-events: none;
+    background: var(--ink); color: var(--paper); border-radius: 3px;
+    padding: 8px 10px; font-size: 11px; min-width: 160px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.18);
+  }
+  .chart-tooltip-date {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--paper); opacity: .65; margin-bottom: 5px;
+  }
+  .chart-tooltip-row { display: flex; align-items: center; gap: 6px; padding: 1.5px 0; }
+  .chart-tooltip-key { width: 9px; height: 2px; background: var(--series-color); flex: 0 0 auto; }
+  .chart-tooltip-name { flex: 1 1 auto; font-size: 11px; }
+  .chart-tooltip-value { font-family: var(--mono); font-weight: 700; font-size: 11.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .chart-tooltip-empty { font-size: 11px; opacity: .7; font-style: italic; }
+  .chart-tooltip-detail { font-size: 9.5px; color: var(--paper); opacity: .55; margin: -1px 0 5px 15px; }
+  .chart-legend-caption { font-size: 11px; color: var(--muted); margin: 14px 0 12px; line-height: 1.5; }
+  .chart-legend { display: flex; flex-wrap: wrap; gap: 8px; }
+  .legend-chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    font: inherit; font-size: 12px; color: var(--ink);
+    background: var(--paper); border: 1px solid var(--border); border-radius: 3px;
+    padding: 5px 10px; cursor: pointer; transition: opacity .15s, background .15s;
+  }
+  .legend-chip:hover { background: var(--surface); }
+  .legend-chip.is-off { opacity: .4; }
+  .legend-chip.is-off .legend-swatch { background: var(--muted) !important; }
+  .legend-swatch { width: 10px; height: 10px; border-radius: 50%; background: var(--series-color); flex: 0 0 auto; }
+  .legend-rate { font-family: var(--mono); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .legend-chip--disabled {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12px; color: var(--muted); background: var(--surface);
+    border: 1px dashed var(--border); border-radius: 3px; padding: 5px 10px; cursor: not-allowed;
+  }
+  .legend-chip--disabled .legend-swatch { background: var(--border); }
+  .legend-nodata-tag { font-size: 9px; letter-spacing: .05em; text-transform: uppercase; opacity: .8; }
+
   /* ── TIER SECTION ── */
   .tier {
     margin-bottom: 40px; display: grid;
@@ -177,6 +235,9 @@
     .stat { border-right: none; border-bottom: 1px solid var(--border); }
     .tier { grid-template-columns: 1fr; }
     .tier-rail { display: none; }
+    .chart-figure { padding: 14px 12px; }
+    .chart-axis-label { font-size: 8px; }
+    .legend-chip, .legend-chip--disabled { font-size: 11px; padding: 4px 8px; }
   }
 </style>
 </head>
@@ -205,6 +266,60 @@
       <span class="stat-label">Ökostrom options</span>
     </div>
   </div>
+
+  <!-- HISTORICAL DASHBOARD -->
+  <section class="dashboard">
+    <h2 class="dashboard-title">Historical Estimated Annual Cost<span class="dashboard-range">Aug 2024 – Jun 2026</span></h2>
+    <p class="dashboard-sub">Hover the chart to compare providers at any point in time. Click a provider below to show or hide its line. Drag the slider to recompute every line for your own usage — all data is real and sourced; see the legend and notes for what's confirmed, interpolated, or out of region.</p>
+    <figure class="chart-figure">
+      <div class="kwh-control">
+        <label for="kwhSlider">Estimated annual usage: <strong id="kwhValue">2,500</strong> kWh/year</label>
+        <input type="range" id="kwhSlider" class="kwh-slider" min="500" max="6000" step="100" value="2500" aria-label="Estimated annual electricity usage in kWh" />
+      </div>
+      <div class="chart-wrap">
+        <svg class="chart-svg" viewBox="0 0 920 460" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Historical estimated annual cost by provider, August 2024 to June 2026">
+          <g class="chart-grid"></g>
+          <g class="chart-xaxis">
+            <text x="52" y="444" class="chart-axis-label" text-anchor="start">Aug 24</text>
+            <text x="168.18" y="444" class="chart-axis-label" text-anchor="middle">Nov 24</text>
+            <text x="284.36" y="444" class="chart-axis-label" text-anchor="middle">Feb 25</text>
+            <text x="400.55" y="444" class="chart-axis-label" text-anchor="middle">May 25</text>
+            <text x="516.73" y="444" class="chart-axis-label" text-anchor="middle">Aug 25</text>
+            <text x="632.91" y="444" class="chart-axis-label" text-anchor="middle">Nov 25</text>
+            <text x="749.09" y="444" class="chart-axis-label" text-anchor="middle">Feb 26</text>
+            <text x="904" y="444" class="chart-axis-label" text-anchor="end">Jun 26</text>
+          </g>
+
+          <g class="series" data-provider="swm" style="--series-color:#2a78d6"></g>
+          <g class="series is-reference" data-provider="elli" style="--series-color:#1baf7a"></g>
+          <g class="series" data-provider="tibber" style="--series-color:#eda100"></g>
+          <g class="series" data-provider="immergruen" style="--series-color:#008300"></g>
+          <g class="series" data-provider="polarstern" style="--series-color:#4a3aa7"></g>
+          <g class="series" data-provider="greenplanet" style="--series-color:#e34948"></g>
+          <g class="series is-reference" data-provider="lichtblick" style="--series-color:#e87ba4"></g>
+          <g class="series" data-provider="naturstrom" style="--series-color:#eb6834"></g>
+
+          <line class="crosshair-line" x1="52" y1="14" x2="52" y2="426" />
+          <rect class="chart-hit" x="52" y="14" width="852" height="412" />
+        </svg>
+        <div class="chart-tooltip" hidden></div>
+      </div>
+      <p class="chart-legend-caption">— solid = confirmed value &nbsp;·&nbsp; ╌ dashed = interpolated between two confirmed points, exact path unknown &nbsp;·&nbsp; faded = real data, but from another city, shown only as a reference (not Munich) &nbsp;·&nbsp; rates shown are each provider's Grundpreis + Arbeitspreis at the usage set above</p>
+      <div class="chart-legend">
+        <button type="button" class="legend-chip" data-provider="swm" style="--series-color:#2a78d6" aria-pressed="true"><span class="legend-swatch"></span>SWM Grundversorgung<span class="legend-rate" data-rate="swm">€961/yr</span></button>
+        <button type="button" class="legend-chip" data-provider="elli" style="--series-color:#1baf7a" aria-pressed="true"><span class="legend-swatch"></span>Elli (ref)<span class="legend-rate" data-rate="elli">€857/yr</span></button>
+        <button type="button" class="legend-chip" data-provider="tibber" style="--series-color:#eda100" aria-pressed="true"><span class="legend-swatch"></span>Tibber<span class="legend-rate" data-rate="tibber">€965/yr</span></button>
+        <button type="button" class="legend-chip" data-provider="immergruen" style="--series-color:#008300" aria-pressed="true"><span class="legend-swatch"></span>immergrün! Energie<span class="legend-rate" data-rate="immergruen">€632/yr</span></button>
+        <button type="button" class="legend-chip" data-provider="polarstern" style="--series-color:#4a3aa7" aria-pressed="true"><span class="legend-swatch"></span>Polarstern<span class="legend-rate" data-rate="polarstern">€943/yr</span></button>
+        <button type="button" class="legend-chip" data-provider="greenplanet" style="--series-color:#e34948" aria-pressed="true"><span class="legend-swatch"></span>Green Planet Energy<span class="legend-rate" data-rate="greenplanet">€958/yr</span></button>
+        <button type="button" class="legend-chip" data-provider="lichtblick" style="--series-color:#e87ba4" aria-pressed="true"><span class="legend-swatch"></span>LichtBlick (ref)<span class="legend-rate" data-rate="lichtblick">€959/yr</span></button>
+        <button type="button" class="legend-chip" data-provider="naturstrom" style="--series-color:#eb6834" aria-pressed="true"><span class="legend-swatch"></span>Naturstrom<span class="legend-rate" data-rate="naturstrom">€1,015/yr</span></button>
+        <span class="legend-chip--disabled" title="No public historical pricing data found"><span class="legend-swatch"></span>eprimo<span class="legend-nodata-tag">no data</span></span>
+        <span class="legend-chip--disabled" title="No public historical pricing data found"><span class="legend-swatch"></span>Ostrom SimplyFair<span class="legend-nodata-tag">no data</span></span>
+        <span class="legend-chip--disabled" title="No public historical pricing data found"><span class="legend-swatch"></span>Ostrom SimplyFair12<span class="legend-nodata-tag">no data</span></span>
+      </div>
+    </figure>
+  </section>
 
   <!-- TIER 1: GRUNDVERSORGUNG -->
   <section class="tier t1">
@@ -562,6 +677,10 @@
         <strong>Hidden caveats to watch</strong>
         <p>New-customer bonuses (Neukundenbonus) are often paid only after 12 months — cancel early and you forfeit them. Check whether the price guarantee covers taxes and levies (Steuern &amp; Abgaben) or only the energy component; most guarantees cover energy only, so surcharges can still rise. Always compare with your exact Munich postal code on Check24 or Verivox — prices vary by network zone.</p>
       </div>
+      <div class="note-block">
+        <strong>About the historical chart</strong>
+        <p>Every line uses real, dated, sourced data — nothing invented. Solid = a confirmed value from an official price sheet or archived snapshot. Dashed = linear interpolation between two confirmed points, used only where no snapshot exists in between. Faded = real data, but from a different German city (Elli: PLZ 53xxx; LichtBlick: Hamburg), shown only as a directional reference, not Munich pricing. Three tariffs (eprimo, Ostrom SimplyFair, Ostrom SimplyFair12) have no publicly archived history at all — their prices are calculated dynamically per postal code with nothing preserved by web archives — so they're listed in the legend for completeness but have no line to show.</p>
+      </div>
     </div>
   </div>
 
@@ -584,9 +703,263 @@
       <li><a href="https://strom-report.com/stromvergleich-muenchen/" target="_blank" rel="noopener noreferrer">Strom-Report München</a></li>
       <li><a href="https://www.check24.de/strom-gas/stadt/muenchen/" target="_blank" rel="noopener noreferrer">CHECK24 München</a></li>
       <li><a href="https://www.verivox.de/strom/" target="_blank" rel="noopener noreferrer">Verivox Stromvergleich</a></li>
+      <li><a href="https://www.smard.de/home/marktdaten" target="_blank" rel="noopener noreferrer">SMARD (Bundesnetzagentur market data)</a></li>
+      <li><a href="https://energy-charts.info" target="_blank" rel="noopener noreferrer">energy-charts.info (Fraunhofer ISE)</a></li>
+      <li><a href="https://www.polarstern-energie.de/service/fragen-antworten/oekostrom/" target="_blank" rel="noopener noreferrer">Polarstern FAQ (price history)</a></li>
+      <li><a href="https://www.naturstrom.de/privatkunden/oekostrom/naturstrom" target="_blank" rel="noopener noreferrer">Naturstrom price composition</a></li>
+      <li><a href="https://www.sparbote.de/472673/elli-volkswagen-naturstrom/" target="_blank" rel="noopener noreferrer">sparbote.de (Elli deal tracker)</a></li>
+      <li><a href="https://www.stromvergleich.de/stromanbieter/lichtblick" target="_blank" rel="noopener noreferrer">stromvergleich.de (LichtBlick)</a></li>
+      <li><a href="https://www.stromauskunft.de/de/stromanbieter/lichtblick.html" target="_blank" rel="noopener noreferrer">stromauskunft.de (LichtBlick)</a></li>
+      <li><a href="https://www.oekostrom-anbieter.info/oekostromanbieter/green-planet-energy-eg" target="_blank" rel="noopener noreferrer">oekostrom-anbieter.info (Green Planet)</a></li>
+      <li><a href="https://support.tibber.com/de/articles/5646566-alle-steuern-abgaben-des-strompreises" target="_blank" rel="noopener noreferrer">Tibber markup breakdown</a></li>
+      <li><a href="https://web.archive.org" target="_blank" rel="noopener noreferrer">Wayback Machine (archived snapshots)</a></li>
     </ul>
   </div>
 
 </div>
+<script>
+(function () {
+  var MONTHS = ["Aug 24","Sep 24","Oct 24","Nov 24","Dec 24","Jan 25","Feb 25","Mar 25","Apr 25","May 25","Jun 25",
+    "Jul 25","Aug 25","Sep 25","Oct 25","Nov 25","Dec 25","Jan 26","Feb 26","Mar 26","Apr 26","May 26","Jun 26"];
+  var plot = { left: 52, top: 14, w: 852, h: 412, n: 23 };
+  // points: {i, v, marker, dashIn} — v is Arbeitspreis in ct/kWh; dashIn flags the segment
+  // ARRIVING at this point as an unconfirmed-timing interpolation (see notes section).
+  // currentRate is each provider's live Munich Arbeitspreis as shown in the tables below —
+  // used for the legend's cost figure. It's kept separate from the chart's last plotted point
+  // because the out-of-region providers (Elli, LichtBlick) and immergrün's source-discrepancy
+  // endpoint intentionally diverge from the current Munich rate (see notes section).
+  var SERIES = {
+    swm: { label: "SWM Grundversorgung", color: "#2a78d6", reference: false, grundpreis: 12.48, currentRate: 32.44,
+      points: [ {i:0,v:37.57}, {i:12,v:37.57,marker:true}, {i:17,v:37.57}, {i:18,v:32.44,marker:true}, {i:22,v:32.44} ] },
+    elli: { label: "Elli", color: "#1baf7a", reference: true, grundpreis: 8.80, currentRate: 30.06,
+      points: [ {i:0,v:25.52,marker:true}, {i:4,v:25.4,marker:true}, {i:17,v:23.3,marker:true} ] },
+    tibber: { label: "Tibber", color: "#eda100", reference: false, grundpreis: 5.99, currentRate: 35.71,
+      points: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22].map(function(i,idx){
+        var v=[32.97,32.59,33.37,36.15,35.59,36.17,37.61,34.23,32.55,31.49,31.16,33.54,32.46,33.11,33.20,34.95,34.11,35.77,34.42,34.69,32.61,34.51,35.71][idx];
+        return {i:i,v:v};
+      }) },
+    immergruen: { label: "immergrün! Energie", color: "#008300", reference: false, grundpreis: 0, currentRate: 25.26,
+      points: [ {i:16,v:22.60,marker:true}, {i:18,v:24.14,marker:true}, {i:20,v:27.51,marker:true} ] },
+    polarstern: { label: "Polarstern", color: "#4a3aa7", reference: false, grundpreis: 15.95, currentRate: 30.05,
+      points: [ {i:0,v:32.59}, {i:3,v:32.01,marker:true,dashIn:true}, {i:12,v:32.01,marker:true,dashIn:false}, {i:17,v:30.05,marker:true,dashIn:true}, {i:22,v:30.05,dashIn:false} ] },
+    greenplanet: { label: "Green Planet Energy", color: "#e34948", reference: false, grundpreis: 13.90, currentRate: 31.63,
+      points: [ {i:5,v:31.63,marker:true}, {i:22,v:31.63,marker:true,dashIn:false} ] },
+    lichtblick: { label: "LichtBlick", color: "#e87ba4", reference: true, grundpreis: 9.78, currentRate: 33.66,
+      points: [ {i:17,v:35.67,marker:true}, {i:20,v:34.77,marker:true,dashIn:false} ] },
+    naturstrom: { label: "Naturstrom", color: "#eb6834", reference: false, grundpreis: 11.90, currentRate: 34.90,
+      points: [ {i:0,v:34.90,marker:true}, {i:2,v:34.90,marker:true,dashIn:false}, {i:5,v:34.90,marker:true,dashIn:false}, {i:11,v:33.90,marker:true,dashIn:false}, {i:14,v:33.90,marker:true,dashIn:false}, {i:17,v:30.90,marker:true,dashIn:false}, {i:22,v:34.90,dashIn:true} ] }
+  };
+
+  function costOf(s, v, kWh) { return s.grundpreis * 12 + v * kWh / 100; }
+
+  function valueAt(points, i) {
+    if (i < points[0].i || i > points[points.length - 1].i) return null;
+    for (var k = 0; k < points.length - 1; k++) {
+      var a = points[k], b = points[k + 1];
+      if (i >= a.i && i <= b.i) {
+        if (a.i === b.i) return a.v;
+        var t = (i - a.i) / (b.i - a.i);
+        return a.v + (b.v - a.v) * t;
+      }
+    }
+    return null;
+  }
+
+  function niceNum(range, round) {
+    var exponent = Math.floor(Math.log(range) / Math.LN10);
+    var fraction = range / Math.pow(10, exponent);
+    var niceFraction;
+    if (round) { niceFraction = fraction < 1.5 ? 1 : fraction < 3 ? 2 : fraction < 7 ? 5 : 10; }
+    else { niceFraction = fraction <= 1 ? 1 : fraction <= 2 ? 2 : fraction <= 5 ? 5 : 10; }
+    return niceFraction * Math.pow(10, exponent);
+  }
+
+  function niceScale(min, max, ticks) {
+    if (min === max) { min -= 1; max += 1; }
+    var range = niceNum(max - min, false);
+    var step = niceNum(range / (ticks - 1), true);
+    return { min: Math.floor(min / step) * step, max: Math.ceil(max / step) * step, step: step };
+  }
+
+  function fmtEUR(n) { return "€" + Math.round(n).toLocaleString("en-US"); }
+
+  var svg = document.querySelector(".chart-svg");
+  if (!svg) return;
+  var hit = svg.querySelector(".chart-hit");
+  var crosshair = svg.querySelector(".crosshair-line");
+  var gridG = svg.querySelector(".chart-grid");
+  var tooltip = document.querySelector(".chart-tooltip");
+  var wrap = document.querySelector(".chart-wrap");
+  var slider = document.getElementById("kwhSlider");
+  var kwhValueEl = document.getElementById("kwhValue");
+  var domain = { min: 0, max: 1 };
+
+  function svgEl(tag, attrs) {
+    var el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    Object.keys(attrs).forEach(function (k) { el.setAttribute(k, attrs[k]); });
+    return el;
+  }
+
+  function xPos(i) { return plot.left + i * (plot.w / (plot.n - 1)); }
+  function yPos(v) { return plot.top + (domain.max - v) / (domain.max - domain.min) * plot.h; }
+
+  function render(kWh) {
+    kwhValueEl.textContent = Number(kWh).toLocaleString("en-US");
+
+    var rawMin = Infinity, rawMax = -Infinity;
+    Object.keys(SERIES).forEach(function (id) {
+      var s = SERIES[id];
+      s.points.forEach(function (p) {
+        var c = costOf(s, p.v, kWh);
+        if (c < rawMin) rawMin = c;
+        if (c > rawMax) rawMax = c;
+      });
+    });
+    domain = niceScale(rawMin - (rawMax - rawMin) * 0.08, rawMax + (rawMax - rawMin) * 0.08, 5);
+
+    while (gridG.firstChild) gridG.removeChild(gridG.firstChild);
+    var ticks = Math.round((domain.max - domain.min) / domain.step) + 1;
+    for (var t = 0; t < ticks; t++) {
+      var val = domain.min + t * domain.step;
+      var y = yPos(val);
+      gridG.appendChild(svgEl("line", { x1: plot.left, y1: y, x2: plot.left + plot.w, y2: y }));
+      var label = svgEl("text", { x: plot.left - 8, y: y + 3, class: "chart-axis-label", "text-anchor": "end" });
+      label.textContent = fmtEUR(val);
+      gridG.appendChild(label);
+    }
+
+    Object.keys(SERIES).forEach(function (id) {
+      var s = SERIES[id];
+      var group = svg.querySelector('.series[data-provider="' + id + '"]');
+      while (group.firstChild) group.removeChild(group.firstChild);
+
+      var segments = [];
+      var curDashed = false;
+      var curPts = [{ x: xPos(s.points[0].i), y: yPos(costOf(s, s.points[0].v, kWh)) }];
+      for (var k = 1; k < s.points.length; k++) {
+        var p1 = s.points[k];
+        var dashed = !!p1.dashIn;
+        var pt = { x: xPos(p1.i), y: yPos(costOf(s, p1.v, kWh)) };
+        if (dashed === curDashed) {
+          curPts.push(pt);
+        } else {
+          segments.push({ dashed: curDashed, pts: curPts });
+          curPts = [curPts[curPts.length - 1], pt];
+          curDashed = dashed;
+        }
+      }
+      segments.push({ dashed: curDashed, pts: curPts });
+
+      segments.forEach(function (seg) {
+        if (seg.pts.length < 2) return;
+        var d = "M " + seg.pts.map(function (p) { return p.x + "," + p.y; }).join(" L ");
+        group.appendChild(svgEl("path", { d: d, class: "chart-line" + (seg.dashed ? " chart-line--dashed" : "") }));
+      });
+      s.points.forEach(function (p) {
+        if (!p.marker) return;
+        group.appendChild(svgEl("circle", { cx: xPos(p.i), cy: yPos(costOf(s, p.v, kWh)), r: 4, class: "chart-marker" }));
+      });
+
+      var rateEl = document.querySelector('.legend-rate[data-rate="' + id + '"]');
+      if (rateEl) rateEl.textContent = fmtEUR(costOf(s, s.currentRate, kWh)) + "/yr · €" + s.grundpreis.toFixed(2) + "/mo base";
+    });
+  }
+
+  function svgPoint(evt) {
+    var pt = svg.createSVGPoint();
+    pt.x = evt.clientX;
+    pt.y = evt.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+  }
+
+  function nearestMonth(evt) {
+    var p = svgPoint(evt);
+    var frac = (p.x - plot.left) / plot.w;
+    return Math.max(0, Math.min(plot.n - 1, Math.round(frac * (plot.n - 1))));
+  }
+
+  hit.addEventListener("mousemove", function (evt) {
+    var i = nearestMonth(evt);
+    var kWh = Number(slider.value);
+    var cx = plot.left + i * (plot.w / (plot.n - 1));
+    crosshair.setAttribute("x1", cx);
+    crosshair.setAttribute("x2", cx);
+    crosshair.style.opacity = "1";
+
+    var rows = [];
+    Object.keys(SERIES).forEach(function (id) {
+      var chip = document.querySelector('.legend-chip[data-provider="' + id + '"]');
+      if (chip && chip.classList.contains("is-off")) return;
+      var s = SERIES[id];
+      var v = valueAt(s.points, i);
+      if (v === null) return;
+      rows.push({ label: s.label, color: s.color, value: costOf(s, v, kWh), rate: v, grundpreis: s.grundpreis, reference: s.reference });
+    });
+    rows.sort(function (a, b) { return b.value - a.value; });
+
+    while (tooltip.firstChild) tooltip.removeChild(tooltip.firstChild);
+    var title = document.createElement("div");
+    title.className = "chart-tooltip-date";
+    title.textContent = MONTHS[i];
+    tooltip.appendChild(title);
+
+    if (rows.length === 0) {
+      var none = document.createElement("div");
+      none.className = "chart-tooltip-empty";
+      none.textContent = "No visible provider has data for this month";
+      tooltip.appendChild(none);
+    } else {
+      rows.forEach(function (r) {
+        var row = document.createElement("div");
+        row.className = "chart-tooltip-row";
+        var key = document.createElement("span");
+        key.className = "chart-tooltip-key";
+        key.style.setProperty("--series-color", r.color);
+        row.appendChild(key);
+        var name = document.createElement("span");
+        name.className = "chart-tooltip-name";
+        name.textContent = r.label + (r.reference ? " (ref)" : "");
+        row.appendChild(name);
+        var val = document.createElement("span");
+        val.className = "chart-tooltip-value";
+        val.textContent = fmtEUR(r.value) + "/yr";
+        row.appendChild(val);
+        tooltip.appendChild(row);
+        var detail = document.createElement("div");
+        detail.className = "chart-tooltip-detail";
+        detail.textContent = "€" + r.grundpreis.toFixed(2) + "/mo base + " + r.rate.toFixed(2) + " ct/kWh";
+        tooltip.appendChild(detail);
+      });
+    }
+
+    tooltip.hidden = false;
+    var wrapRect = wrap.getBoundingClientRect();
+    var left = evt.clientX - wrapRect.left + 14;
+    var top = evt.clientY - wrapRect.top - 10;
+    var maxLeft = wrapRect.width - tooltip.offsetWidth - 8;
+    if (left > maxLeft) left = evt.clientX - wrapRect.left - tooltip.offsetWidth - 14;
+    tooltip.style.left = Math.max(4, left) + "px";
+    tooltip.style.top = Math.max(4, top) + "px";
+  });
+
+  hit.addEventListener("mouseleave", function () {
+    crosshair.style.opacity = "0";
+    tooltip.hidden = true;
+  });
+
+  document.querySelectorAll(".legend-chip").forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      var id = chip.getAttribute("data-provider");
+      var group = svg.querySelector('.series[data-provider="' + id + '"]');
+      var isOff = chip.classList.toggle("is-off");
+      chip.setAttribute("aria-pressed", isOff ? "false" : "true");
+      if (group) group.classList.toggle("is-hidden", isOff);
+    });
+  });
+
+  slider.addEventListener("input", function () { render(Number(slider.value)); });
+  render(Number(slider.value));
+})();
+</script>
 </body>
 </html>
