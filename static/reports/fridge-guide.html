@@ -12,6 +12,8 @@
     --border:  #CAC7BE;
     --surface: #E8E6DF;
 
+    --t0: #8A4020;
+    --t0-light: #F2E0D8;
     --t1: #3A5F8A;
     --t1-light: #D8E5F3;
     --t2: #1A5438;
@@ -137,6 +139,7 @@
   .energy-a { background: #d3eae0; color: #1a5438; }
   .energy-b { background: #d8e5f3; color: #3a5f8a; }
   .energy-c { background: #fff3cd; color: #7a5a14; }
+  .energy-d { background: #ffe5d0; color: #8a4020; }
 
   .nofrost-yes { color: #1a5438; font-weight: 600; font-size: 12px; }
   .nofrost-no  { color: var(--muted); font-size: 12px; }
@@ -157,6 +160,7 @@
   }
 
   /* ── TIER VARS ── */
+  .t0 { --tier-color: var(--t0); --tier-bg: var(--t0-light); }
   .t1 { --tier-color: var(--t1); --tier-bg: var(--t1-light); }
   .t2 { --tier-color: var(--t2); --tier-bg: var(--t2-light); }
   .t3 { --tier-color: var(--t3); --tier-bg: var(--t3-light); }
@@ -196,24 +200,105 @@
     <div class="report-meta">Munich, Germany &nbsp;·&nbsp; As of July 2026 &nbsp;·&nbsp; Prices incl. VAT &nbsp;·&nbsp; Retailer: MediaMarkt DE</div>
     <h1 class="report-title">Fridges to Buy<br>in Munich</h1>
     <p class="report-subtitle">
-      Four price tiers — all models energy class C or better (new EU 2021 scale). No fridge-freezer combo reaches class C below ~€349 in the current MediaMarkt catalogue. Prices sourced from mediamarkt.de; all models available with home delivery to Munich.
+      Five price tiers — all models energy class D or better (new EU 2021 scale). A dedicated Budget tier covers class-D models from €199; class C and above start at ~€349. Prices sourced from mediamarkt.de; all models available with home delivery to Munich.
     </p>
   </header>
 
   <div class="summary-strip">
     <div class="stat">
-      <span class="stat-value">€349 – €1,199</span>
+      <span class="stat-value">€199 – €1,199</span>
       <span class="stat-label">Total price range</span>
     </div>
     <div class="stat">
-      <span class="stat-value">12 models</span>
-      <span class="stat-label">Across 4 tiers · all ≥ class C</span>
+      <span class="stat-value">15 models</span>
+      <span class="stat-label">Across 5 tiers · all ≥ class D</span>
     </div>
     <div class="stat">
       <span class="stat-value">All ✓</span>
       <span class="stat-label">Home delivery to Munich</span>
     </div>
   </div>
+
+  <!-- TIER 0 — BUDGET (D-class) -->
+  <section class="tier t0">
+    <div class="tier-rail"><div class="tier-code">Tier 00</div></div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Budget</span>
+        <span class="tier-band">under €300</span>
+      </div>
+      <p class="tier-desc">
+        Class-D fridge-freezers — the cheapest models in the guide. All three include NoFrost, which is rare at this price point. If your budget allows ~€349+, the Entry tier offers class-C models with better long-term energy costs.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Capacity</th>
+              <th>Dimensions (W×H×D)</th>
+              <th>Energy class</th>
+              <th>Noise</th>
+              <th>No Frost</th>
+              <th>Price</th>
+              <th>Delivery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_ok-ofk-681-d-nf-w-kuhlgefrierkombination-d-253-l-1805-mm-hoch-weiss-3015152.html" target="_blank" rel="noopener noreferrer">OFK 681 D NF W</a></span>
+                <span class="desk-brand">OK.</span>
+                <span class="desk-note">NoFrost · inverter compressor · White</span>
+                <span class="pick-badge">Cheapest with NoFrost</span>
+              </td>
+              <td><span class="dim">253 L</span></td>
+              <td><span class="dim">54 × 180 × 57 cm</span></td>
+              <td><span class="energy-badge energy-d">D</span></td>
+              <td><span class="dim">—</span></td>
+              <td><span class="nofrost-yes">Yes (both)</span></td>
+              <td><span class="price-val">€ 199</span></td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~2 days · +€39.90</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_exquisit-kgc5250-85-nf-040d-inoxlook-az-kuhlgefrierkombination-d-1810-mm-hoch-inoxlook-dunkel-165401295.html" target="_blank" rel="noopener noreferrer">KGC5250-85-NF-040D</a></span>
+                <span class="desk-brand">Exquisit</span>
+                <span class="desk-note">NoFrost · quick freeze · dark Inoxlook</span>
+              </td>
+              <td><span class="dim">247 L</span></td>
+              <td><span class="dim">~52 × 181 × 60 cm</span></td>
+              <td><span class="energy-badge energy-d">D</span></td>
+              <td><span class="dim">39 dB</span></td>
+              <td><span class="nofrost-yes">Yes (both)</span></td>
+              <td>
+                <span class="price-val">~€ 239</span>
+                <span class="price-note">price approx.</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~2 days · +€39.90</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_beko-b3rcno255xb-kuhlgefrierkombination-d-250-l-1800-mm-hoch-inox-3007190.html" target="_blank" rel="noopener noreferrer">B3RCNO255XB</a></span>
+                <span class="desk-brand">Beko</span>
+                <span class="desk-note">NoFrost · dual cooling circuits · Inox</span>
+              </td>
+              <td><span class="dim">250 L</span></td>
+              <td><span class="dim">~54 × 180 × 67 cm</span></td>
+              <td><span class="energy-badge energy-d">D</span></td>
+              <td><span class="dim">—</span></td>
+              <td><span class="nofrost-yes">Yes (both)</span></td>
+              <td>
+                <span class="price-val">€ 399</span>
+                <span class="price-note">was €689 · Inox finish</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">check postcode</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 
   <!-- TIER 1 -->
   <section class="tier t1">
@@ -556,8 +641,8 @@
         <p>All prices verified at mediamarkt.de in July 2026, incl. German VAT. Prices may change; "~" marks approximate values. Promotions and cashback offers not factored in.</p>
       </div>
       <div class="note-block">
-        <strong>Energy class C minimum</strong>
-        <p>The EU 2021 re-labelling reset the scale. Budget models (mini-fridges, low-cost combos) now sit at D–G. Class C is the new practical baseline for a responsible purchase. Classes A, B, and C all qualify here.</p>
+        <strong>Energy class D minimum</strong>
+        <p>The EU 2021 re-labelling reset the scale. The guide covers class D and above. Class D is the entry point for full-size fridge-freezers under €300; class C and above start at ~€349. Classes A–D all qualify here.</p>
       </div>
       <div class="note-block">
         <strong>Energy cost impact</strong>
