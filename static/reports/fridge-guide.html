@@ -104,7 +104,7 @@
 
   /* ── TABLE ── */
   .table-wrap { overflow-x: auto; border-left: 4px solid var(--tier-color); }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 640px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 680px; }
   thead tr { background: var(--ink); color: var(--paper); }
   thead th {
     padding: 9px 12px; text-align: left; font-size: 10px;
@@ -137,8 +137,6 @@
   .energy-a { background: #d3eae0; color: #1a5438; }
   .energy-b { background: #d8e5f3; color: #3a5f8a; }
   .energy-c { background: #fff3cd; color: #7a5a14; }
-  .energy-d { background: #ffe5cc; color: #8a3a14; }
-  .energy-e { background: #f3d8d8; color: #8a1414; }
 
   .nofrost-yes { color: #1a5438; font-weight: 600; font-size: 12px; }
   .nofrost-no  { color: var(--muted); font-size: 12px; }
@@ -195,21 +193,21 @@
 <div class="page">
 
   <header class="report-header">
-    <div class="report-meta">Munich, Germany &nbsp;·&nbsp; As of June 2026 &nbsp;·&nbsp; Prices incl. VAT &nbsp;·&nbsp; Retailer: MediaMarkt DE</div>
+    <div class="report-meta">Munich, Germany &nbsp;·&nbsp; As of July 2026 &nbsp;·&nbsp; Prices incl. VAT &nbsp;·&nbsp; Retailer: MediaMarkt DE</div>
     <h1 class="report-title">Fridges to Buy<br>in Munich</h1>
     <p class="report-subtitle">
-      Five price tiers — from compact budget fridges to premium built-in appliances. All models available via MediaMarkt Deutschland with home delivery to Munich. Prices and specs sourced directly from mediamarkt.de.
+      Four price tiers — all models energy class C or better (new EU 2021 scale). No fridge-freezer combo reaches class C below ~€349 in the current MediaMarkt catalogue. Prices sourced from mediamarkt.de; all models available with home delivery to Munich.
     </p>
   </header>
 
   <div class="summary-strip">
     <div class="stat">
-      <span class="stat-value">€99 – €4,000</span>
+      <span class="stat-value">€349 – €1,199</span>
       <span class="stat-label">Total price range</span>
     </div>
     <div class="stat">
-      <span class="stat-value">9 models</span>
-      <span class="stat-label">Across 4 tiers</span>
+      <span class="stat-value">12 models</span>
+      <span class="stat-label">Across 4 tiers · all ≥ class C</span>
     </div>
     <div class="stat">
       <span class="stat-value">All ✓</span>
@@ -222,11 +220,11 @@
     <div class="tier-rail"><div class="tier-code">Tier 01</div></div>
     <div class="tier-body">
       <div class="tier-head">
-        <span class="tier-name">Budget</span>
-        <span class="tier-band">under €200</span>
+        <span class="tier-name">Entry</span>
+        <span class="tier-band">under €500</span>
       </div>
       <p class="tier-desc">
-        Compact and mini fridges — suitable for a single person, office, or secondary room. No freezer compartment in most cases. Ultra-low price at the cost of capacity and energy efficiency.
+        The three cheapest models meeting the class-C minimum. The EU 2021 re-labelling reset efficiency thresholds — all fridge-freezer combos below ~€349 are class D or worse and are excluded. The Koenic KFK 631-1 C IN is the entry pick: slim 58 cm depth fits tighter kitchen layouts.
       </p>
       <div class="table-wrap">
         <table>
@@ -236,6 +234,7 @@
               <th>Capacity</th>
               <th>Dimensions (W×H×D)</th>
               <th>Energy class</th>
+              <th>Noise</th>
               <th>No Frost</th>
               <th>Price</th>
               <th>Delivery</th>
@@ -244,28 +243,54 @@
           <tbody>
             <tr>
               <td>
-                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_ok-ofr-011-e-mini-kuhlschrank-e-510-mm-hoch-weiss-2757522.html" target="_blank" rel="noopener noreferrer">OFR 011 E</a></span>
-                <span class="desk-brand">OK.</span>
-                <span class="desk-note">Mini fridge — fits under a desk</span>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_koenic-kfk-631-1-c-in-kuhlgefrierkombination-c-149-kwh-1850-mm-hoch-inox-2882323.html" target="_blank" rel="noopener noreferrer">KFK 631-1 C IN</a></span>
+                <span class="desk-brand">Koenic</span>
+                <span class="desk-note">Slim 58 cm depth · 315 L total · Inox</span>
+                <span class="pick-badge">Cheapest C-class</span>
               </td>
-              <td><span class="dim">40 L</span></td>
-              <td><span class="dim">44 × 51 × 47 cm</span></td>
-              <td><span class="energy-badge energy-e">E</span></td>
+              <td><span class="dim">315 L</span></td>
+              <td><span class="dim">59.8 × 185 × 58 cm</span></td>
+              <td><span class="energy-badge energy-c">C</span></td>
+              <td><span class="dim">—</span></td>
               <td><span class="nofrost-no">No</span></td>
-              <td><span class="price-val">€ 99</span></td>
-              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~1 day · free</span></td>
+              <td>
+                <span class="price-val">€ 349</span>
+                <span class="price-note">149 kWh/yr</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~2 days · +€39.90</span></td>
             </tr>
             <tr>
               <td>
-                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_ok-ofr181-ew-kuhlschrank-e-832-mm-hoch-weiss-2868374.html" target="_blank" rel="noopener noreferrer">OFR 181 EW</a></span>
-                <span class="desk-brand">OK.</span>
-                <span class="desk-note">Compact larder fridge, no freezer</span>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_beko-b5rcna346hg-kuhlgefrierkombination-c-301-l-1796-mm-hoch-manhattan-gray-3005058.html" target="_blank" rel="noopener noreferrer">B5RCNA346HG</a></span>
+                <span class="desk-brand">Beko</span>
+                <span class="desk-note">NoFrost both · HarvestFresh vitamin cycle · Manhattan Gray</span>
               </td>
-              <td><span class="dim">75 L</span></td>
-              <td><span class="dim">45 × 83 × 45 cm</span></td>
-              <td><span class="energy-badge energy-e">E</span></td>
-              <td><span class="nofrost-no">No</span></td>
-              <td><span class="price-val">~€ 111</span></td>
+              <td><span class="dim">301 L</span></td>
+              <td><span class="dim">59.5 × 180 × 67 cm</span></td>
+              <td><span class="energy-badge energy-c">C</span></td>
+              <td><span class="dim">35 dB</span></td>
+              <td><span class="nofrost-yes">Yes (both)</span></td>
+              <td>
+                <span class="price-val">€ 429</span>
+                <span class="price-note">4.2/5 on MediaMarkt</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">check postcode</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_koenic-kfk-621-c-nf-in-kuhlgefrierkombination-c-171-kwh-1902-mm-hoch-inox-2858091.html" target="_blank" rel="noopener noreferrer">KFK 621 C NF IN</a></span>
+                <span class="desk-brand">Koenic</span>
+                <span class="desk-note">NoFrost both · inverter compressor · temp display</span>
+              </td>
+              <td><span class="dim">338 L</span></td>
+              <td><span class="dim">59.5 × 190 × 70 cm</span></td>
+              <td><span class="energy-badge energy-c">C</span></td>
+              <td><span class="dim">35 dB</span></td>
+              <td><span class="nofrost-yes">Yes (both)</span></td>
+              <td>
+                <span class="price-val">~€ 479</span>
+                <span class="price-note">171 kWh/yr</span>
+              </td>
               <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~2 days · +€39.90</span></td>
             </tr>
           </tbody>
@@ -280,10 +305,10 @@
     <div class="tier-body">
       <div class="tier-head">
         <span class="tier-name">Mid-Range</span>
-        <span class="tier-band">€200 – €450</span>
+        <span class="tier-band">€500 – €800</span>
       </div>
       <p class="tier-desc">
-        Full-size fridge-freezer combos for 1–2 person households. Best value per litre. The Gorenje is the standout pick: 4.5/5 rating, CrispZone drawer, LED, and strong energy performance for the price.
+        Samsung's C-class NoFrost+ model and two Koenic A-class picks. Both Koenic A models are whisper-quiet at 29 dB — competitive with premium brands at a fraction of the price. The KFK 611 A NF IN offers the largest capacity in the tier at 378 L.
       </p>
       <div class="table-wrap">
         <table>
@@ -302,35 +327,54 @@
           <tbody>
             <tr>
               <td>
-                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_koenic-ofk-651-e-w-kuhlgefrierkombination-e-262-l-1800-mm-hoch-weiss-3017591.html" target="_blank" rel="noopener noreferrer">OFK 651 E W</a></span>
-                <span class="desk-brand">OK.</span>
-                <span class="desk-note">262 L total (fridge+freezer)</span>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_samsung-rl34c600csaeg-kuhlgefrierkombination-c-163-kwh-1853-mm-hoch-premium-edelstahl-look-2885578.html" target="_blank" rel="noopener noreferrer">RL34C600CSA/EG</a></span>
+                <span class="desk-brand">Samsung</span>
+                <span class="desk-note">NoFrost+ · SpaceMax technology · stainless look</span>
               </td>
-              <td><span class="dim">262 L</span></td>
-              <td><span class="dim">54.5 × 180 × 55.5 cm</span></td>
-              <td><span class="energy-badge energy-e">E</span></td>
-              <td><span class="dim">—</span></td>
-              <td><span class="nofrost-no">No</span></td>
-              <td><span class="price-val">€ 199</span></td>
+              <td><span class="dim">344 L</span></td>
+              <td><span class="dim">59.5 × 185 × 65.8 cm</span></td>
+              <td><span class="energy-badge energy-c">C</span></td>
+              <td><span class="dim">35 dB</span></td>
+              <td><span class="nofrost-yes">Yes (both)</span></td>
+              <td>
+                <span class="price-val">~€ 599</span>
+                <span class="price-note">163 kWh/yr</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~5 days · free</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_koenic-kfk-651-a-nf-in-kuhlgefrierkombination-a-334-l-1850-mm-hoch-edelstahl-3012050.html" target="_blank" rel="noopener noreferrer">KFK 651 A NF IN</a></span>
+                <span class="desk-brand">Koenic</span>
+                <span class="desk-note">Class A · NoFrost both · Edelstahl</span>
+                <span class="pick-badge">Best value A-class</span>
+              </td>
+              <td><span class="dim">334 L</span></td>
+              <td><span class="dim">~60 × 185 × 66 cm</span></td>
+              <td><span class="energy-badge energy-a">A</span></td>
+              <td><span class="dim">29 dB</span></td>
+              <td><span class="nofrost-yes">Yes (both)</span></td>
+              <td>
+                <span class="price-val">€ 699</span>
+              </td>
               <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~2 days · +€39.90</span></td>
             </tr>
             <tr>
               <td>
-                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_gorenje-rk-4182-ps4-2663090.html" target="_blank" rel="noopener noreferrer">RK4182PS4</a></span>
-                <span class="desk-brand">Gorenje</span>
-                <span class="desk-note">198 L fridge + 71 L freezer</span>
-                <span class="pick-badge">Best value</span>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_koenic-kfk-611-a-nf-in-kuhlgefrierkombination-a-113-kwh-2010-mm-hoch-inox-2858837.html" target="_blank" rel="noopener noreferrer">KFK 611 A NF IN</a></span>
+                <span class="desk-brand">Koenic</span>
+                <span class="desk-note">Largest in tier · NoFrost both · outer temp display</span>
               </td>
-              <td><span class="dim">269 L</span></td>
-              <td><span class="dim">55 × 180 × 55.7 cm</span></td>
-              <td><span class="energy-badge energy-e">E</span></td>
-              <td><span class="dim">39 dB</span></td>
-              <td><span class="nofrost-no">No</span></td>
+              <td><span class="dim">378 L</span></td>
+              <td><span class="dim">~60 × 201 × 65 cm</span></td>
+              <td><span class="energy-badge energy-a">A</span></td>
+              <td><span class="dim">29 dB</span></td>
+              <td><span class="nofrost-yes">Yes (both)</span></td>
               <td>
-                <span class="price-val">€285 – €350</span>
-                <span class="price-note">4.5/5 on MediaMarkt</span>
+                <span class="price-val">€ 799</span>
+                <span class="price-note">113 kWh/yr</span>
               </td>
-              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">check postcode · +€39.90</span></td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~2 days · +€39.90</span></td>
             </tr>
           </tbody>
         </table>
@@ -344,10 +388,10 @@
     <div class="tier-body">
       <div class="tier-head">
         <span class="tier-name">Upper Mid-Range</span>
-        <span class="tier-band">€450 – €800</span>
+        <span class="tier-band">€800 – €1,050</span>
       </div>
       <p class="tier-desc">
-        Quiet, high-capacity appliances with No-Frost technology and better energy classes. The KOENIC is whisper-quiet (35 dB) and eliminates manual defrosting. The Samsung adds a built-in water dispenser and smart app control.
+        Bosch, Samsung, and Siemens enter. The Samsung Bespoke is the standout: 387 L capacity, lowest annual consumption in the entire guide (108 kWh/yr), and free delivery. The Siemens iQ500 adds hyperFresh 0°C zone and Total NoFrost with near-silent operation.
       </p>
       <div class="table-wrap">
         <table>
@@ -366,37 +410,54 @@
           <tbody>
             <tr>
               <td>
-                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_koenic-kfk-611-b-nf-in-kuhlgefrierkombination-b-140-kwh-2010-mm-hoch-inox-2858838.html" target="_blank" rel="noopener noreferrer">KFK 611 B NF IN</a></span>
-                <span class="desk-brand">KOENIC</span>
-                <span class="desk-note">Stainless steel look; external temp display</span>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_bosch-kgn-362-lbf-serie-4-kuhlgefrierkombination-b-321-l-1860-mm-hoch-metall-optik-2970145.html" target="_blank" rel="noopener noreferrer">KGN362LBF Serie 4</a></span>
+                <span class="desk-brand">Bosch</span>
+                <span class="desk-note">NoFrost · metal-look · 20h power-cut food safety</span>
               </td>
-              <td><span class="dim">~340 L</span></td>
-              <td><span class="dim">~60 × 185 × 65 cm</span></td>
+              <td><span class="dim">321 L</span></td>
+              <td><span class="dim">60 × 186 × 66.5 cm</span></td>
               <td><span class="energy-badge energy-b">B</span></td>
-              <td><span class="dim">35 dB</span></td>
+              <td><span class="dim">—</span></td>
               <td><span class="nofrost-yes">Yes (both)</span></td>
               <td>
-                <span class="price-val">~€ 500</span>
-                <span class="price-note">140 kWh/yr · 4.5/5 on MediaMarkt</span>
+                <span class="price-val">~€ 839</span>
               </td>
-              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~2 days · +€39.90</span></td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~3 days · free</span></td>
             </tr>
             <tr>
               <td>
-                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_samsung-rl-34-c652csaeg-kuhlgefrierkombination-c-163-kwh-1853-mm-hoch-edelstahl-lookurban-silver-144688754.html" target="_blank" rel="noopener noreferrer">RL34C652CSA/EG</a></span>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_samsung-rl38c776areg-kuhlgefrierkombination-a-387-l-2030-mm-hoch-edelstahl-2968235.html" target="_blank" rel="noopener noreferrer">RL38C776ASR/EG Bespoke</a></span>
                 <span class="desk-brand">Samsung</span>
-                <span class="desk-note">Water dispenser (no plumbing) · SmartThings app</span>
+                <span class="desk-note">108 kWh/yr · NoFrost+ · AI Energy Mode · Metal Cooling</span>
+                <span class="pick-badge">Lowest consumption</span>
               </td>
-              <td><span class="dim">341 L</span></td>
-              <td><span class="dim">~60 × 185 × 65 cm</span></td>
-              <td><span class="energy-badge energy-c">C</span></td>
+              <td><span class="dim">387 L</span></td>
+              <td><span class="dim">59.5 × 203 × 65.8 cm</span></td>
+              <td><span class="energy-badge energy-a">A</span></td>
               <td><span class="dim">35 dB</span></td>
-              <td><span class="nofrost-no">No</span></td>
+              <td><span class="nofrost-yes">Yes (both)</span></td>
               <td>
-                <span class="price-val">~€ 600</span>
-                <span class="price-note">4.7/5 on MediaMarkt · AI Energy Mode</span>
+                <span class="price-val">€ 899</span>
+                <span class="price-note">4.5/5 on MediaMarkt</span>
               </td>
-              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~5 days · free</span></td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~3 days · free</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_siemens-kg39naiau-iq500-kuhlgefrierkombination-a-363-l-2030-mm-hoch-gebursteter-stahl-antifingerprint-2989329.html" target="_blank" rel="noopener noreferrer">KG39NAIAU iQ500</a></span>
+                <span class="desk-brand">Siemens</span>
+                <span class="desk-note">hyperFresh 0°C zone · Total NoFrost · AntiFingerprint steel</span>
+              </td>
+              <td><span class="dim">363 L</span></td>
+              <td><span class="dim">60 × 203 × 66.5 cm</span></td>
+              <td><span class="energy-badge energy-a">A</span></td>
+              <td><span class="dim">29 dB</span></td>
+              <td><span class="nofrost-yes">Yes (Total)</span></td>
+              <td>
+                <span class="price-val">~€ 1,039</span>
+                <span class="price-note">112 kWh/yr</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Free delivery</span><span class="delivery-detail">~7 days · free</span></td>
             </tr>
           </tbody>
         </table>
@@ -410,10 +471,10 @@
     <div class="tier-body">
       <div class="tier-head">
         <span class="tier-name">Premium</span>
-        <span class="tier-band">€800 – €1,500</span>
+        <span class="tier-band">€1,000 – €1,200</span>
       </div>
       <p class="tier-desc">
-        Siemens iQ-line fridges: top energy class, near-silent operation, Total No-Frost throughout. The KG39N2XAG is the top-rated freestanding pick (4.8/5); the KI81RADD0 is the go-to if you want a fully integrated built-in model.
+        Liebherr's 5723 flagship line — all 201.5 cm tall, all with full NoFrost. The CBNdgc and CBNsda add a BioFresh drawer (0°C/+3°C zone) for longer shelf life of meat, fish, and dairy. The CNsda 5723-22 is the most energy-efficient of the three at 104 kWh/yr.
       </p>
       <div class="table-wrap">
         <table>
@@ -432,38 +493,54 @@
           <tbody>
             <tr>
               <td>
-                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_siemens-kg39n2xag-iq300-kuhlgefrierkombination-a-363-l-2030-mm-hoch-gebursteter-schwarzer-stahl-antifingerprint-2992317.html" target="_blank" rel="noopener noreferrer">KG39N2XAG iQ300</a></span>
-                <span class="desk-brand">Siemens</span>
-                <span class="desk-note">hyperFresh 0°C zone · AntiFingerprint steel</span>
-                <span class="pick-badge">Top pick</span>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_liebherr-cbndgc-5723-plus-kuhlgefrierkombination-c-360-l-2015-mm-hoch-stahldarkgrey-3013272.html" target="_blank" rel="noopener noreferrer">CBNdgc 5723 Plus</a></span>
+                <span class="desk-brand">Liebherr</span>
+                <span class="desk-note">BioFresh drawer · NoFrost · DarkGrey/Steel</span>
               </td>
-              <td><span class="dim">363 L</span></td>
-              <td><span class="dim">60 × 203 × 65 cm</span></td>
-              <td><span class="energy-badge energy-a">A</span></td>
-              <td><span class="dim">29 dB</span></td>
+              <td><span class="dim">360 L</span></td>
+              <td><span class="dim">~60 × 201 × 68 cm</span></td>
+              <td><span class="energy-badge energy-c">C</span></td>
+              <td><span class="dim">35 dB</span></td>
               <td><span class="nofrost-yes">Yes (both)</span></td>
               <td>
-                <span class="price-val">€ 1,019</span>
-                <span class="price-note">112 kWh/yr · 4.8/5 · Free shipping</span>
+                <span class="price-val">~€ 999</span>
               </td>
-              <td class="delivery-check"><span class="delivery-yes">Free delivery</span><span class="delivery-detail">~8 days · free</span></td>
+              <td class="delivery-check"><span class="delivery-yes">Free delivery</span><span class="delivery-detail">~5 days · free</span></td>
             </tr>
             <tr>
               <td>
-                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_siemens-ki81radd0-iq500-einbaukuhlschrank-310-l-d-1772-mm-hoch-weiss-2896427.html" target="_blank" rel="noopener noreferrer">KI81RADD0 iQ500</a></span>
-                <span class="desk-brand">Siemens</span>
-                <span class="desk-note">Fully integrated built-in; disappears behind kitchen units</span>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_liebherr-cbnsda-5723-prime-kuhlgefrierkombination-a-116-kwh-2015-mm-hoch-edelstahlsilber-2834442.html" target="_blank" rel="noopener noreferrer">CBNsda 5723 Prime</a></span>
+                <span class="desk-brand">Liebherr</span>
+                <span class="desk-note">BioFresh drawer · NoFrost · Silver · Class A</span>
               </td>
-              <td><span class="dim">310 L</span></td>
-              <td><span class="dim">55.8 × 177.2 × 54.8 cm</span></td>
-              <td><span class="energy-badge energy-d">D</span></td>
+              <td><span class="dim">360 L</span></td>
+              <td><span class="dim">~60 × 201 × 68 cm</span></td>
+              <td><span class="energy-badge energy-a">A</span></td>
               <td><span class="dim">—</span></td>
-              <td><span class="nofrost-no">No</span></td>
+              <td><span class="nofrost-yes">Yes (both)</span></td>
               <td>
-                <span class="price-val">€ 760</span>
-                <span class="price-note">4.7/5 · Free shipping</span>
+                <span class="price-val">~€ 1,149</span>
+                <span class="price-note">116 kWh/yr</span>
               </td>
-              <td class="delivery-check"><span class="delivery-yes">Free delivery</span><span class="delivery-detail">~2 days · free</span></td>
+              <td class="delivery-check"><span class="delivery-yes">Free delivery</span><span class="delivery-detail">~5 days · free</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_liebherr-cnsda-5723-22-plus-kuhlgefrierkombination-a-104-kwh-2015-mm-hoch-steeldoorsilver-2920295.html" target="_blank" rel="noopener noreferrer">CNsda 5723-22 Plus</a></span>
+                <span class="desk-brand">Liebherr</span>
+                <span class="desk-note">No BioFresh · SteelDoor/Silver · most energy-efficient</span>
+                <span class="pick-badge">Most efficient Liebherr</span>
+              </td>
+              <td><span class="dim">371 L</span></td>
+              <td><span class="dim">~60 × 201 × 68 cm</span></td>
+              <td><span class="energy-badge energy-a">A</span></td>
+              <td><span class="dim">34 dB</span></td>
+              <td><span class="nofrost-yes">Yes (both)</span></td>
+              <td>
+                <span class="price-val">€ 1,199</span>
+                <span class="price-note">104 kWh/yr</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Free delivery</span><span class="delivery-detail">~5 days · free</span></td>
             </tr>
           </tbody>
         </table>
@@ -476,25 +553,34 @@
     <div class="notes-grid">
       <div class="note-block">
         <strong>Price accuracy</strong>
-        <p>All prices verified at mediamarkt.de on 25 June 2026. Prices include German VAT and may change. Promotions (e.g. Cashback) not factored in.</p>
+        <p>All prices verified at mediamarkt.de in July 2026, incl. German VAT. Prices may change; "~" marks approximate values. Promotions and cashback offers not factored in.</p>
       </div>
       <div class="note-block">
-        <strong>Choosing capacity</strong>
-        <p>For 2 people: a 270–340 L combo is ideal. Minimum recommended: 60–80 L per person in the fridge section. For a built-in kitchen: measure the housing niche precisely (H × W × D) before ordering.</p>
+        <strong>Energy class C minimum</strong>
+        <p>The EU 2021 re-labelling reset the scale. Budget models (mini-fridges, low-cost combos) now sit at D–G. Class C is the new practical baseline for a responsible purchase. Classes A, B, and C all qualify here.</p>
       </div>
       <div class="note-block">
         <strong>Energy cost impact</strong>
-        <p>Energy class A (Siemens iQ300, ~112 kWh/yr) saves roughly €40–50/year vs class E (~280 kWh/yr). Over 10 years that's €400–500 — factors into tier comparison.</p>
+        <p>At Munich's 2026 rate (~€0.33/kWh): class A at 108 kWh/yr costs ~€36/yr; class C at 171 kWh/yr costs ~€56/yr. That's ~€20/yr difference — €200 over 10 years — worth weighing against the price gap between tiers.</p>
       </div>
       <div class="note-block">
-        <strong>Munich delivery &amp; purchase</strong>
-        <p>MediaMarkt has stores in Munich (OEZ, Neuhauser Str., Fröttmaning). Saturn (sister brand, Karlsplatz) stocks the same range. For Tier 3+, request Aufstellservice (installation service) at checkout.</p>
+        <strong>Choosing capacity</strong>
+        <p>For 2 people: 300–380 L total is ideal. Allow ≥60 L per person in the fridge section. Measure your niche carefully: door clearance and ventilation gaps add ≥5 cm on each side.</p>
+      </div>
+      <div class="note-block">
+        <strong>No Frost</strong>
+        <p>Eliminates manual defrosting and maintains more stable temperatures. All Tier 2–4 models with NoFrost have it in both compartments. The Koenic KFK 631-1 C IN (Tier 1) is the only model here without NoFrost.</p>
+      </div>
+      <div class="note-block">
+        <strong>Munich purchase &amp; delivery</strong>
+        <p>MediaMarkt has stores in Munich (OEZ, Neuhauser Str., Fröttmaning). Saturn (sister brand, Karlsplatz) stocks the same range. For Tier 3+, request Aufstellservice (installation) at checkout.</p>
       </div>
     </div>
     <div class="sources">
       <strong>Sources (verified primary)</strong>
       <ul>
-        <li>mediamarkt.de — All product pages (25 June 2026)</li>
+        <li>mediamarkt.de — All product pages (July 2026)</li>
+        <li>Geizhals Deutschland — Price verification</li>
         <li>MediaMarkt customer ratings cited inline per model</li>
       </ul>
     </div>
