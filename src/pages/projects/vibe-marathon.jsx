@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import {
-  LineChart, Line, BarChart, Bar,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  ComposedChart, LineChart, BarChart, PieChart,
+  Line, Bar, Area, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceArea, ResponsiveContainer,
 } from 'recharts';
 
 const COACH_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/coach.json';
@@ -61,6 +62,45 @@ function MetricCard({ label, value, sub, color }) {
   );
 }
 
+function groupByType(history) {
+  const counts = {};
+  for (const entry of history) {
+    const type = entry.recommendation_type;
+    if (!type || !typeColors[type]) continue;
+    counts[type] = (counts[type] || 0) + 1;
+  }
+  return Object.entries(counts).map(([type, count]) => ({
+    type,
+    label: typeLabels[type] || type,
+    count,
+    color: typeColors[type],
+  }));
+}
+
+const activityLabels = {
+  outdoor_running: "🏃 Run",
+  indoor_running: "🏃 Treadmill",
+  treadmill_running: "🏃 Treadmill",
+  swimming: "🏊 Swim",
+  open_water_swimming: "🏊 Swim",
+  outdoor_cycling: "🚴 Bike",
+  indoor_cycling: "🚴 Bike",
+  walking: "🚶 Walk",
+};
+
+function activityLabel(type) {
+  if (activityLabels[type]) return activityLabels[type];
+  if (!type) return "Session";
+  return type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function formatPace(minPerKm) {
+  if (minPerKm == null) return "—";
+  const min = Math.floor(minPerKm);
+  const sec = Math.round((minPerKm - min) * 60);
+  return `${min}:${String(sec).padStart(2, '0')}/km`;
+}
+
 function groupByWeek(history) {
   const weeks = {};
   for (const entry of history) {
@@ -80,7 +120,7 @@ function getUpcomingDays(plan, n = 7) {
   const upcoming = [];
   for (const week of plan.weeks) {
     for (const day of week.days || []) {
-      if (day.date > today && upcoming.length < n) {
+      if (day.date >= today && upcoming.length < n) {
         upcoming.push({ ...day, phase: week.phase, weekLabel: week.label });
       }
     }
@@ -179,6 +219,49 @@ function UpcomingDayCard({ day, isMobile }) {
   );
 }
 
+function RecentSessionCard({ session }) {
+  const d = new Date(session.date + 'T00:00:00');
+  const dateStr = d.toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric' });
+
+  return (
+    <div style={{
+      border: "1.5px solid #e0e0e0",
+      borderRadius: 12,
+      background: "#fff",
+      padding: "12px 14px",
+      marginBottom: 8,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1a2e" }}>{dateStr}</span>
+        <span style={{ fontSize: 12, fontWeight: 600, color: "#666" }}>{activityLabel(session.type)}</span>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginLeft: "auto" }}>
+          {session.distance_km != null && (
+            <span style={{ background: "#f5f5f5", borderRadius: 6, padding: "2px 8px", fontSize: 11, color: "#555" }}>
+              {session.distance_km.toFixed(1)} km
+            </span>
+          )}
+          {session.avg_pace_min_km != null && (
+            <span style={{ background: "#f5f5f5", borderRadius: 6, padding: "2px 8px", fontSize: 11, color: "#555" }}>
+              {formatPace(session.avg_pace_min_km)}
+            </span>
+          )}
+          <span style={{ background: "#f5f5f5", borderRadius: 6, padding: "2px 8px", fontSize: 11, color: "#555" }}>
+            {session.avg_hr ?? "—"}{session.max_hr != null ? ` / ${session.max_hr}` : ""} bpm
+          </span>
+        </div>
+      </div>
+      {session.lesson && (
+        <div style={{
+          fontSize: 12, color: "#444", lineHeight: 1.5,
+          borderLeft: "3px solid #7B68EE", paddingLeft: 10,
+        }}>
+          💡 {session.lesson}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function VibeDashboard() {
   const [coach, setCoach] = useState(null);
   const [history, setHistory] = useState([]);
@@ -208,6 +291,7 @@ export default function VibeDashboard() {
 
   const readiness = coach?.readiness;
   const rec = coach?.recommendation;
+  const recentActivity = coach?.recentActivity;
   const recColor = typeColors[rec?.type] || "#9E9E9E";
   const scoreCol = scoreColor(readiness?.score);
 
@@ -216,6 +300,7 @@ export default function VibeDashboard() {
 
   const last90 = history.slice(-90).map(e => ({ ...e, date: e.date?.slice(5) }));
   const weeklyVol = groupByWeek(history);
+  const trainingMix = groupByType(history);
   const hasCharts = history.length > 0;
 
   const upcomingDays = getUpcomingDays(plan, 7);
@@ -307,24 +392,6 @@ export default function VibeDashboard() {
           </>
         ) : (
           <>
-            {/* Hero */}
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 20 }}>
-              <MetricCard label="Days to Race" value={coach.daysToRace} color="#1a1a2e" />
-              <MetricCard
-                label="Phase"
-                value={coach.phase ? coach.phase.charAt(0).toUpperCase() + coach.phase.slice(1) : "—"}
-                color={phaseColors[coach.phase] || "#1a1a2e"}
-              />
-              <MetricCard
-                label="Readiness"
-                value={readiness?.score ?? "—"}
-                sub={readiness?.score != null
-                  ? readiness.score >= 70 ? "Good" : readiness.score >= 50 ? "Moderate" : "Low"
-                  : "No data yet"}
-                color={scoreCol}
-              />
-            </div>
-
             {/* Recommendation */}
             {rec && (
               <div style={{
@@ -377,6 +444,24 @@ export default function VibeDashboard() {
               </div>
             )}
 
+            {/* Hero */}
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 20 }}>
+              <MetricCard label="Days to Race" value={coach.daysToRace} color="#1a1a2e" />
+              <MetricCard
+                label="Phase"
+                value={coach.phase ? coach.phase.charAt(0).toUpperCase() + coach.phase.slice(1) : "—"}
+                color={phaseColors[coach.phase] || "#1a1a2e"}
+              />
+              <MetricCard
+                label="Readiness"
+                value={readiness?.score ?? "—"}
+                sub={readiness?.score != null
+                  ? readiness.score >= 70 ? "Good" : readiness.score >= 50 ? "Moderate" : "Low"
+                  : "No data yet"}
+                color={scoreCol}
+              />
+            </div>
+
             {/* Key metrics */}
             {readiness && (
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 28 }}>
@@ -428,42 +513,89 @@ export default function VibeDashboard() {
               </div>
             )}
 
-            {/* Training Load Chart */}
+            {/* Performance Management Chart (PMC) */}
             {hasCharts && last90.length > 0 && (
               <div style={{ marginBottom: 32 }}>
                 <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 12 }}>
-                  Training Load — last 90 days
+                  Performance Management Chart — last 90 days
                 </h3>
-                <ResponsiveContainer width="100%" height={200}>
+                <ResponsiveContainer width="100%" height={240}>
+                  <ComposedChart data={last90} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                    <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={Math.floor(last90.length / 6)} />
+                    <YAxis yAxisId="left" tick={{ fontSize: 10 }} />
+                    <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} domain={[0, 'auto']} />
+                    <Tooltip />
+                    <Legend iconSize={10} wrapperStyle={{ fontSize: 12 }} />
+                    <Bar yAxisId="right" dataKey="tss" fill="#B0BEC5" name="TSS" barSize={4} radius={[1, 1, 0, 0]} />
+                    <Area yAxisId="left" type="monotone" dataKey="tsb" name="TSB (Form)"
+                          stroke="#7B68EE" fill="#7B68EE" fillOpacity={0.15}
+                          strokeWidth={1.5} strokeDasharray="4 2" baseValue={0} />
+                    <Line yAxisId="left" type="monotone" dataKey="ctl" stroke="#4CAF93" dot={false} name="CTL (Fitness)" strokeWidth={2} />
+                    <Line yAxisId="left" type="monotone" dataKey="atl" stroke="#E8A838" dot={false} name="ATL (Fatigue)" strokeWidth={2} />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {/* Readiness Score Trend */}
+            {hasCharts && last90.length > 0 && (
+              <div style={{ marginBottom: 32 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 12 }}>
+                  Readiness Score Trend — last 90 days
+                </h3>
+                <ResponsiveContainer width="100%" height={180}>
                   <LineChart data={last90} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
                     <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={Math.floor(last90.length / 6)} />
-                    <YAxis tick={{ fontSize: 10 }} />
+                    <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
                     <Tooltip />
-                    <Legend iconSize={10} wrapperStyle={{ fontSize: 12 }} />
-                    <Line type="monotone" dataKey="ctl" stroke="#4CAF93" dot={false} name="CTL (Fitness)" strokeWidth={2} />
-                    <Line type="monotone" dataKey="atl" stroke="#E8A838" dot={false} name="ATL (Fatigue)" strokeWidth={2} />
-                    <Line type="monotone" dataKey="tsb" stroke="#7B68EE" dot={false} name="TSB (Form)" strokeWidth={1.5} strokeDasharray="4 2" />
+                    <ReferenceArea y1={0} y2={50} fill="#E05C5C" fillOpacity={0.08} />
+                    <ReferenceArea y1={50} y2={70} fill="#E8A838" fillOpacity={0.08} />
+                    <ReferenceArea y1={70} y2={100} fill="#4CAF93" fillOpacity={0.08} />
+                    <Line type="monotone" dataKey="readiness_score" stroke="#1a1a2e" dot={false} name="Readiness" strokeWidth={2} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
             )}
 
-            {/* Weekly Volume */}
-            {hasCharts && weeklyVol.length > 0 && (
-              <div style={{ marginBottom: 32 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 12 }}>
-                  Weekly Volume (km)
-                </h3>
-                <ResponsiveContainer width="100%" height={160}>
-                  <BarChart data={weeklyVol} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-                    <XAxis dataKey="week" tick={{ fontSize: 10 }} />
-                    <YAxis tick={{ fontSize: 10 }} />
-                    <Tooltip />
-                    <Bar dataKey="distance_km" fill="#4CAF93" name="km" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+            {/* Weekly Volume + Training Mix */}
+            {hasCharts && (
+              <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginBottom: 32 }}>
+                {weeklyVol.length > 0 && (
+                  <div style={{ flex: isMobile ? "1 1 100%" : "1 1 300px", minWidth: 0 }}>
+                    <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 12 }}>
+                      Weekly Volume (km)
+                    </h3>
+                    <ResponsiveContainer width="100%" height={160}>
+                      <BarChart data={weeklyVol} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                        <XAxis dataKey="week" tick={{ fontSize: 10 }} />
+                        <YAxis tick={{ fontSize: 10 }} />
+                        <Tooltip />
+                        <Bar dataKey="distance_km" fill="#4CAF93" name="km" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+                {trainingMix.length > 0 && (
+                  <div style={{ flex: isMobile ? "1 1 100%" : "1 1 260px", minWidth: 0 }}>
+                    <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 12 }}>
+                      Training Mix
+                    </h3>
+                    <ResponsiveContainer width="100%" height={160}>
+                      <PieChart>
+                        <Tooltip />
+                        <Legend iconSize={10} wrapperStyle={{ fontSize: 11 }} />
+                        <Pie data={trainingMix} dataKey="count" nameKey="label" innerRadius={35} outerRadius={55} paddingAngle={2}>
+                          {trainingMix.map(entry => (
+                            <Cell key={entry.type} fill={entry.color} />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
               </div>
             )}
 
@@ -495,6 +627,23 @@ export default function VibeDashboard() {
                 </h3>
                 {upcomingDays.map(day => (
                   <UpcomingDayCard key={day.date} day={day} isMobile={isMobile} />
+                ))}
+              </div>
+            )}
+
+            {/* Recent Sessions */}
+            {recentActivity?.sessions?.length > 0 && (
+              <div style={{ marginBottom: 32 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 8 }}>
+                  Recent Sessions
+                </h3>
+                {recentActivity.analysis && (
+                  <p style={{ fontSize: 12, color: "#888", margin: "0 0 12px 0", lineHeight: 1.5 }}>
+                    {recentActivity.analysis}
+                  </p>
+                )}
+                {recentActivity.sessions.map(session => (
+                  <RecentSessionCard key={session.date + session.type} session={session} />
                 ))}
               </div>
             )}
