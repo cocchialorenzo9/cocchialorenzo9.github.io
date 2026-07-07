@@ -114,6 +114,15 @@ function groupByWeek(history) {
   return Object.values(weeks).slice(-12);
 }
 
+function getPlanDay(plan, date) {
+  if (!plan?.weeks) return undefined;
+  for (const week of plan.weeks) {
+    const day = (week.days || []).find(d => d.date === date);
+    if (day) return day;
+  }
+  return undefined;
+}
+
 function getUpcomingDays(plan, n = 7) {
   if (!plan?.weeks) return [];
   const today = new Date().toISOString().slice(0, 10);
@@ -295,6 +304,11 @@ export default function VibeDashboard() {
   const recColor = typeColors[rec?.type] || "#9E9E9E";
   const scoreCol = scoreColor(readiness?.score);
 
+  const todayDate = new Date().toISOString().slice(0, 10);
+  const todayPlanDay = getPlanDay(plan, todayDate);
+  const todayColor = typeColors[todayPlanDay?.training?.type] || "#9E9E9E";
+  const todayLabel = typeLabels[todayPlanDay?.training?.type] || (todayPlanDay?.training ? todayPlanDay.training.type : "Rest");
+
   const notStarted = readiness?.score == null && history.length === 0;
   const noHistory = readiness?.score != null && history.length === 0;
 
@@ -392,57 +406,136 @@ export default function VibeDashboard() {
           </>
         ) : (
           <>
-            {/* Recommendation */}
-            {rec && (
-              <div style={{
-                border: `2px solid ${recColor}`,
-                borderRadius: 14,
-                padding: "16px 20px",
-                marginBottom: 24,
-                background: `${recColor}12`,
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
-                  <span style={{
-                    background: recColor,
-                    color: "white",
-                    borderRadius: 8,
-                    padding: "3px 10px",
-                    fontSize: 12,
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                  }}>
-                    {rec.type}
-                  </span>
-                  <span style={{ fontWeight: 700, fontSize: isMobile ? 15 : 17, color: "#1a1a2e" }}>
-                    {rec.title}
-                  </span>
+            {/* Today / Tomorrow */}
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 24 }}>
+              {todayPlanDay && (
+                <div style={{
+                  flex: isMobile ? "1 1 100%" : "1 1 320px",
+                  minWidth: 0,
+                  border: `2px solid ${todayColor}`,
+                  borderRadius: 14,
+                  padding: "16px 20px",
+                  background: `${todayColor}12`,
+                }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
+                    Today
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
+                    {todayPlanDay.training ? (
+                      <>
+                        <span style={{
+                          background: todayColor,
+                          color: "white",
+                          borderRadius: 8,
+                          padding: "3px 10px",
+                          fontSize: 12,
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                          letterSpacing: "0.05em",
+                        }}>
+                          {todayLabel}
+                        </span>
+                        <span style={{ fontWeight: 700, fontSize: isMobile ? 15 : 17, color: "#1a1a2e" }}>
+                          {todayPlanDay.training.title}
+                        </span>
+                      </>
+                    ) : (
+                      <span style={{ fontWeight: 700, fontSize: isMobile ? 15 : 17, color: "#999" }}>Rest day</span>
+                    )}
+                  </div>
+                  {todayPlanDay.training?.detail && (
+                    <p style={{
+                      fontSize: 13,
+                      color: "#555",
+                      margin: "0 0 8px 0",
+                      borderLeft: `3px solid ${todayColor}`,
+                      paddingLeft: 12,
+                      lineHeight: 1.5,
+                    }}>
+                      {todayPlanDay.training.detail}
+                    </p>
+                  )}
+                  {todayPlanDay.bigPicture && (
+                    <p style={{ fontSize: 13, color: "#555", margin: "0 0 10px 0", lineHeight: 1.55 }}>
+                      {todayPlanDay.bigPicture}
+                    </p>
+                  )}
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {todayPlanDay.movement && (
+                      <div style={{
+                        background: "#f0faf2", borderRadius: 8, padding: "6px 10px",
+                        fontSize: 11, color: "#2e7d32", flex: "1 1 140px",
+                      }}>
+                        <span style={{ fontWeight: 700 }}>🚲 Move: </span>{todayPlanDay.movement}
+                      </div>
+                    )}
+                    {todayPlanDay.food && (
+                      <div style={{
+                        background: "#fffbf0", borderRadius: 8, padding: "6px 10px",
+                        fontSize: 11, color: "#7a5200", flex: "1 1 140px",
+                      }}>
+                        <span style={{ fontWeight: 700 }}>🍝 Food: </span>{todayPlanDay.food}
+                      </div>
+                    )}
+                  </div>
                 </div>
-                {rec.reasoning && (
-                  <p style={{ fontSize: 14, color: "#444", margin: "0 0 10px 0", lineHeight: 1.55 }}>
-                    {rec.reasoning}
-                  </p>
-                )}
-                {rec.sessionDetail && (
-                  <p style={{
-                    fontSize: 13,
-                    color: "#555",
-                    margin: "0 0 8px 0",
-                    borderLeft: `3px solid ${recColor}`,
-                    paddingLeft: 12,
-                    lineHeight: 1.5,
-                  }}>
-                    {rec.sessionDetail}
-                  </p>
-                )}
-                {rec.bikeNote && (
-                  <p style={{ fontSize: 12, color: "#777", margin: "6px 0 0 0" }}>🚴 {rec.bikeNote}</p>
-                )}
-                {rec.swimNote && (
-                  <p style={{ fontSize: 12, color: "#777", margin: "4px 0 0 0" }}>🏊 {rec.swimNote}</p>
-                )}
-              </div>
-            )}
+              )}
+
+              {rec && (
+                <div style={{
+                  flex: isMobile ? "1 1 100%" : "1 1 320px",
+                  minWidth: 0,
+                  border: `2px solid ${recColor}`,
+                  borderRadius: 14,
+                  padding: "16px 20px",
+                  background: `${recColor}12`,
+                }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: "#999", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
+                    Tomorrow
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
+                    <span style={{
+                      background: recColor,
+                      color: "white",
+                      borderRadius: 8,
+                      padding: "3px 10px",
+                      fontSize: 12,
+                      fontWeight: 700,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em",
+                    }}>
+                      {rec.type}
+                    </span>
+                    <span style={{ fontWeight: 700, fontSize: isMobile ? 15 : 17, color: "#1a1a2e" }}>
+                      {rec.title}
+                    </span>
+                  </div>
+                  {rec.reasoning && (
+                    <p style={{ fontSize: 14, color: "#444", margin: "0 0 10px 0", lineHeight: 1.55 }}>
+                      {rec.reasoning}
+                    </p>
+                  )}
+                  {rec.sessionDetail && (
+                    <p style={{
+                      fontSize: 13,
+                      color: "#555",
+                      margin: "0 0 8px 0",
+                      borderLeft: `3px solid ${recColor}`,
+                      paddingLeft: 12,
+                      lineHeight: 1.5,
+                    }}>
+                      {rec.sessionDetail}
+                    </p>
+                  )}
+                  {rec.bikeNote && (
+                    <p style={{ fontSize: 12, color: "#777", margin: "6px 0 0 0" }}>🚴 {rec.bikeNote}</p>
+                  )}
+                  {rec.swimNote && (
+                    <p style={{ fontSize: 12, color: "#777", margin: "4px 0 0 0" }}>🏊 {rec.swimNote}</p>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Hero */}
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 20 }}>
