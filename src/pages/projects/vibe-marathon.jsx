@@ -318,6 +318,10 @@ export default function VibeDashboard() {
   const hasCharts = history.length > 0;
 
   const upcomingDays = getUpcomingDays(plan, 7);
+  // getUpcomingDays includes today (see below), but the active dashboard state
+  // already shows today in its own dedicated "Today" card — exclude it here
+  // so it doesn't also appear at the top of "Next 7 sessions".
+  const futureDays = upcomingDays.filter(d => d.date !== todayDate);
 
   const raceDate = (() => {
     if (!coach?.date || !coach?.daysToRace) return null;
@@ -713,12 +717,12 @@ export default function VibeDashboard() {
             )}
 
             {/* Upcoming Days */}
-            {upcomingDays.length > 0 && (
+            {futureDays.length > 0 && (
               <div style={{ marginBottom: 32 }}>
                 <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 12 }}>
                   Next 7 sessions
                 </h3>
-                {upcomingDays.map(day => (
+                {futureDays.map(day => (
                   <UpcomingDayCard key={day.date} day={day} isMobile={isMobile} />
                 ))}
               </div>
