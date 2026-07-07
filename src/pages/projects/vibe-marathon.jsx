@@ -6,28 +6,11 @@ import {
   Line, Bar, Area, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceArea, ResponsiveContainer,
 } from 'recharts';
+import { typeColors, typeLabels, activityLabel, formatPace, useIsMobile } from './_vibeMarathonShared';
 
 const COACH_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/coach.json';
 const HISTORY_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/chart-data.json';
 const PLAN_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/training-plan.json';
-
-const typeColors = {
-  easy: "#4CAF93",
-  tempo: "#E8A838",
-  long: "#7B68EE",
-  race: "#E05C5C",
-  swim: "#4FC3F7",
-  rest: "#9E9E9E",
-};
-
-const typeLabels = {
-  easy: "Easy",
-  tempo: "Quality",
-  long: "Long Run",
-  race: "RACE",
-  swim: "Swim",
-  rest: "Rest",
-};
 
 const phaseColors = {
   base: "#4CAF93",
@@ -75,30 +58,6 @@ function groupByType(history) {
     count,
     color: typeColors[type],
   }));
-}
-
-const activityLabels = {
-  outdoor_running: "🏃 Run",
-  indoor_running: "🏃 Treadmill",
-  treadmill_running: "🏃 Treadmill",
-  swimming: "🏊 Swim",
-  open_water_swimming: "🏊 Swim",
-  outdoor_cycling: "🚴 Bike",
-  indoor_cycling: "🚴 Bike",
-  walking: "🚶 Walk",
-};
-
-function activityLabel(type) {
-  if (activityLabels[type]) return activityLabels[type];
-  if (!type) return "Session";
-  return type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-}
-
-function formatPace(minPerKm) {
-  if (minPerKm == null) return "—";
-  const min = Math.floor(minPerKm);
-  const sec = Math.round((minPerKm - min) * 60);
-  return `${min}:${String(sec).padStart(2, '0')}/km`;
 }
 
 function groupByWeek(history) {
@@ -276,14 +235,7 @@ export default function VibeDashboard() {
   const [history, setHistory] = useState([]);
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 600);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     Promise.all([
@@ -731,9 +683,14 @@ export default function VibeDashboard() {
             {/* Recent Sessions */}
             {recentActivity?.sessions?.length > 0 && (
               <div style={{ marginBottom: 32 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 8 }}>
-                  Recent Sessions
-                </h3>
+                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 8 }}>
+                  <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", margin: 0 }}>
+                    Recent Sessions
+                  </h3>
+                  <Link to="/projects/vibe-marathon-journal" style={{ fontSize: 12, color: "#4CAF93", fontWeight: 600, textDecoration: "none" }}>
+                    View full Training Journal →
+                  </Link>
+                </div>
                 {recentActivity.analysis && (
                   <p style={{ fontSize: 12, color: "#888", margin: "0 0 12px 0", lineHeight: 1.5 }}>
                     {recentActivity.analysis}
