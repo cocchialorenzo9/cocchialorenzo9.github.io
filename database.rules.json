@@ -1,0 +1,10 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "homeState": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}

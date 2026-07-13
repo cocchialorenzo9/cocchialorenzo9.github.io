@@ -1,4 +1,5 @@
 // @ts-check
+require('dotenv').config();
 const lightCodeTheme = require('prism-react-renderer/themes/github');
 const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
@@ -19,6 +20,15 @@ const config = {
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
+  },
+
+  // Firebase apiKey/appId come from env vars (local .env, or GitHub Actions
+  // secrets in CI) so the literal values never sit in tracked source —
+  // see src/lib/firebase.js, which reads these back via
+  // @generated/docusaurus.config.
+  customFields: {
+    firebaseApiKey: process.env.FIREBASE_API_KEY || '',
+    firebaseAppId: process.env.FIREBASE_APP_ID || '',
   },
 
   presets: [
