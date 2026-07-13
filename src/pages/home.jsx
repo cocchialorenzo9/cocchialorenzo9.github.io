@@ -1,76 +1,25 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Layout from '@theme/Layout';
-
-// ← Change this to your preferred PIN
-const PIN = '1234';
+import { ref, onValue, update, set } from 'firebase/database';
+import { db, HOME_STATE_PATH } from '../lib/firebase';
 
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
 const PRIORITY_LABELS = { high: '🔴 Must', medium: '🟡 Soon', low: '🟢 Nice to have' };
 const PRIORITY_COLORS = { high: '#dc2626', medium: '#d97706', low: '#16a34a' };
 
-// ── Persistence ───────────────────────────────────────────────────────────────
+const RETAILERS = ['amazon', 'ikea', 'ebay', 'other'];
+const RETAILER_LABELS = { amazon: '📦 Amazon', ikea: '🟦 IKEA', ebay: '🛍️ eBay', other: '🏪 Other' };
+const RETAILER_COLORS = { amazon: '#ff9900', ikea: '#0058a3', ebay: '#e53238', other: '#78716c' };
+const RETAILER_UNSET_LABEL = '🏷️ Pick retailer';
+const RETAILER_UNSET_COLOR = '#a8a29e';
 
-const STORAGE_KEY = 'home_page_state_v1';
-const SHOP_STORAGE_KEY = 'home_shop_state_v1';
-
-function loadState() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; }
+function retailerLabel(r) {
+  return r && r !== 'unset' ? RETAILER_LABELS[r] : RETAILER_UNSET_LABEL;
 }
 
-function saveState(st) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(st)); } catch {}
-}
-
-function loadShopState() {
-  try { return JSON.parse(localStorage.getItem(SHOP_STORAGE_KEY) || '{}'); } catch { return {}; }
-}
-
-function saveShopState(st) {
-  try { localStorage.setItem(SHOP_STORAGE_KEY, JSON.stringify(st)); } catch {}
-}
-
-// ── PIN gate ──────────────────────────────────────────────────────────────────
-
-function PinGate({ onUnlock }) {
-  const [pin, setPin] = useState('');
-  const [error, setError] = useState(false);
-  const [shake, setShake] = useState(false);
-
-  function submit(e) {
-    e.preventDefault();
-    if (pin === PIN) {
-      onUnlock();
-    } else {
-      setError(true);
-      setShake(true);
-      setPin('');
-      setTimeout(() => setShake(false), 600);
-    }
-  }
-
-  return (
-    <div style={s.pinOverlay}>
-      <div style={{ ...s.pinBox, animation: shake ? 'shake 0.5s ease' : 'none' }}>
-        <div style={s.pinEmoji}>🏠</div>
-        <h2 style={s.pinTitle}>Our Home</h2>
-        <p style={s.pinSub}>Enter PIN to continue</p>
-        <form onSubmit={submit} style={s.pinForm}>
-          <input
-            type="password"
-            inputMode="numeric"
-            maxLength={6}
-            value={pin}
-            onChange={e => { setPin(e.target.value); setError(false); }}
-            style={{ ...s.pinInput, borderColor: error ? '#dc2626' : '#d1c4ae' }}
-            autoFocus
-            placeholder="••••"
-          />
-          {error && <p style={s.pinError}>Wrong PIN, try again</p>}
-          <button type="submit" style={s.pinBtn}>Unlock</button>
-        </form>
-      </div>
-    </div>
-  );
+function retailerStyle(r) {
+  const color = r && r !== 'unset' ? RETAILER_COLORS[r] : RETAILER_UNSET_COLOR;
+  return { color, borderColor: color };
 }
 
 // ── Timeline (always visible) ─────────────────────────────────────────────────
@@ -111,8 +60,7 @@ function Timeline({ items, state, toggle }) {
 
 function HomeApp() {
   const [data, setData] = useState(null);
-  const [state, setState] = useState(loadState);
-  const [shopState, setShopState] = useState(loadShopState);
+  const [shared, setShared] = useState(null);
   const [tab, setTab] = useState('rooms');
 
   useEffect(() => {
@@ -121,24 +69,91 @@ function HomeApp() {
       .then(setData);
   }, []);
 
-  function toggle(id) {
-    const next = { ...state, [id]: !state[id] };
-    setState(next);
-    saveState(next);
+  // Live-synced shared state — everyone with the page open sees the same
+  // tree and gets pushed updates within ~1s of any write (Firebase Realtime
+  // Database `onValue`), replacing the old per-browser localStorage copy.
+  useEffect(() => {
+    const sharedRef = ref(db, HOME_STATE_PATH);
+    const unsubscribe = onValue(sharedRef, snap => setShared(snap.val() || {}));
+    return () => unsubscribe();
+  }, []);
+
+  // Each mutation targets a single sub-path so two people editing different
+  // items concurrently never clobber each other's unrelated writes.
+  function toggleChecked(id) {
+    const current = (shared.checked || {})[id];
+    update(ref(db, `${HOME_STATE_PATH}/checked`), { [id]: !current });
   }
 
-  function handleShopChange(next) {
-    setShopState(next);
-    saveShopState(next);
+  function setOwnedOverride(id, isOwned) {
+    update(ref(db, `${HOME_STATE_PATH}/ownedOverride`), { [id]: isOwned });
   }
 
   function handlePriorityChange(id, priority) {
-    const next = { ...shopState, priorities: { ...(shopState.priorities || {}), [id]: priority } };
-    setShopState(next);
-    saveShopState(next);
+    update(ref(db, `${HOME_STATE_PATH}/priorities`), { [id]: priority });
   }
 
-  if (!data) {
+  function setRetailer(id, retailer) {
+    update(ref(db, `${HOME_STATE_PATH}/retailers`), { [id]: retailer });
+  }
+
+  function reorderShoppingGroup(priority, orderedIds) {
+    set(ref(db, `${HOME_STATE_PATH}/order/${priority}`), orderedIds);
+  }
+
+  // Unlike the single-subpath setters above, addItem/deleteCustomItem
+  // create or destroy a multi-field entity, so each uses one atomic
+  // multi-path update() — a partial write here (e.g. a customItems entry
+  // with no matching priorities entry) would break rendering, not just
+  // leave things untidy.
+  function addItem({ label, roomId, priority, retailer }) {
+    const id = `custom_${crypto.randomUUID()}`;
+    const updates = {
+      [`customItems/${id}`]: { label, roomId, createdAt: Date.now() },
+      [`priorities/${id}`]: priority,
+    };
+    if (retailer) updates[`retailers/${id}`] = retailer;
+    update(ref(db, HOME_STATE_PATH), updates);
+  }
+
+  function deleteCustomItem(id) {
+    const currentOrder = shared.order || {};
+    const updates = {
+      [`customItems/${id}`]: null,
+      [`checked/${id}`]: null,
+      [`ownedOverride/${id}`]: null,
+      [`priorities/${id}`]: null,
+      [`retailers/${id}`]: null,
+    };
+    ['high', 'medium', 'low'].forEach(p => {
+      if ((currentOrder[p] || []).includes(id)) {
+        updates[`order/${p}`] = currentOrder[p].filter(x => x !== id);
+      }
+    });
+    update(ref(db, HOME_STATE_PATH), updates);
+  }
+
+  // Fold user-added items (Firebase-only) into the static room catalog so
+  // everything downstream (progress count, buy/owned filters, shopping
+  // list, priority/retailer grouping) treats them identically to catalog
+  // items — no other changes needed in RoomsTab/ShoppingTab for this.
+  // Computed unconditionally (before the loading gate below) since hooks
+  // must run in the same order on every render.
+  const mergedRooms = useMemo(() => {
+    if (!data) return [];
+    const customItems = (shared && shared.customItems) || {};
+    return data.rooms.map(room => ({
+      ...room,
+      items: [
+        ...room.items,
+        ...Object.entries(customItems)
+          .filter(([, c]) => c.roomId === room.id)
+          .map(([id, c]) => ({ id, label: c.label, isCustom: true })),
+      ],
+    }));
+  }, [data, shared]);
+
+  if (!data || shared === null) {
     return (
       <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a8a29e', fontSize: 15 }}>
         Loading…
@@ -146,14 +161,20 @@ function HomeApp() {
     );
   }
 
+  const checked = shared.checked || {};
+  const ownedOverride = shared.ownedOverride || {};
+  const priorities = shared.priorities || {};
+  const order = shared.order || {};
+  const retailers = shared.retailers || {};
+
   // Progress: only count non-owned items
-  const allBuyItems = data.rooms.flatMap(r => r.items).filter(i => !i.owned);
-  const doneCount = allBuyItems.filter(i => state[i.id]).length;
+  const allBuyItems = mergedRooms.flatMap(r => r.items).filter(i => !i.owned);
+  const doneCount = allBuyItems.filter(i => checked[i.id]).length;
   const progress = Math.round((doneCount / allBuyItems.length) * 100);
 
-  const shoppingItems = data.rooms
+  const shoppingItems = mergedRooms
     .flatMap(r => r.items.map(i => ({ ...i, room: r.name })))
-    .filter(i => !state[i.id] && (!i.owned || state['unowned:' + i.id]) && !state['owned:' + i.id])
+    .filter(i => !checked[i.id] && (!i.owned || ownedOverride[i.id] === false) && ownedOverride[i.id] !== true)
     .map(i => ({ ...i, priority: i.owned ? (i.defaultPriority || 'medium') : i.priority }))
     .sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
 
@@ -169,7 +190,7 @@ function HomeApp() {
       </div>
 
       {/* Timeline — always visible */}
-      <Timeline items={data.timeline} state={state} toggle={toggle} />
+      <Timeline items={data.timeline} state={checked} toggle={toggleChecked} />
 
       {/* Tabs */}
       <div style={s.tabs}>
@@ -184,8 +205,35 @@ function HomeApp() {
         ))}
       </div>
 
-      {tab === 'rooms'    && <RoomsTab rooms={data.rooms} utilities={data.utilities} state={state} toggle={toggle} shopState={shopState} onPriorityChange={handlePriorityChange} />}
-      {tab === 'shopping' && <ShoppingTab items={shoppingItems} shopState={shopState} onShopChange={handleShopChange} toggle={toggle} />}
+      {tab === 'rooms' && (
+        <RoomsTab
+          rooms={mergedRooms}
+          utilities={data.utilities}
+          checked={checked}
+          ownedOverride={ownedOverride}
+          toggleChecked={toggleChecked}
+          setOwnedOverride={setOwnedOverride}
+          priorities={priorities}
+          onPriorityChange={handlePriorityChange}
+          retailers={retailers}
+          setRetailer={setRetailer}
+          addItem={addItem}
+          deleteCustomItem={deleteCustomItem}
+        />
+      )}
+      {tab === 'shopping' && (
+        <ShoppingTab
+          items={shoppingItems}
+          priorities={priorities}
+          order={order}
+          onPriorityChange={handlePriorityChange}
+          reorderShoppingGroup={reorderShoppingGroup}
+          setOwnedOverride={setOwnedOverride}
+          retailers={retailers}
+          setRetailer={setRetailer}
+          deleteCustomItem={deleteCustomItem}
+        />
+      )}
     </div>
   );
 }
@@ -194,8 +242,9 @@ function HomeApp() {
 
 const PRIORITY_CYCLE = { high: 'medium', medium: 'low', low: 'high' };
 
-function RoomsTab({ rooms, utilities, state, toggle, shopState, onPriorityChange }) {
-  const [contextMenu, setContextMenu] = useState(null); // { id, label, type, originallyOwned, x, y }
+function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, setOwnedOverride, priorities, onPriorityChange, retailers, setRetailer, addItem, deleteCustomItem }) {
+  const [contextMenu, setContextMenu] = useState(null); // { id, label, type, x, y }
+  const [retailerCard, setRetailerCard] = useState(null); // { id, label, x, y }
   const [swipeDx, setSwipeDx] = useState({});
   const touchRef = useRef({});
   const [hoverItemId, setHoverItemId] = useState(null);
@@ -207,8 +256,15 @@ function RoomsTab({ rooms, utilities, state, toggle, shopState, onPriorityChange
     return () => document.removeEventListener('click', close);
   }, [contextMenu]);
 
+  useEffect(() => {
+    if (!retailerCard) return;
+    const close = () => setRetailerCard(null);
+    setTimeout(() => document.addEventListener('click', close), 0);
+    return () => document.removeEventListener('click', close);
+  }, [retailerCard]);
+
   function unownItem(id) {
-    toggle('unowned:' + id);
+    setOwnedOverride(id, false);
     setContextMenu(null);
   }
 
@@ -234,9 +290,9 @@ function RoomsTab({ rooms, utilities, state, toggle, shopState, onPriorityChange
     <>
     <div style={s.grid}>
       {rooms.map(room => {
-        const buyItems = room.items.filter(i => (!i.owned || state['unowned:' + i.id]) && !state['owned:' + i.id]);
-        const ownedItems = room.items.filter(i => (i.owned && !state['unowned:' + i.id]) || state['owned:' + i.id]);
-        const done = buyItems.filter(i => state[i.id]).length;
+        const buyItems = room.items.filter(i => (!i.owned || ownedOverride[i.id] === false) && ownedOverride[i.id] !== true);
+        const ownedItems = room.items.filter(i => (i.owned && ownedOverride[i.id] !== false) || ownedOverride[i.id] === true);
+        const done = buyItems.filter(i => checked[i.id]).length;
         return (
           <div key={room.id} style={s.card}>
             <div style={s.cardHeader}>
@@ -254,8 +310,9 @@ function RoomsTab({ rooms, utilities, state, toggle, shopState, onPriorityChange
             {buyItems.length > 0 && (
               <ul style={s.itemList}>
                 {buyItems.map(item => {
-                  const effP = (shopState.priorities || {})[item.id]
+                  const effP = priorities[item.id]
                     || (item.owned ? (item.defaultPriority || 'medium') : item.priority);
+                  const effR = retailers[item.id] || 'unset';
                   return (
                     <li
                       key={item.id}
@@ -264,16 +321,16 @@ function RoomsTab({ rooms, utilities, state, toggle, shopState, onPriorityChange
                       onMouseLeave={() => setHoverItemId(null)}
                     >
                       <span
-                        style={{ ...s.checkbox, ...(state[item.id] ? s.checkboxDone : {}) }}
-                        onClick={() => toggle(item.id)}
+                        style={{ ...s.checkbox, ...(checked[item.id] ? s.checkboxDone : {}) }}
+                        onClick={() => toggleChecked(item.id)}
                       >
-                        {state[item.id] ? '✓' : ''}
+                        {checked[item.id] ? '✓' : ''}
                       </span>
-                      <div style={s.itemContent} onClick={() => toggle(item.id)}>
-                        <span style={{ ...s.itemLabel, ...(state[item.id] ? s.itemLabelDone : {}) }}>
+                      <div style={s.itemContent} onClick={() => toggleChecked(item.id)}>
+                        <span style={{ ...s.itemLabel, ...(checked[item.id] ? s.itemLabelDone : {}) }}>
                           {item.label}
                         </span>
-                        {item.reportUrl && !state[item.id] && (
+                        {item.reportUrl && !checked[item.id] && (
                           <a
                             href={item.reportUrl}
                             target="_blank"
@@ -284,11 +341,11 @@ function RoomsTab({ rooms, utilities, state, toggle, shopState, onPriorityChange
                             → View report
                           </a>
                         )}
-                        {item.deliveryHint && !state[item.id] && (
+                        {item.deliveryHint && !checked[item.id] && (
                           <span style={s.deliveryHint}>⏱ {item.deliveryHint}</span>
                         )}
                       </div>
-                      {!state[item.id] && (
+                      {!checked[item.id] && (
                         <>
                           <span
                             style={{ ...s.badge, color: PRIORITY_COLORS[effP], borderColor: PRIORITY_COLORS[effP], cursor: 'pointer' }}
@@ -297,10 +354,17 @@ function RoomsTab({ rooms, utilities, state, toggle, shopState, onPriorityChange
                           >
                             {PRIORITY_LABELS[effP]}
                           </span>
+                          <span
+                            style={{ ...s.retailerBadge, ...retailerStyle(effR) }}
+                            title="Click to set retailer"
+                            onClick={e => { e.stopPropagation(); setRetailerCard({ id: item.id, label: item.label, x: e.clientX, y: e.clientY }); }}
+                          >
+                            {retailerLabel(effR)}
+                          </span>
                           {hoverItemId === item.id && (
                             <button
                               style={s.dotMenuBtn}
-                              onClick={e => { e.stopPropagation(); setContextMenu({ id: item.id, label: item.label, type: 'moveToOwned', originallyOwned: !!item.owned, x: e.clientX, y: e.clientY }); }}
+                              onClick={e => { e.stopPropagation(); setContextMenu({ id: item.id, label: item.label, type: 'moveToOwned', isCustom: !!item.isCustom, x: e.clientX, y: e.clientY }); }}
                             >⋯</button>
                           )}
                         </>
@@ -343,7 +407,7 @@ function RoomsTab({ rooms, utilities, state, toggle, shopState, onPriorityChange
                           {hoverItemId === item.id && (
                             <button
                               style={s.dotMenuBtn}
-                              onClick={e => { e.stopPropagation(); setContextMenu({ id: item.id, label: item.label, type: 'moveToList', x: e.clientX, y: e.clientY }); }}
+                              onClick={e => { e.stopPropagation(); setContextMenu({ id: item.id, label: item.label, type: 'moveToList', isCustom: !!item.isCustom, x: e.clientX, y: e.clientY }); }}
                             >⋯</button>
                           )}
                         </div>
@@ -395,6 +459,9 @@ function RoomsTab({ rooms, utilities, state, toggle, shopState, onPriorityChange
           })}
         </ul>
       </div>
+
+      {/* Add a new item — inline step-by-step flow, no modal */}
+      <AddItemCard rooms={rooms} addItem={addItem} />
     </div>
 
     {/* Context menu */}
@@ -418,28 +485,198 @@ function RoomsTab({ rooms, utilities, state, toggle, shopState, onPriorityChange
           <button
             style={{ display: 'block', width: '100%', padding: '8px 14px', textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: 13, color: '#1c1917', fontWeight: 500 }}
             onClick={() => {
-              if (contextMenu.originallyOwned) toggle('unowned:' + contextMenu.id);
-              else toggle('owned:' + contextMenu.id);
+              setOwnedOverride(contextMenu.id, true);
               setContextMenu(null);
             }}
           >
             ✓ Move to Already have
           </button>
         )}
+        {contextMenu.isCustom && (
+          <>
+            <div style={s.menuDivider} />
+            <button
+              style={s.menuDangerItem}
+              onClick={() => { deleteCustomItem(contextMenu.id); setContextMenu(null); }}
+            >
+              🗑 Delete item
+            </button>
+          </>
+        )}
+      </div>
+    )}
+
+    {/* Retailer picker card */}
+    {retailerCard && (
+      <div
+        style={{ position: 'fixed', top: retailerCard.y, left: retailerCard.x, zIndex: 1000, background: '#fff', border: '1px solid #e7e5e4', borderRadius: 10, boxShadow: '0 4px 20px rgba(0,0,0,0.13)', padding: '10px 14px', minWidth: 200 }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div style={{ fontSize: 11, color: '#a8a29e', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
+          {retailerCard.label}
+        </div>
+        <select
+          value={retailers[retailerCard.id] || ''}
+          onChange={e => { setRetailer(retailerCard.id, e.target.value); setRetailerCard(null); }}
+          style={s.retailerSelect}
+          autoFocus
+        >
+          <option value="" disabled>Pick retailer…</option>
+          {RETAILERS.map(r => <option key={r} value={r}>{RETAILER_LABELS[r]}</option>)}
+        </select>
       </div>
     )}
     </>
   );
 }
 
+// ── Add item wizard (inline, no modal) ────────────────────────────────────────
+
+const ADD_ITEM_STEP_LABELS = ['Name', 'Room', 'Priority', 'Retailer', 'Review'];
+
+function AddItemCard({ rooms, addItem }) {
+  const [open, setOpen] = useState(false);
+  const [step, setStep] = useState(0);
+  const [draft, setDraft] = useState({ label: '', roomId: null, priority: 'medium', retailer: null });
+
+  function reset() {
+    setOpen(false);
+    setStep(0);
+    setDraft({ label: '', roomId: null, priority: 'medium', retailer: null });
+  }
+
+  function submit() {
+    addItem(draft);
+    reset();
+  }
+
+  if (!open) {
+    return (
+      <button style={s.addItemTile} onClick={() => setOpen(true)}>
+        <span style={s.addItemPlus}>+</span>
+        Add item
+      </button>
+    );
+  }
+
+  const canNext = step === 0 ? draft.label.trim().length > 0 : step === 1 ? draft.roomId != null : true;
+  const selectedRoom = rooms.find(r => r.id === draft.roomId);
+
+  return (
+    <div style={s.card}>
+      <div style={s.wizardHeader}>
+        <span style={s.wizardStepLabel}>{ADD_ITEM_STEP_LABELS[step]} · {step + 1}/5</span>
+        <button style={s.wizardClose} onClick={reset} title="Cancel">×</button>
+      </div>
+
+      {step === 0 && (
+        <input
+          autoFocus
+          value={draft.label}
+          onChange={e => setDraft(d => ({ ...d, label: e.target.value }))}
+          placeholder="e.g. Standing desk lamp"
+          style={s.wizardInput}
+        />
+      )}
+
+      {step === 1 && (
+        <div style={s.wizardOptionList}>
+          {rooms.map(room => (
+            <button
+              key={room.id}
+              style={{ ...s.wizardOptionBtn, ...(draft.roomId === room.id ? s.wizardOptionBtnActive : {}) }}
+              onClick={() => setDraft(d => ({ ...d, roomId: room.id }))}
+            >
+              {room.emoji} {room.name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {step === 2 && (
+        <div style={s.wizardOptionList}>
+          {['high', 'medium', 'low'].map(p => (
+            <button
+              key={p}
+              style={{
+                ...s.wizardOptionBtn,
+                ...(draft.priority === p ? { ...s.wizardOptionBtnActive, borderColor: PRIORITY_COLORS[p], color: PRIORITY_COLORS[p] } : {}),
+              }}
+              onClick={() => setDraft(d => ({ ...d, priority: p }))}
+            >
+              {PRIORITY_LABELS[p]}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {step === 3 && (
+        <div style={s.wizardOptionList}>
+          {RETAILERS.map(r => (
+            <button
+              key={r}
+              style={{
+                ...s.wizardOptionBtn,
+                ...(draft.retailer === r ? { ...s.wizardOptionBtnActive, borderColor: RETAILER_COLORS[r], color: RETAILER_COLORS[r] } : {}),
+              }}
+              onClick={() => setDraft(d => ({ ...d, retailer: r }))}
+            >
+              {RETAILER_LABELS[r]}
+            </button>
+          ))}
+          <button
+            style={{ ...s.wizardOptionBtn, ...(draft.retailer === null ? s.wizardOptionBtnActive : {}) }}
+            onClick={() => setDraft(d => ({ ...d, retailer: null }))}
+          >
+            {RETAILER_UNSET_LABEL}
+          </button>
+        </div>
+      )}
+
+      {step === 4 && (
+        <div style={s.wizardReview}>
+          <p style={s.wizardReviewLabel}>{draft.label}</p>
+          <p style={s.wizardReviewLine}>{selectedRoom ? `${selectedRoom.emoji} ${selectedRoom.name}` : ''}</p>
+          <div style={s.wizardReviewBadges}>
+            <span style={{ ...s.badge, color: PRIORITY_COLORS[draft.priority], borderColor: PRIORITY_COLORS[draft.priority] }}>
+              {PRIORITY_LABELS[draft.priority]}
+            </span>
+            <span style={{ ...s.retailerBadge, ...retailerStyle(draft.retailer || 'unset') }}>
+              {retailerLabel(draft.retailer || 'unset')}
+            </span>
+          </div>
+        </div>
+      )}
+
+      <div style={s.wizardNav}>
+        {step > 0 && <button style={s.wizardBtnGhost} onClick={() => setStep(x => x - 1)}>← Back</button>}
+        {step < 4 && (
+          <button
+            style={{ ...s.wizardBtnPrimary, ...(canNext ? {} : s.wizardBtnDisabled) }}
+            disabled={!canNext}
+            onClick={() => setStep(x => x + 1)}
+          >
+            Next →
+          </button>
+        )}
+        {step === 4 && (
+          <button style={s.wizardBtnPrimary} onClick={submit}>✓ Add item</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Shopping tab ──────────────────────────────────────────────────────────────
 
-function ShoppingTab({ items, shopState, onShopChange, toggle }) {
+function ShoppingTab({ items, priorities, order, onPriorityChange, reorderShoppingGroup, setOwnedOverride, retailers, setRetailer, deleteCustomItem }) {
   const dragId = useRef(null);
   const dragPriority = useRef(null);
   const [dragOver, setDragOver] = useState(null);
   const [pending, setPending] = useState(null);
   const [shopCtx, setShopCtx] = useState(null); // { id, label, owned, x, y }
+  const [retailerCard, setRetailerCard] = useState(null); // { id, label, x, y }
+  const [retailerFilter, setRetailerFilter] = useState('all');
   const [shopSwipe, setShopSwipe] = useState({});
   const shopTouchRef = useRef({});
   const [hoverShopId, setHoverShopId] = useState(null);
@@ -451,9 +688,15 @@ function ShoppingTab({ items, shopState, onShopChange, toggle }) {
     return () => document.removeEventListener('click', close);
   }, [shopCtx]);
 
+  useEffect(() => {
+    if (!retailerCard) return;
+    const close = () => setRetailerCard(null);
+    setTimeout(() => document.addEventListener('click', close), 0);
+    return () => document.removeEventListener('click', close);
+  }, [retailerCard]);
+
   function moveToAlreadyHave(item) {
-    if (item.owned) toggle('unowned:' + item.id);
-    else toggle('owned:' + item.id);
+    setOwnedOverride(item.id, true);
     setShopCtx(null);
   }
 
@@ -476,15 +719,19 @@ function ShoppingTab({ items, shopState, onShopChange, toggle }) {
   }
 
   function effPriority(item) {
-    return (shopState.priorities || {})[item.id] || item.priority;
+    return priorities[item.id] || item.priority;
+  }
+
+  function effRetailer(item) {
+    return retailers[item.id] || 'unset';
   }
 
   function orderedGroup(priority, groupItems) {
-    const order = (shopState.order || {})[priority] || [];
-    if (!order.length) return groupItems;
+    const groupOrder = order[priority] || [];
+    if (!groupOrder.length) return groupItems;
     return [...groupItems].sort((a, b) => {
-      const ai = order.indexOf(a.id);
-      const bi = order.indexOf(b.id);
+      const ai = groupOrder.indexOf(a.id);
+      const bi = groupOrder.indexOf(b.id);
       if (ai < 0 && bi < 0) return 0;
       if (ai < 0) return 1;
       if (bi < 0) return -1;
@@ -492,8 +739,14 @@ function ShoppingTab({ items, shopState, onShopChange, toggle }) {
     });
   }
 
+  // Retailer filter narrows the item set; Must/Soon/Nice-to-have grouping
+  // below is unchanged and simply applies to the (possibly narrower) set.
+  const filteredItems = retailerFilter === 'all'
+    ? items
+    : items.filter(i => effRetailer(i) === retailerFilter);
+
   const grouped = { high: [], medium: [], low: [] };
-  items.forEach(i => grouped[effPriority(i)].push(i));
+  filteredItems.forEach(i => grouped[effPriority(i)].push(i));
 
   function handleDragStart(e, item) {
     dragId.current = item.id;
@@ -530,10 +783,7 @@ function ShoppingTab({ items, shopState, onShopChange, toggle }) {
       const tgtIdx = without.findIndex(i => i.id === targetItem.id);
       const insertAt = over?.pos === 'before' ? tgtIdx : tgtIdx + 1;
       without.splice(Math.max(0, insertAt), 0, srcItem);
-      onShopChange({
-        ...shopState,
-        order: { ...(shopState.order || {}), [srcPriority]: without.map(i => i.id) },
-      });
+      reorderShoppingGroup(srcPriority, without.map(i => i.id));
     } else {
       setPending({ id: srcId, label: srcItem.label, from: srcPriority, to: tgtPriority, targetId: targetItem.id, pos: over?.pos });
     }
@@ -542,18 +792,15 @@ function ShoppingTab({ items, shopState, onShopChange, toggle }) {
   function confirmMove() {
     if (!pending) return;
     const { id, from, to, targetId, pos } = pending;
-    const priorities = { ...(shopState.priorities || {}), [id]: to };
-    const fromOrder = ((shopState.order || {})[from] || []).filter(x => x !== id);
+    const fromOrder = (order[from] || []).filter(x => x !== id);
     const toGroupItems = orderedGroup(to, grouped[to]);
     const toOrder = toGroupItems.map(i => i.id);
     const tgtIdx = toOrder.indexOf(targetId);
     if (tgtIdx >= 0) toOrder.splice(pos === 'before' ? tgtIdx : tgtIdx + 1, 0, id);
     else toOrder.push(id);
-    onShopChange({
-      ...shopState,
-      priorities,
-      order: { ...(shopState.order || {}), [from]: fromOrder, [to]: toOrder },
-    });
+    onPriorityChange(id, to);
+    reorderShoppingGroup(from, fromOrder);
+    reorderShoppingGroup(to, toOrder);
     setPending(null);
   }
 
@@ -569,6 +816,19 @@ function ShoppingTab({ items, shopState, onShopChange, toggle }) {
   return (
     <>
     <div style={s.shopping}>
+      {/* Retailer filter — narrows the list below while keeping priority groups */}
+      <div style={s.filterBar}>
+        {[['all', 'All'], ...RETAILERS.map(r => [r, RETAILER_LABELS[r]])].map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => setRetailerFilter(key)}
+            style={{ ...s.filterBtn, ...(retailerFilter === key ? s.filterBtnActive : {}) }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       {pending && (
         <div style={s.confirmBanner}>
           <p style={s.confirmText}>
@@ -586,6 +846,12 @@ function ShoppingTab({ items, shopState, onShopChange, toggle }) {
         </div>
       )}
 
+      {filteredItems.length === 0 && (
+        <p style={{ textAlign: 'center', color: '#a8a29e', fontSize: 14, margin: '24px 0' }}>
+          No items for this retailer yet.
+        </p>
+      )}
+
       {Object.entries(grouped).filter(([, arr]) => arr.length > 0).map(([priority, arr]) => (
         <div key={priority} style={s.shopGroup}>
           <h3 style={{ ...s.shopGroupTitle, color: PRIORITY_COLORS[priority] }}>
@@ -596,6 +862,7 @@ function ShoppingTab({ items, shopState, onShopChange, toggle }) {
               const isOver = dragOver?.id === item.id;
               const dx = shopSwipe[item.id] || 0;
               const isSwiping = shopTouchRef.current[item.id] != null;
+              const effR = effRetailer(item);
               return (
                 <li
                   key={item.id}
@@ -637,11 +904,18 @@ function ShoppingTab({ items, shopState, onShopChange, toggle }) {
                         <span style={s.deliveryHint}>⏱ {item.deliveryHint}</span>
                       )}
                     </div>
+                    <span
+                      style={{ ...s.retailerBadge, ...retailerStyle(effR), marginLeft: 'auto' }}
+                      title="Click to set retailer"
+                      onClick={e => { e.stopPropagation(); setRetailerCard({ id: item.id, label: item.label, x: e.clientX, y: e.clientY }); }}
+                    >
+                      {retailerLabel(effR)}
+                    </span>
                     <span style={s.shopItemRoom}>{item.room}</span>
                     {hoverShopId === item.id && (
                       <button
                         style={s.dotMenuBtn}
-                        onClick={e => { e.stopPropagation(); setShopCtx({ id: item.id, label: item.label, owned: item.owned, x: e.clientX, y: e.clientY }); }}
+                        onClick={e => { e.stopPropagation(); setShopCtx({ id: item.id, label: item.label, owned: item.owned, isCustom: !!item.isCustom, x: e.clientX, y: e.clientY }); }}
                       >⋯</button>
                     )}
                   </div>
@@ -668,6 +942,38 @@ function ShoppingTab({ items, shopState, onShopChange, toggle }) {
         >
           ✓ Move to Already have
         </button>
+        {shopCtx.isCustom && (
+          <>
+            <div style={s.menuDivider} />
+            <button
+              style={s.menuDangerItem}
+              onClick={() => { deleteCustomItem(shopCtx.id); setShopCtx(null); }}
+            >
+              🗑 Delete item
+            </button>
+          </>
+        )}
+      </div>
+    )}
+
+    {/* Retailer picker card */}
+    {retailerCard && (
+      <div
+        style={{ position: 'fixed', top: retailerCard.y, left: retailerCard.x, zIndex: 1000, background: '#fff', border: '1px solid #e7e5e4', borderRadius: 10, boxShadow: '0 4px 20px rgba(0,0,0,0.13)', padding: '10px 14px', minWidth: 200 }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div style={{ fontSize: 11, color: '#a8a29e', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
+          {retailerCard.label}
+        </div>
+        <select
+          value={retailers[retailerCard.id] || ''}
+          onChange={e => { setRetailer(retailerCard.id, e.target.value); setRetailerCard(null); }}
+          style={s.retailerSelect}
+          autoFocus
+        >
+          <option value="" disabled>Pick retailer…</option>
+          {RETAILERS.map(r => <option key={r} value={r}>{RETAILER_LABELS[r]}</option>)}
+        </select>
       </div>
     )}
   </>
@@ -706,18 +1012,8 @@ function UtilitiesTab({ utilities }) {
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const s = {
-  // PIN
-  pinOverlay: { minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#faf8f3' },
-  pinBox: { background: '#fff', borderRadius: 20, padding: '32px 28px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)', textAlign: 'center', maxWidth: 320, width: '100%' },
-  pinEmoji: { fontSize: 52, marginBottom: 8 },
-  pinTitle: { margin: '0 0 4px', color: '#1c1917', fontSize: 24, fontWeight: 700 },
-  pinSub: { color: '#78716c', margin: '0 0 20px', fontSize: 14 },
-  pinForm: { display: 'flex', flexDirection: 'column', gap: 12 },
-  pinInput: { fontSize: 28, textAlign: 'center', border: '2px solid', borderRadius: 12, padding: '10px 16px', outline: 'none', letterSpacing: 4, color: '#1c1917', background: '#faf8f3', width: '100%', boxSizing: 'border-box' },
-  pinError: { color: '#dc2626', fontSize: 13, margin: 0 },
-  pinBtn: { background: '#2d6a4f', color: '#fff', border: 'none', borderRadius: 12, padding: '12px', fontSize: 16, fontWeight: 600, cursor: 'pointer' },
   // App shell
-  app: { maxWidth: 960, margin: '0 auto', padding: '32px 16px' },
+  app: { maxWidth: 1280, margin: '0 auto', padding: '32px 16px' },
   header: { textAlign: 'center', marginBottom: 20 },
   headerTitle: { fontSize: 32, fontWeight: 800, color: '#1c1917', margin: '0 0 16px' },
   progressBar: { height: 10, background: '#e7e5e4', borderRadius: 99, overflow: 'hidden', maxWidth: 400, margin: '0 auto 8px' },
@@ -735,14 +1031,14 @@ const s = {
   tab: { padding: '8px 20px', borderRadius: 99, border: '2px solid #e7e5e4', background: '#fff', color: '#78716c', cursor: 'pointer', fontWeight: 600, fontSize: 14, transition: 'all 0.15s' },
   tabActive: { background: '#2d6a4f', color: '#fff', borderColor: '#2d6a4f' },
   // Rooms grid
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))', gap: 20 },
+  grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(360px, 100%), 1fr))', gap: 20 },
   card: { background: '#fff', borderRadius: 16, padding: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.06)', border: '1px solid #f0ebe3' },
   cardHeader: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 },
   cardEmoji: { fontSize: 32 },
   cardTitle: { margin: '0 0 2px', fontSize: 17, fontWeight: 700, color: '#1c1917' },
   cardProgress: { fontSize: 12, color: '#78716c' },
   itemList: { listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 0 },
-  itemRow: { display: 'flex', alignItems: 'flex-start', gap: 8, padding: '10px 0', borderBottom: '1px solid #f5f0e8', userSelect: 'none' },
+  itemRow: { display: 'flex', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8, padding: '10px 0', borderBottom: '1px solid #f5f0e8', userSelect: 'none' },
   checkbox: { width: 20, height: 20, borderRadius: 6, border: '2px solid #d1c4ae', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: '#fff', flexShrink: 0, transition: 'all 0.15s', background: 'transparent', cursor: 'pointer', marginTop: 1 },
   checkboxDone: { background: '#16a34a', borderColor: '#16a34a' },
   itemContent: { flex: 1, display: 'flex', flexDirection: 'column', gap: 4, cursor: 'pointer', minWidth: 0 },
@@ -751,6 +1047,28 @@ const s = {
   reportBtn: { display: 'inline-block', fontSize: 11, fontWeight: 600, color: '#2d6a4f', border: '1px solid #2d6a4f', borderRadius: 99, padding: '2px 9px', textDecoration: 'none', alignSelf: 'flex-start' },
   deliveryHint: { fontSize: 11, color: '#78716c', fontStyle: 'italic', alignSelf: 'flex-start' },
   badge: { fontSize: 11, fontWeight: 600, border: '1px solid', borderRadius: 99, padding: '1px 7px', flexShrink: 0, marginTop: 2 },
+  retailerBadge: { fontSize: 11, fontWeight: 600, border: '1px solid', borderRadius: 99, padding: '1px 7px', flexShrink: 0, marginTop: 2, cursor: 'pointer' },
+  retailerSelect: { fontSize: 13, padding: '6px 10px', borderRadius: 8, border: '1px solid #d1c4ae', background: '#faf8f3', color: '#1c1917', width: '100%', boxSizing: 'border-box' },
+  menuDivider: { height: 1, background: '#f0ebe3', margin: '4px 0' },
+  menuDangerItem: { display: 'block', width: '100%', padding: '8px 14px', textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: 13, color: '#dc2626', fontWeight: 500 },
+  // Add-item wizard
+  addItemTile: { background: '#fff', borderRadius: 16, padding: 20, border: '2px dashed #d1c4ae', color: '#78716c', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 15, fontWeight: 600, cursor: 'pointer', minHeight: 84 },
+  addItemPlus: { fontSize: 20, lineHeight: 1 },
+  wizardHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 },
+  wizardStepLabel: { fontSize: 12, fontWeight: 700, color: '#a8a29e', textTransform: 'uppercase', letterSpacing: '.06em' },
+  wizardClose: { background: 'none', border: 'none', cursor: 'pointer', fontSize: 20, color: '#78716c', lineHeight: 1, padding: 0 },
+  wizardInput: { fontSize: 15, padding: '10px 12px', borderRadius: 10, border: '1px solid #d1c4ae', background: '#faf8f3', color: '#1c1917', width: '100%', boxSizing: 'border-box' },
+  wizardOptionList: { display: 'flex', flexDirection: 'column', gap: 8 },
+  wizardOptionBtn: { padding: '10px 14px', borderRadius: 10, border: '2px solid #e7e5e4', background: '#fff', color: '#1c1917', cursor: 'pointer', fontSize: 14, fontWeight: 500, textAlign: 'left' },
+  wizardOptionBtnActive: { borderColor: '#2d6a4f', background: '#f0f7f3' },
+  wizardReview: { display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 4 },
+  wizardReviewLabel: { fontSize: 16, fontWeight: 700, color: '#1c1917', margin: 0 },
+  wizardReviewLine: { fontSize: 13, color: '#78716c', margin: 0 },
+  wizardReviewBadges: { display: 'flex', gap: 8, marginTop: 4 },
+  wizardNav: { display: 'flex', justifyContent: 'space-between', gap: 8, marginTop: 18 },
+  wizardBtnGhost: { padding: '8px 16px', borderRadius: 8, border: '1px solid #e7e5e4', background: '#fff', color: '#78716c', cursor: 'pointer', fontSize: 13, fontWeight: 600 },
+  wizardBtnPrimary: { padding: '8px 16px', borderRadius: 8, border: 'none', background: '#2d6a4f', color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 600, marginLeft: 'auto' },
+  wizardBtnDisabled: { opacity: 0.45, cursor: 'not-allowed' },
   // Owned section
   ownedSection: { marginTop: 12, paddingTop: 10, borderTop: '1px dashed #e7e5e4' },
   ownedLabel: { fontSize: 10, fontWeight: 700, color: '#a8a29e', textTransform: 'uppercase', letterSpacing: '.08em', display: 'block', marginBottom: 6 },
@@ -762,6 +1080,9 @@ const s = {
   ownedItemLabel: { fontSize: 13, color: '#a8a29e', textDecoration: 'line-through' },
   // Shopping
   shopping: { maxWidth: 680, margin: '0 auto' },
+  filterBar: { display: 'flex', gap: 8, marginBottom: 20, justifyContent: 'center', flexWrap: 'wrap' },
+  filterBtn: { padding: '6px 16px', borderRadius: 99, border: '2px solid #e7e5e4', background: '#fff', color: '#78716c', cursor: 'pointer', fontWeight: 600, fontSize: 13, transition: 'all 0.15s' },
+  filterBtnActive: { background: '#2d6a4f', color: '#fff', borderColor: '#2d6a4f' },
   shopGroup: { marginBottom: 28 },
   shopGroupTitle: { fontWeight: 700, marginBottom: 10, fontSize: 16 },
   shopCount: { fontWeight: 400, color: '#78716c' },
@@ -770,7 +1091,7 @@ const s = {
   shopItemLeft: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
   shopItemLabel: { fontSize: 14, color: '#1c1917', fontWeight: 500 },
   reportBtnShop: { display: 'inline-block', fontSize: 11, fontWeight: 600, color: '#2d6a4f', border: '1px solid #2d6a4f', borderRadius: 99, padding: '2px 9px', textDecoration: 'none', flexShrink: 0 },
-  shopItemRoom: { fontSize: 12, color: '#78716c', background: '#f5f0e8', borderRadius: 99, padding: '2px 10px', flexShrink: 0, marginLeft: 'auto' },
+  shopItemRoom: { fontSize: 12, color: '#78716c', background: '#f5f0e8', borderRadius: 99, padding: '2px 10px', flexShrink: 0 },
   dragHandle: { fontSize: 14, color: '#d1c4ae', cursor: 'grab', flexShrink: 0, paddingRight: 6, userSelect: 'none' },
   confirmBanner: { background: '#fff', border: '1.5px solid #d97706', borderRadius: 12, padding: '14px 16px', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 },
   confirmText: { fontSize: 13, color: '#1c1917', lineHeight: 1.5, margin: 0 },
@@ -791,31 +1112,9 @@ const s = {
 // ── Page root ─────────────────────────────────────────────────────────────────
 
 export default function Home() {
-  const [unlocked, setUnlocked] = useState(false);
-
-  useEffect(() => {
-    if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('home_unlocked') === 'yes') {
-      setUnlocked(true);
-    }
-  }, []);
-
-  function handleUnlock() {
-    sessionStorage.setItem('home_unlocked', 'yes');
-    setUnlocked(true);
-  }
-
   return (
     <Layout title="Our Home" description="">
-      <style>{`
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          20%       { transform: translateX(-8px); }
-          40%       { transform: translateX(8px); }
-          60%       { transform: translateX(-5px); }
-          80%       { transform: translateX(5px); }
-        }
-      `}</style>
-      {unlocked ? <HomeApp /> : <PinGate onUnlock={handleUnlock} />}
+      <HomeApp />
     </Layout>
   );
 }

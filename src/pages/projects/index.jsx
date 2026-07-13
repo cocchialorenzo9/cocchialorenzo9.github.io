@@ -11,6 +11,15 @@ const PROJECTS = [
     statusColor: "#4CAF93",
     emoji: "🏃",
   },
+  {
+    slug: "home",
+    path: "/home",
+    name: "Our Home",
+    description: "Shared move-in checklist and shopping list — rooms, priorities, and where to buy each item.",
+    status: "Active",
+    statusColor: "#4CAF93",
+    emoji: "🏠",
+  },
 ];
 
 export default function ProjectsIndex() {
@@ -23,7 +32,7 @@ export default function ProjectsIndex() {
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {PROJECTS.map(p => (
-            <Link key={p.slug} to={`/projects/${p.slug}`} style={{ textDecoration: "none" }}>
+            <Link key={p.slug} to={p.path || `/projects/${p.slug}`} style={{ textDecoration: "none" }}>
               <div
                 style={{
                   border: "1.5px solid #e0e0e0",
