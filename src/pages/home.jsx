@@ -22,6 +22,125 @@ function retailerStyle(r) {
   return { color, borderColor: color };
 }
 
+function formatLink(url) {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, '');
+    const path = u.pathname !== '/' ? u.pathname.replace(/\/$/, '') : '';
+    return { host, path };
+  } catch {
+    return { host: url, path: '' };
+  }
+}
+
+const HOSTNAME_PATTERN = /^([a-z0-9]([a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}$/i;
+
+function normalizeUrl(input) {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+  const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  try {
+    const u = new URL(withProtocol);
+    if (!HOSTNAME_PATTERN.test(u.hostname)) return null;
+    return u.toString();
+  } catch {
+    return null;
+  }
+}
+
+// ── Link chips (shared by Rooms and Shopping tabs) ─────────────────────────────
+
+function LinkChips({ urls, onRemove }) {
+  if (!urls.length) return null;
+  return (
+    <div style={s.linksRow}>
+      {urls.map(url => {
+        const { host, path } = formatLink(url);
+        return (
+          <span key={url} style={s.linkChip}>
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={s.linkChipLink}
+              onClick={e => e.stopPropagation()}
+              title={url}
+            >
+              <span style={s.linkChipHost}>{host}</span>
+              {path && <span style={s.linkChipPath}>{path}</span>}
+            </a>
+            <button
+              style={s.linkChipRemove}
+              title="Remove link"
+              onClick={e => { e.stopPropagation(); onRemove(url); }}
+            >×</button>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+function AddLinkCard({ card, onAdd, onClose }) {
+  const [value, setValue] = useState('');
+  const [error, setError] = useState(false);
+
+  function submit() {
+    const normalized = normalizeUrl(value);
+    if (!normalized) { setError(true); return; }
+    onAdd(card.id, normalized);
+    onClose();
+  }
+
+  return (
+    <div
+      style={{ position: 'fixed', top: card.y, left: card.x, zIndex: 1000, background: '#fff', border: '1px solid #e7e5e4', borderRadius: 10, boxShadow: '0 4px 20px rgba(0,0,0,0.13)', padding: '10px 14px', minWidth: 240 }}
+      onClick={e => e.stopPropagation()}
+    >
+      <div style={{ fontSize: 11, color: '#a8a29e', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
+        {card.label}
+      </div>
+      <input
+        autoFocus
+        value={value}
+        onChange={e => { setValue(e.target.value); setError(false); }}
+        onKeyDown={e => { if (e.key === 'Enter') submit(); }}
+        placeholder="Paste a product link…"
+        style={s.linkAddInput}
+      />
+      {error && <div style={s.linkAddError}>That doesn't look like a valid URL.</div>}
+      <div style={s.linkAddActions}>
+        <button style={s.wizardBtnGhost} onClick={onClose}>Cancel</button>
+        <button style={s.wizardBtnPrimary} onClick={submit}>Add link</button>
+      </div>
+    </div>
+  );
+}
+
+function CategoryPickerCard({ card, rooms, onMove, onClose }) {
+  return (
+    <div
+      style={{ position: 'fixed', top: card.y, left: card.x, zIndex: 1000, background: '#fff', border: '1px solid #e7e5e4', borderRadius: 10, boxShadow: '0 4px 20px rgba(0,0,0,0.13)', padding: '10px 14px', minWidth: 200 }}
+      onClick={e => e.stopPropagation()}
+    >
+      <div style={{ fontSize: 11, color: '#a8a29e', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
+        {card.label}
+      </div>
+      <div style={s.wizardOptionList}>
+        {rooms.filter(r => r.id !== card.currentRoomId).map(room => (
+          <button
+            key={room.id}
+            style={s.wizardOptionBtn}
+            onClick={() => { onMove(card.item, room.id); onClose(); }}
+          >
+            {room.emoji} {room.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Timeline (always visible) ─────────────────────────────────────────────────
 
 function Timeline({ items, state, toggle }) {
@@ -97,6 +216,30 @@ function HomeApp() {
     update(ref(db, `${HOME_STATE_PATH}/retailers`), { [id]: retailer });
   }
 
+  function addLink(id, url) {
+    const current = (shared.links || {})[id] || [];
+    if (current.includes(url)) return;
+    set(ref(db, `${HOME_STATE_PATH}/links/${id}`), [...current, url]);
+  }
+
+  function removeLink(id, url) {
+    const current = (shared.links || {})[id] || [];
+    set(ref(db, `${HOME_STATE_PATH}/links/${id}`), current.filter(u => u !== url));
+  }
+
+  function addCategory({ name, emoji }) {
+    const id = `category_${crypto.randomUUID()}`;
+    update(ref(db, `${HOME_STATE_PATH}/customRooms`), { [id]: { name, emoji, createdAt: Date.now() } });
+  }
+
+  function moveItemToRoom(item, roomId) {
+    if (item.isCustom) {
+      update(ref(db, `${HOME_STATE_PATH}/customItems/${item.id}`), { roomId });
+    } else {
+      update(ref(db, `${HOME_STATE_PATH}/roomOverride`), { [item.id]: roomId });
+    }
+  }
+
   function reorderShoppingGroup(priority, orderedIds) {
     set(ref(db, `${HOME_STATE_PATH}/order/${priority}`), orderedIds);
   }
@@ -124,6 +267,7 @@ function HomeApp() {
       [`ownedOverride/${id}`]: null,
       [`priorities/${id}`]: null,
       [`retailers/${id}`]: null,
+      [`links/${id}`]: null,
     };
     ['high', 'medium', 'low'].forEach(p => {
       if ((currentOrder[p] || []).includes(id)) {
@@ -133,24 +277,34 @@ function HomeApp() {
     update(ref(db, HOME_STATE_PATH), updates);
   }
 
-  // Fold user-added items (Firebase-only) into the static room catalog so
-  // everything downstream (progress count, buy/owned filters, shopping
-  // list, priority/retailer grouping) treats them identically to catalog
-  // items — no other changes needed in RoomsTab/ShoppingTab for this.
+  // Fold user-added items and categories (Firebase-only) into the static
+  // room catalog so everything downstream (progress count, buy/owned
+  // filters, shopping list, priority/retailer grouping) treats them
+  // identically to catalog items/rooms — no other changes needed in
+  // RoomsTab/ShoppingTab for this. `roomOverride` lets a static catalog
+  // item be reassigned to any room even though its room membership is
+  // otherwise implicit in the JSON nesting; custom items already carry a
+  // mutable `roomId` field, so they don't need an override.
   // Computed unconditionally (before the loading gate below) since hooks
   // must run in the same order on every render.
   const mergedRooms = useMemo(() => {
     if (!data) return [];
     const customItems = (shared && shared.customItems) || {};
-    return data.rooms.map(room => ({
-      ...room,
-      items: [
-        ...room.items,
-        ...Object.entries(customItems)
-          .filter(([, c]) => c.roomId === room.id)
-          .map(([id, c]) => ({ id, label: c.label, isCustom: true })),
-      ],
-    }));
+    const customRooms = (shared && shared.customRooms) || {};
+    const roomOverride = (shared && shared.roomOverride) || {};
+
+    const allRooms = [
+      ...data.rooms.map(({ items, ...room }) => room),
+      ...Object.entries(customRooms).map(([id, c]) => ({ id, name: c.name, emoji: c.emoji })),
+    ];
+
+    const allItems = [
+      ...data.rooms.flatMap(room =>
+        room.items.map(item => ({ ...item, roomId: roomOverride[item.id] || room.id }))),
+      ...Object.entries(customItems).map(([id, c]) => ({ id, label: c.label, isCustom: true, roomId: c.roomId })),
+    ];
+
+    return allRooms.map(room => ({ ...room, items: allItems.filter(i => i.roomId === room.id) }));
   }, [data, shared]);
 
   if (!data || shared === null) {
@@ -166,6 +320,7 @@ function HomeApp() {
   const priorities = shared.priorities || {};
   const order = shared.order || {};
   const retailers = shared.retailers || {};
+  const links = shared.links || {};
 
   // Progress: only count non-owned items
   const allBuyItems = mergedRooms.flatMap(r => r.items).filter(i => !i.owned);
@@ -173,7 +328,7 @@ function HomeApp() {
   const progress = Math.round((doneCount / allBuyItems.length) * 100);
 
   const shoppingItems = mergedRooms
-    .flatMap(r => r.items.map(i => ({ ...i, room: r.name })))
+    .flatMap(r => r.items.map(i => ({ ...i, room: r.name, roomId: r.id })))
     .filter(i => !checked[i.id] && (!i.owned || ownedOverride[i.id] === false) && ownedOverride[i.id] !== true)
     .map(i => ({ ...i, priority: i.owned ? (i.defaultPriority || 'medium') : i.priority }))
     .sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
@@ -217,8 +372,13 @@ function HomeApp() {
           onPriorityChange={handlePriorityChange}
           retailers={retailers}
           setRetailer={setRetailer}
+          links={links}
+          addLink={addLink}
+          removeLink={removeLink}
           addItem={addItem}
           deleteCustomItem={deleteCustomItem}
+          moveItemToRoom={moveItemToRoom}
+          addCategory={addCategory}
         />
       )}
       {tab === 'shopping' && (
@@ -231,7 +391,12 @@ function HomeApp() {
           setOwnedOverride={setOwnedOverride}
           retailers={retailers}
           setRetailer={setRetailer}
+          links={links}
+          addLink={addLink}
+          removeLink={removeLink}
           deleteCustomItem={deleteCustomItem}
+          rooms={mergedRooms}
+          moveItemToRoom={moveItemToRoom}
         />
       )}
     </div>
@@ -242,9 +407,11 @@ function HomeApp() {
 
 const PRIORITY_CYCLE = { high: 'medium', medium: 'low', low: 'high' };
 
-function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, setOwnedOverride, priorities, onPriorityChange, retailers, setRetailer, addItem, deleteCustomItem }) {
-  const [contextMenu, setContextMenu] = useState(null); // { id, label, type, x, y }
+function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, setOwnedOverride, priorities, onPriorityChange, retailers, setRetailer, links, addLink, removeLink, addItem, deleteCustomItem, moveItemToRoom, addCategory }) {
+  const [contextMenu, setContextMenu] = useState(null); // { id, label, type, roomId, isCustom, x, y }
   const [retailerCard, setRetailerCard] = useState(null); // { id, label, x, y }
+  const [linkCard, setLinkCard] = useState(null); // { id, label, x, y }
+  const [categoryCard, setCategoryCard] = useState(null); // { item, label, currentRoomId, x, y }
   const [swipeDx, setSwipeDx] = useState({});
   const touchRef = useRef({});
   const [hoverItemId, setHoverItemId] = useState(null);
@@ -262,6 +429,20 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
     setTimeout(() => document.addEventListener('click', close), 0);
     return () => document.removeEventListener('click', close);
   }, [retailerCard]);
+
+  useEffect(() => {
+    if (!linkCard) return;
+    const close = () => setLinkCard(null);
+    setTimeout(() => document.addEventListener('click', close), 0);
+    return () => document.removeEventListener('click', close);
+  }, [linkCard]);
+
+  useEffect(() => {
+    if (!categoryCard) return;
+    const close = () => setCategoryCard(null);
+    setTimeout(() => document.addEventListener('click', close), 0);
+    return () => document.removeEventListener('click', close);
+  }, [categoryCard]);
 
   function unownItem(id) {
     setOwnedOverride(id, false);
@@ -344,6 +525,12 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
                         {item.deliveryHint && !checked[item.id] && (
                           <span style={s.deliveryHint}>⏱ {item.deliveryHint}</span>
                         )}
+                        {!checked[item.id] && (
+                          <LinkChips
+                            urls={links[item.id] || []}
+                            onRemove={url => removeLink(item.id, url)}
+                          />
+                        )}
                       </div>
                       {!checked[item.id] && (
                         <>
@@ -364,7 +551,7 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
                           {hoverItemId === item.id && (
                             <button
                               style={s.dotMenuBtn}
-                              onClick={e => { e.stopPropagation(); setContextMenu({ id: item.id, label: item.label, type: 'moveToOwned', isCustom: !!item.isCustom, x: e.clientX, y: e.clientY }); }}
+                              onClick={e => { e.stopPropagation(); setContextMenu({ id: item.id, label: item.label, type: 'moveToOwned', isCustom: !!item.isCustom, roomId: room.id, x: e.clientX, y: e.clientY }); }}
                             >⋯</button>
                           )}
                         </>
@@ -407,7 +594,7 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
                           {hoverItemId === item.id && (
                             <button
                               style={s.dotMenuBtn}
-                              onClick={e => { e.stopPropagation(); setContextMenu({ id: item.id, label: item.label, type: 'moveToList', isCustom: !!item.isCustom, x: e.clientX, y: e.clientY }); }}
+                              onClick={e => { e.stopPropagation(); setContextMenu({ id: item.id, label: item.label, type: 'moveToList', isCustom: !!item.isCustom, roomId: room.id, x: e.clientX, y: e.clientY }); }}
                             >⋯</button>
                           )}
                         </div>
@@ -417,6 +604,9 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
                 </ul>
               </div>
             )}
+
+            {/* Add a new item to this category — inline step-by-step flow, no modal */}
+            <AddItemCard roomId={room.id} addItem={addItem} />
           </div>
         );
       })}
@@ -460,8 +650,8 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
         </ul>
       </div>
 
-      {/* Add a new item — inline step-by-step flow, no modal */}
-      <AddItemCard rooms={rooms} addItem={addItem} />
+      {/* Add a new category — inline step-by-step flow, no modal */}
+      <AddCategoryCard addCategory={addCategory} />
     </div>
 
     {/* Context menu */}
@@ -492,6 +682,30 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
             ✓ Move to Already have
           </button>
         )}
+        <button
+          style={{ display: 'block', width: '100%', padding: '8px 14px', textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: 13, color: '#1c1917', fontWeight: 500 }}
+          onClick={() => {
+            setLinkCard({ id: contextMenu.id, label: contextMenu.label, x: contextMenu.x, y: contextMenu.y });
+            setContextMenu(null);
+          }}
+        >
+          🔗 Add link
+        </button>
+        <button
+          style={{ display: 'block', width: '100%', padding: '8px 14px', textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: 13, color: '#1c1917', fontWeight: 500 }}
+          onClick={() => {
+            setCategoryCard({
+              item: { id: contextMenu.id, isCustom: contextMenu.isCustom },
+              label: contextMenu.label,
+              currentRoomId: contextMenu.roomId,
+              x: contextMenu.x,
+              y: contextMenu.y,
+            });
+            setContextMenu(null);
+          }}
+        >
+          ↔ Move to category
+        </button>
         {contextMenu.isCustom && (
           <>
             <div style={s.menuDivider} />
@@ -526,46 +740,55 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
         </select>
       </div>
     )}
+
+    {/* Add-link card */}
+    {linkCard && (
+      <AddLinkCard card={linkCard} onAdd={addLink} onClose={() => setLinkCard(null)} />
+    )}
+
+    {/* Category picker card */}
+    {categoryCard && (
+      <CategoryPickerCard card={categoryCard} rooms={rooms} onMove={moveItemToRoom} onClose={() => setCategoryCard(null)} />
+    )}
     </>
   );
 }
 
 // ── Add item wizard (inline, no modal) ────────────────────────────────────────
 
-const ADD_ITEM_STEP_LABELS = ['Name', 'Room', 'Priority', 'Retailer', 'Review'];
+const ADD_ITEM_STEP_LABELS = ['Name', 'Priority', 'Retailer', 'Review'];
 
-function AddItemCard({ rooms, addItem }) {
+function AddItemCard({ roomId, addItem }) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
-  const [draft, setDraft] = useState({ label: '', roomId: null, priority: 'medium', retailer: null });
+  const [draft, setDraft] = useState({ label: '', priority: 'medium', retailer: null });
 
   function reset() {
     setOpen(false);
     setStep(0);
-    setDraft({ label: '', roomId: null, priority: 'medium', retailer: null });
+    setDraft({ label: '', priority: 'medium', retailer: null });
   }
 
   function submit() {
-    addItem(draft);
+    addItem({ ...draft, roomId });
     reset();
   }
 
   if (!open) {
     return (
-      <button style={s.addItemTile} onClick={() => setOpen(true)}>
+      <button style={s.addItemRow} onClick={() => setOpen(true)}>
         <span style={s.addItemPlus}>+</span>
         Add item
       </button>
     );
   }
 
-  const canNext = step === 0 ? draft.label.trim().length > 0 : step === 1 ? draft.roomId != null : true;
-  const selectedRoom = rooms.find(r => r.id === draft.roomId);
+  const canNext = step === 0 ? draft.label.trim().length > 0 : true;
 
   return (
-    <div style={s.card}>
+    <div style={s.wizardInline}>
       <div style={s.wizardHeader}>
-        <span style={s.wizardStepLabel}>{ADD_ITEM_STEP_LABELS[step]} · {step + 1}/5</span>
+        <span style={s.wizardStepLabel}>{ADD_ITEM_STEP_LABELS[step]} · {step + 1}/4</span>
         <button style={s.wizardClose} onClick={reset} title="Cancel">×</button>
       </div>
 
@@ -580,20 +803,6 @@ function AddItemCard({ rooms, addItem }) {
       )}
 
       {step === 1 && (
-        <div style={s.wizardOptionList}>
-          {rooms.map(room => (
-            <button
-              key={room.id}
-              style={{ ...s.wizardOptionBtn, ...(draft.roomId === room.id ? s.wizardOptionBtnActive : {}) }}
-              onClick={() => setDraft(d => ({ ...d, roomId: room.id }))}
-            >
-              {room.emoji} {room.name}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {step === 2 && (
         <div style={s.wizardOptionList}>
           {['high', 'medium', 'low'].map(p => (
             <button
@@ -610,7 +819,7 @@ function AddItemCard({ rooms, addItem }) {
         </div>
       )}
 
-      {step === 3 && (
+      {step === 2 && (
         <div style={s.wizardOptionList}>
           {RETAILERS.map(r => (
             <button
@@ -633,10 +842,9 @@ function AddItemCard({ rooms, addItem }) {
         </div>
       )}
 
-      {step === 4 && (
+      {step === 3 && (
         <div style={s.wizardReview}>
           <p style={s.wizardReviewLabel}>{draft.label}</p>
-          <p style={s.wizardReviewLine}>{selectedRoom ? `${selectedRoom.emoji} ${selectedRoom.name}` : ''}</p>
           <div style={s.wizardReviewBadges}>
             <span style={{ ...s.badge, color: PRIORITY_COLORS[draft.priority], borderColor: PRIORITY_COLORS[draft.priority] }}>
               {PRIORITY_LABELS[draft.priority]}
@@ -650,7 +858,7 @@ function AddItemCard({ rooms, addItem }) {
 
       <div style={s.wizardNav}>
         {step > 0 && <button style={s.wizardBtnGhost} onClick={() => setStep(x => x - 1)}>← Back</button>}
-        {step < 4 && (
+        {step < 3 && (
           <button
             style={{ ...s.wizardBtnPrimary, ...(canNext ? {} : s.wizardBtnDisabled) }}
             disabled={!canNext}
@@ -659,8 +867,91 @@ function AddItemCard({ rooms, addItem }) {
             Next →
           </button>
         )}
-        {step === 4 && (
+        {step === 3 && (
           <button style={s.wizardBtnPrimary} onClick={submit}>✓ Add item</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Add category wizard (inline, no modal) ────────────────────────────────────
+
+const ADD_CATEGORY_STEP_LABELS = ['Name', 'Emoji', 'Review'];
+
+function AddCategoryCard({ addCategory }) {
+  const [open, setOpen] = useState(false);
+  const [step, setStep] = useState(0);
+  const [draft, setDraft] = useState({ name: '', emoji: '' });
+
+  function reset() {
+    setOpen(false);
+    setStep(0);
+    setDraft({ name: '', emoji: '' });
+  }
+
+  function submit() {
+    addCategory(draft);
+    reset();
+  }
+
+  if (!open) {
+    return (
+      <button style={s.addItemTile} onClick={() => setOpen(true)}>
+        <span style={s.addItemPlus}>+</span>
+        Add category
+      </button>
+    );
+  }
+
+  const canNext = step === 0 ? draft.name.trim().length > 0 : step === 1 ? draft.emoji.trim().length > 0 : true;
+
+  return (
+    <div style={s.card}>
+      <div style={s.wizardHeader}>
+        <span style={s.wizardStepLabel}>{ADD_CATEGORY_STEP_LABELS[step]} · {step + 1}/3</span>
+        <button style={s.wizardClose} onClick={reset} title="Cancel">×</button>
+      </div>
+
+      {step === 0 && (
+        <input
+          autoFocus
+          value={draft.name}
+          onChange={e => setDraft(d => ({ ...d, name: e.target.value }))}
+          placeholder="e.g. Balcony"
+          style={s.wizardInput}
+        />
+      )}
+
+      {step === 1 && (
+        <input
+          autoFocus
+          value={draft.emoji}
+          onChange={e => setDraft(d => ({ ...d, emoji: e.target.value }))}
+          placeholder="🪴"
+          style={s.wizardInput}
+        />
+      )}
+
+      {step === 2 && (
+        <div style={s.wizardReview}>
+          <p style={s.wizardReviewLabel}>{draft.emoji} {draft.name}</p>
+        </div>
+      )}
+
+      <div style={s.wizardNav}>
+        {step > 0 && <button style={s.wizardBtnGhost} onClick={() => setStep(x => x - 1)}>← Back</button>}
+        {step < 2 && (
+          <button
+            style={{ ...s.wizardBtnPrimary, ...(canNext ? {} : s.wizardBtnDisabled) }}
+            disabled={!canNext}
+            onClick={() => setStep(x => x + 1)}
+          >
+            Next →
+          </button>
+        )}
+        {step === 2 && (
+          <button style={s.wizardBtnPrimary} onClick={submit}>✓ Add category</button>
         )}
       </div>
     </div>
@@ -669,13 +960,15 @@ function AddItemCard({ rooms, addItem }) {
 
 // ── Shopping tab ──────────────────────────────────────────────────────────────
 
-function ShoppingTab({ items, priorities, order, onPriorityChange, reorderShoppingGroup, setOwnedOverride, retailers, setRetailer, deleteCustomItem }) {
+function ShoppingTab({ items, priorities, order, onPriorityChange, reorderShoppingGroup, setOwnedOverride, retailers, setRetailer, links, addLink, removeLink, deleteCustomItem, rooms, moveItemToRoom }) {
   const dragId = useRef(null);
   const dragPriority = useRef(null);
   const [dragOver, setDragOver] = useState(null);
   const [pending, setPending] = useState(null);
-  const [shopCtx, setShopCtx] = useState(null); // { id, label, owned, x, y }
+  const [shopCtx, setShopCtx] = useState(null); // { id, label, owned, roomId, isCustom, x, y }
   const [retailerCard, setRetailerCard] = useState(null); // { id, label, x, y }
+  const [linkCard, setLinkCard] = useState(null); // { id, label, x, y }
+  const [categoryCard, setCategoryCard] = useState(null); // { item, label, currentRoomId, x, y }
   const [retailerFilter, setRetailerFilter] = useState('all');
   const [shopSwipe, setShopSwipe] = useState({});
   const shopTouchRef = useRef({});
@@ -694,6 +987,20 @@ function ShoppingTab({ items, priorities, order, onPriorityChange, reorderShoppi
     setTimeout(() => document.addEventListener('click', close), 0);
     return () => document.removeEventListener('click', close);
   }, [retailerCard]);
+
+  useEffect(() => {
+    if (!linkCard) return;
+    const close = () => setLinkCard(null);
+    setTimeout(() => document.addEventListener('click', close), 0);
+    return () => document.removeEventListener('click', close);
+  }, [linkCard]);
+
+  useEffect(() => {
+    if (!categoryCard) return;
+    const close = () => setCategoryCard(null);
+    setTimeout(() => document.addEventListener('click', close), 0);
+    return () => document.removeEventListener('click', close);
+  }, [categoryCard]);
 
   function moveToAlreadyHave(item) {
     setOwnedOverride(item.id, true);
@@ -903,6 +1210,10 @@ function ShoppingTab({ items, priorities, order, onPriorityChange, reorderShoppi
                       {item.deliveryHint && (
                         <span style={s.deliveryHint}>⏱ {item.deliveryHint}</span>
                       )}
+                      <LinkChips
+                        urls={links[item.id] || []}
+                        onRemove={url => removeLink(item.id, url)}
+                      />
                     </div>
                     <span
                       style={{ ...s.retailerBadge, ...retailerStyle(effR), marginLeft: 'auto' }}
@@ -915,7 +1226,7 @@ function ShoppingTab({ items, priorities, order, onPriorityChange, reorderShoppi
                     {hoverShopId === item.id && (
                       <button
                         style={s.dotMenuBtn}
-                        onClick={e => { e.stopPropagation(); setShopCtx({ id: item.id, label: item.label, owned: item.owned, isCustom: !!item.isCustom, x: e.clientX, y: e.clientY }); }}
+                        onClick={e => { e.stopPropagation(); setShopCtx({ id: item.id, label: item.label, owned: item.owned, isCustom: !!item.isCustom, roomId: item.roomId, x: e.clientX, y: e.clientY }); }}
                       >⋯</button>
                     )}
                   </div>
@@ -941,6 +1252,30 @@ function ShoppingTab({ items, priorities, order, onPriorityChange, reorderShoppi
           onClick={() => moveToAlreadyHave(items.find(i => i.id === shopCtx.id))}
         >
           ✓ Move to Already have
+        </button>
+        <button
+          style={{ display: 'block', width: '100%', padding: '8px 14px', textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: 13, color: '#1c1917', fontWeight: 500 }}
+          onClick={() => {
+            setLinkCard({ id: shopCtx.id, label: shopCtx.label, x: shopCtx.x, y: shopCtx.y });
+            setShopCtx(null);
+          }}
+        >
+          🔗 Add link
+        </button>
+        <button
+          style={{ display: 'block', width: '100%', padding: '8px 14px', textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: 13, color: '#1c1917', fontWeight: 500 }}
+          onClick={() => {
+            setCategoryCard({
+              item: { id: shopCtx.id, isCustom: shopCtx.isCustom },
+              label: shopCtx.label,
+              currentRoomId: shopCtx.roomId,
+              x: shopCtx.x,
+              y: shopCtx.y,
+            });
+            setShopCtx(null);
+          }}
+        >
+          ↔ Move to category
         </button>
         {shopCtx.isCustom && (
           <>
@@ -975,6 +1310,16 @@ function ShoppingTab({ items, priorities, order, onPriorityChange, reorderShoppi
           {RETAILERS.map(r => <option key={r} value={r}>{RETAILER_LABELS[r]}</option>)}
         </select>
       </div>
+    )}
+
+    {/* Add-link card */}
+    {linkCard && (
+      <AddLinkCard card={linkCard} onAdd={addLink} onClose={() => setLinkCard(null)} />
+    )}
+
+    {/* Category picker card */}
+    {categoryCard && (
+      <CategoryPickerCard card={categoryCard} rooms={rooms} onMove={moveItemToRoom} onClose={() => setCategoryCard(null)} />
     )}
   </>
   );
@@ -1049,11 +1394,22 @@ const s = {
   badge: { fontSize: 11, fontWeight: 600, border: '1px solid', borderRadius: 99, padding: '1px 7px', flexShrink: 0, marginTop: 2 },
   retailerBadge: { fontSize: 11, fontWeight: 600, border: '1px solid', borderRadius: 99, padding: '1px 7px', flexShrink: 0, marginTop: 2, cursor: 'pointer' },
   retailerSelect: { fontSize: 13, padding: '6px 10px', borderRadius: 8, border: '1px solid #d1c4ae', background: '#faf8f3', color: '#1c1917', width: '100%', boxSizing: 'border-box' },
+  linksRow: { display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 2 },
+  linkChip: { display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, border: '1px solid #d1c4ae', borderRadius: 99, padding: '2px 4px 2px 9px', background: '#faf8f3' },
+  linkChipLink: { display: 'inline-flex', alignItems: 'center', gap: 4, color: '#57534e', textDecoration: 'none', maxWidth: 180, overflow: 'hidden' },
+  linkChipHost: { color: '#2d6a4f', fontWeight: 700, whiteSpace: 'nowrap' },
+  linkChipPath: { color: '#a8a29e', fontWeight: 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 110 },
+  linkChipRemove: { background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: '#a8a29e', lineHeight: 1, padding: '0 4px', flexShrink: 0 },
+  linkAddInput: { fontSize: 13, padding: '8px 10px', borderRadius: 8, border: '1px solid #d1c4ae', background: '#faf8f3', color: '#1c1917', width: '100%', boxSizing: 'border-box' },
+  linkAddError: { fontSize: 11, color: '#dc2626', marginTop: 4 },
+  linkAddActions: { display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 10 },
   menuDivider: { height: 1, background: '#f0ebe3', margin: '4px 0' },
   menuDangerItem: { display: 'block', width: '100%', padding: '8px 14px', textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: 13, color: '#dc2626', fontWeight: 500 },
   // Add-item wizard
   addItemTile: { background: '#fff', borderRadius: 16, padding: 20, border: '2px dashed #d1c4ae', color: '#78716c', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 15, fontWeight: 600, cursor: 'pointer', minHeight: 84 },
+  addItemRow: { width: '100%', background: 'none', borderTop: '1px dashed #e7e5e4', borderLeft: 'none', borderRight: 'none', borderBottom: 'none', color: '#78716c', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: '10px 0 0', marginTop: 10 },
   addItemPlus: { fontSize: 20, lineHeight: 1 },
+  wizardInline: { marginTop: 10, paddingTop: 12, borderTop: '1px dashed #e7e5e4' },
   wizardHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 },
   wizardStepLabel: { fontSize: 12, fontWeight: 700, color: '#a8a29e', textTransform: 'uppercase', letterSpacing: '.06em' },
   wizardClose: { background: 'none', border: 'none', cursor: 'pointer', fontSize: 20, color: '#78716c', lineHeight: 1, padding: 0 },
