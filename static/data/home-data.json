@@ -16,6 +16,7 @@
         { "id": "lr3", "label": "TV unit / cabinet", "priority": "medium" },
         { "id": "lr5", "label": "Floor lamp", "priority": "high", "reportUrl": "/reports/floor-lamp.html" },
         { "id": "lr7", "label": "Bookshelf", "priority": "low" },
+        { "id": "lr_robot", "label": "Robot vacuum", "priority": "low", "reportUrl": "/reports/cleaning-robot.html" },
         { "id": "lr_sofa", "label": "Sofa", "owned": true }
       ]
     },
