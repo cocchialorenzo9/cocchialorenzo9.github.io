@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Robot Vacuums Munich 2026 – Buyer's Guide by Price Tier</title>
+<style>
+  :root {
+    --paper:   #F1F0EB;
+    --ink:     #1B1B19;
+    --muted:   #71706A;
+    --border:  #CAC7BE;
+    --surface: #E8E6DF;
+
+    --t1: #3A5F8A;
+    --t1-light: #D8E5F3;
+    --t2: #1A5438;
+    --t2-light: #D3EAE0;
+    --t3: #7A5A14;
+    --t3-light: #F0E4C4;
+
+    --delivery: #1A5438;
+    --delivery-bg: #D3EAE0;
+
+    --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --mono: "SF Mono", "Cascadia Code", "Fira Mono", "Courier New", monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: var(--paper); }
+  body { font-family: var(--sans); color: var(--ink); background: var(--paper); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  .page { max-width: 960px; margin: 0 auto; padding: 56px 32px 80px; }
+
+  .report-header { display: flex; flex-direction: column; gap: 0; border-bottom: 2px solid var(--ink); padding-bottom: 24px; margin-bottom: 32px; }
+  .report-meta { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; font-weight: 500; }
+  .report-title { font-size: clamp(30px, 5vw, 48px); font-weight: 700; letter-spacing: -.025em; line-height: 1.05; text-wrap: balance; margin-bottom: 14px; }
+  .report-subtitle { font-size: 15px; color: var(--muted); max-width: 620px; line-height: 1.55; }
+
+  .summary-strip { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--border); background: var(--surface); margin-bottom: 48px; }
+  .stat { padding: 18px 20px; border-right: 1px solid var(--border); }
+  .stat:last-child { border-right: none; }
+  .stat-value { font-family: var(--mono); font-size: 22px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--ink); display: block; margin-bottom: 3px; }
+  .stat-label { font-size: 11px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+
+  .tier { margin-bottom: 40px; display: grid; grid-template-columns: 28px 1fr; gap: 0 20px; }
+  .tier-rail { display: flex; align-items: flex-start; padding-top: 4px; }
+  .tier-code { writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; color: white; background: var(--tier-color); padding: 10px 6px; white-space: nowrap; height: fit-content; }
+  .tier-body { min-width: 0; }
+  .tier-head { display: flex; align-items: baseline; gap: 14px; padding: 14px 20px; background: var(--tier-bg); border-left: 4px solid var(--tier-color); margin-bottom: 2px; }
+  .tier-name { font-size: 20px; font-weight: 700; letter-spacing: -.02em; color: var(--tier-color); }
+  .tier-band { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--tier-color); font-variant-numeric: tabular-nums; opacity: .75; }
+  .tier-desc { font-size: 13px; color: var(--muted); padding: 10px 20px; border-left: 4px solid var(--tier-color); background: var(--tier-bg); margin-bottom: 8px; line-height: 1.5; }
+
+  .table-wrap { overflow-x: auto; border-left: 4px solid var(--tier-color); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px; }
+  thead tr { background: var(--ink); color: var(--paper); }
+  thead th { padding: 9px 12px; text-align: left; font-size: 10px; letter-spacing: .10em; text-transform: uppercase; font-weight: 600; white-space: nowrap; }
+  thead th:first-child { padding-left: 16px; }
+  thead th:last-child { text-align: center; }
+  tbody tr { border-bottom: 1px solid var(--border); background: white; }
+  tbody tr:nth-child(even) { background: var(--paper); }
+  tbody tr:hover { background: var(--tier-bg); }
+  tbody td { padding: 11px 12px; vertical-align: middle; }
+  tbody td:first-child { padding-left: 16px; }
+
+  .desk-model { font-weight: 600; font-size: 13.5px; color: var(--ink); display: block; }
+  .desk-model a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+  .desk-model a:hover { color: var(--tier-color); }
+  .desk-brand { font-size: 11px; color: var(--muted); display: block; margin-top: 1px; }
+  .desk-note { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; font-style: italic; }
+
+  .dim, .price-val { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12.5px; white-space: nowrap; }
+  .price-val { font-weight: 700; font-size: 14px; color: var(--ink); }
+  .price-note { font-size: 10px; color: var(--muted); display: block; margin-top: 1px; font-family: var(--sans); }
+
+  .nav-pill {
+    display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px;
+    border-radius: 2px; background: var(--surface); color: var(--muted);
+  }
+
+  .delivery-yes { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--delivery); background: var(--delivery-bg); padding: 3px 9px; border-radius: 2px; white-space: nowrap; }
+  .delivery-yes::before { content: "✓"; font-size: 11px; }
+  .delivery-check { text-align: center; }
+  .delivery-detail { display: block; font-size: 10px; color: var(--muted); font-family: var(--mono); margin-top: 4px; }
+
+  .pick-badge { display: inline-block; font-size: 10px; font-weight: 700; color: #7a5a14; background: #f0e4c4; border-radius: 2px; padding: 1px 6px; margin-top: 3px; letter-spacing: .04em; text-transform: uppercase; }
+
+  .t1 { --tier-color: var(--t1); --tier-bg: var(--t1-light); }
+  .t2 { --tier-color: var(--t2); --tier-bg: var(--t2-light); }
+  .t3 { --tier-color: var(--t3); --tier-bg: var(--t3-light); }
+
+  .notes { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); }
+  .notes-title { font-size: 11px; letter-spacing: .10em; text-transform: uppercase; font-weight: 700; color: var(--muted); margin-bottom: 14px; }
+  .notes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .note-block { padding: 14px 16px; background: var(--surface); border-left: 3px solid var(--border); }
+  .note-block strong { display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px; color: var(--ink); }
+  .note-block p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  .sources { margin-top: 28px; font-size: 11px; color: var(--muted); }
+  .sources strong { display: block; letter-spacing: .08em; text-transform: uppercase; font-size: 10px; font-weight: 700; margin-bottom: 6px; }
+  .sources ul { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 16px; }
+  .sources li::before { content: "→ "; color: var(--border); }
+
+  @media (max-width: 600px) {
+    .page { padding: 32px 16px 60px; }
+    .summary-strip { grid-template-columns: 1fr; }
+    .stat { border-right: none; border-bottom: 1px solid var(--border); }
+    .tier { grid-template-columns: 1fr; }
+    .tier-rail { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="report-header">
+    <div class="report-meta">Munich, Germany &nbsp;·&nbsp; As of July 2026 &nbsp;·&nbsp; Prices incl. VAT &nbsp;·&nbsp; Retailers: MediaMarkt DE · Amazon.de · Otto</div>
+    <h1 class="report-title">Robot Vacuums<br>for the Living Room</h1>
+    <p class="report-subtitle">
+      A nice-to-have, not a must-have — three price tiers for a robot vacuum/mop combo to keep the living room floors clean between proper cleans. All models handle hard floors and carpets; higher tiers add self-emptying, self-washing, and self-drying docks.
+    </p>
+  </header>
+
+  <div class="summary-strip">
+    <div class="stat">
+      <span class="stat-value">€150 – €1,289</span>
+      <span class="stat-label">Total price range</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">6 models</span>
+      <span class="stat-label">Across 3 tiers</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">Nice to have</span>
+      <span class="stat-label">Not a moving-in priority</span>
+    </div>
+  </div>
+
+  <!-- TIER 1 -->
+  <section class="tier t1">
+    <div class="tier-rail"><div class="tier-code">Tier 01</div></div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Budget</span>
+        <span class="tier-band">under €300</span>
+      </div>
+      <p class="tier-desc">
+        Solid LiDAR navigation and basic mopping without the multi-function docks of higher tiers. The Roborock Q10 S5 is a straightforward vacuum-and-mop with strong suction for the price; the Xiaomi X20+ is the cheapest model here with a full self-cleaning dock included.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Suction power</th>
+              <th>Navigation</th>
+              <th>Mopping</th>
+              <th>Price</th>
+              <th>Delivery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_roborock-q10-s5-saugroboter-mit-wischfunktion-171762537.html" target="_blank" rel="noopener noreferrer">Q10 S5</a></span>
+                <span class="desk-brand">Roborock</span>
+                <span class="desk-note">JawScrapers anti-tangle brush · basic charging dock only</span>
+              </td>
+              <td><span class="dim">10,000 Pa</span></td>
+              <td><span class="nav-pill">LiDAR</span></td>
+              <td>VibraRise 2.0 vibration mop</td>
+              <td>
+                <span class="price-val">~€ 180</span>
+                <span class="price-note">street price · UVP €249.99</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">~2 days · free</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.amazon.de/Xiaomi-X20-Wischfunktion-Selbstreinigung-Wassernachf%C3%BCllung/dp/B0CTCXKL52" target="_blank" rel="noopener noreferrer">Robot Vacuum X20+</a></span>
+                <span class="desk-brand">Xiaomi</span>
+                <span class="desk-note">All-in-One station · self-empty, self-wash, self-dry, 4 L tanks</span>
+                <span class="pick-badge">Best value</span>
+              </td>
+              <td><span class="dim">6,000 Pa</span></td>
+              <td><span class="nav-pill">LDS laser</span></td>
+              <td>Auto-lift mop pad</td>
+              <td>
+                <span class="price-val">~€ 267</span>
+                <span class="price-note">often discounted from €399</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">1–2 days · Prime</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIER 2 -->
+  <section class="tier t2">
+    <div class="tier-rail"><div class="tier-code">Tier 02</div></div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Mid-Range</span>
+        <span class="tier-band">€300 – €600</span>
+      </div>
+      <p class="tier-desc">
+        Hybrid LiDAR/camera navigation and hot-water mop-washing docks. The Dreame L40s Pro Ultra is the standout here — 19,000 Pa suction, an AI camera that avoids 180+ obstacle types, and self-cleaning mop pads that extend to reach edges. The Ecovacs T50 Pro Omni is a close second with even higher rated suction.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Suction power</th>
+              <th>Navigation</th>
+              <th>Mopping</th>
+              <th>Price</th>
+              <th>Delivery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.otto.de/p/ecovacs-saugroboter-deebot-t50-pro-omni-gen3-saugroboter-mit-wischfunktion-25000-pa-reinigung-des-mopps-bei-75-c-heisslufttrocknung-81-mm-aivi-3d-3-0-autom-zugabe-v-reinigungsloesung-CS07E20HT/" target="_blank" rel="noopener noreferrer">Deebot T50 Pro Omni Gen 3</a></span>
+                <span class="desk-brand">Ecovacs</span>
+                <span class="desk-note">Omni station washes mop at 75°C + hot-air dries it</span>
+              </td>
+              <td><span class="dim">25,000 Pa</span></td>
+              <td><span class="nav-pill">AIVI 3D 3.0</span></td>
+              <td>Hot-water self-wash + dry</td>
+              <td>
+                <span class="price-val">~€ 399</span>
+                <span class="price-note">often discounted from €599</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">2–5 days · free</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.amazon.de/dp/B0DY8V59LY" target="_blank" rel="noopener noreferrer">L40s Pro Ultra</a></span>
+                <span class="desk-brand">Dreame</span>
+                <span class="desk-note">HyperStream DuoBrush · self-cleaning extending mop pads</span>
+                <span class="pick-badge">Top pick</span>
+              </td>
+              <td><span class="dim">19,000 Pa</span></td>
+              <td><span class="nav-pill">LDS + AI camera</span></td>
+              <td>Self-wash + climbing mop pads</td>
+              <td>
+                <span class="price-val">~€ 489</span>
+                <span class="price-note">often on sale · check site</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">1–2 days · Prime</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIER 3 -->
+  <section class="tier t3">
+    <div class="tier-rail"><div class="tier-code">Tier 03</div></div>
+    <div class="tier-body">
+      <div class="tier-head">
+        <span class="tier-name">Premium</span>
+        <span class="tier-band">€600+</span>
+      </div>
+      <p class="tier-desc">
+        Flagship suction, dual navigation systems, and extending arms that reach under furniture and into corners. The Roborock Saros 20 is the standout at this tier — nearly 3× the suction of the mid-range picks and a chassis slim enough to clean under most sofas.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Suction power</th>
+              <th>Navigation</th>
+              <th>Mopping</th>
+              <th>Price</th>
+              <th>Delivery</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.otto.de/p/ecovacs-nass-trocken-saugroboter-deebot-t30-omni-11-000pa-mini-omni-station-mopphebesystem-adaptive-kantenreinigung-C1853579539/" target="_blank" rel="noopener noreferrer">Deebot T30 Omni</a></span>
+                <span class="desk-brand">Ecovacs</span>
+                <span class="desk-note">Mini Omni station · adaptive edge cleaning</span>
+              </td>
+              <td><span class="dim">11,000 Pa</span></td>
+              <td><span class="nav-pill">LDS + camera</span></td>
+              <td>Mop-lift + self-wash</td>
+              <td><span class="price-val">~€ 600</span></td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">2–5 days · free</span></td>
+            </tr>
+            <tr>
+              <td>
+                <span class="desk-model"><a href="https://www.mediamarkt.de/de/product/_roborock-saros-20x-black-saugwischroboter-3032177.html" target="_blank" rel="noopener noreferrer">Saros 20X</a></span>
+                <span class="desk-brand">Roborock</span>
+                <span class="desk-note">FlexiArm extending side brush &amp; mop · AdaptiLift chassis</span>
+                <span class="pick-badge">Top pick</span>
+              </td>
+              <td><span class="dim">36,000 Pa</span></td>
+              <td><span class="nav-pill">3D ToF + StarSight</span></td>
+              <td>212°F hot-water wash + bag-dry</td>
+              <td>
+                <span class="price-val">~€ 1,289</span>
+                <span class="price-note">launch price · UVP €1,489</span>
+              </td>
+              <td class="delivery-check"><span class="delivery-yes">Home delivery</span><span class="delivery-detail">2–5 days · free</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <footer class="notes">
+    <div class="notes-title">Research notes</div>
+    <div class="notes-grid">
+      <div class="note-block">
+        <strong>Self-empty vs. self-wash vs. self-dry docks</strong>
+        <p>Budget models charge only. Mid-tier docks add auto-emptying dust bags and mop washing. Premium docks add hot-air or hot-water drying so the mop doesn't smell musty between cleans — worth it if the robot runs daily.</p>
+      </div>
+      <div class="note-block">
+        <strong>LiDAR vs. camera navigation</strong>
+        <p>LiDAR (LDS) maps rooms reliably in the dark and is the budget-tier default. AI camera hybrids (mid/premium tiers) add object recognition — useful for avoiding cables, shoes, and pet mess, but need reasonable ambient light.</p>
+      </div>
+      <div class="note-block">
+        <strong>Carpets and thresholds</strong>
+        <p>Check auto mop-lift is supported before buying if the living room has any rugs — otherwise the robot wets carpet edges. Higher-tier models (Saros 20) can also climb taller door thresholds without getting stuck.</p>
+      </div>
+      <div class="note-block">
+        <strong>Not a moving-in priority</strong>
+        <p>Unlike the other living-room items, this is purely a convenience purchase — buy once the essentials (desk, lamp, sofa) are sorted and only if daily light cleaning is genuinely wanted.</p>
+      </div>
+    </div>
+    <div class="sources">
+      <strong>Sources</strong>
+      <ul>
+        <li>amazon.de — Xiaomi X20+, Dreame L40s Pro Ultra listings (July 2026)</li>
+        <li>mediamarkt.de — Roborock Q10 S5, Saros 20X product pages (July 2026)</li>
+        <li>otto.de — Ecovacs Deebot T50 Pro Omni, T30 Omni product pages (July 2026)</li>
+        <li>geizhals.de — cross-check pricing (July 2026)</li>
+      </ul>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
