@@ -633,7 +633,7 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
           <div>
             <h3 style={s.cardTitle}>Utilities</h3>
             <span style={s.cardProgress}>
-              {utilities.filter(u => (utilStatuses[u.id] || u.status) === 'included').length}/{utilities.length} sorted
+              {utilities.filter(u => ['included', 'done'].includes(utilStatuses[u.id] || u.status)).length}/{utilities.length} sorted
             </span>
           </div>
         </div>
@@ -1370,6 +1370,7 @@ function ShoppingTab({ items, priorities, order, onPriorityChange, reorderShoppi
 
 const UTIL_STATUS = {
   included:    { label: '✓ Included',    bg: '#d3eae0', color: '#1a5438' },
+  done:        { label: '✓ Done',        bg: '#dbeafe', color: '#1d4ed8' },
   'in-progress': { label: '⟳ In progress', bg: '#fef3c7', color: '#92400e' },
   todo:        { label: '○ To do',       bg: '#f3f4f6', color: '#6b7280' },
 };
