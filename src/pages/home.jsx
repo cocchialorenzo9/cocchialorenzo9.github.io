@@ -7,9 +7,9 @@ const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
 const PRIORITY_LABELS = { high: '🔴 Must', medium: '🟡 Soon', low: '🟢 Nice to have' };
 const PRIORITY_COLORS = { high: '#dc2626', medium: '#d97706', low: '#16a34a' };
 
-const RETAILERS = ['amazon', 'ikea', 'ebay', 'other'];
-const RETAILER_LABELS = { amazon: '📦 Amazon', ikea: '🟦 IKEA', ebay: '🛍️ eBay', other: '🏪 Other' };
-const RETAILER_COLORS = { amazon: '#ff9900', ikea: '#0058a3', ebay: '#e53238', other: '#78716c' };
+const RETAILERS = ['amazon', 'ikea', 'ebay', 'obi', 'other'];
+const RETAILER_LABELS = { amazon: '📦 Amazon', ikea: '🟦 IKEA', ebay: '🛍️ eBay', obi: '🧰 Obi', other: '🏪 Other' };
+const RETAILER_COLORS = { amazon: '#ff9900', ikea: '#0058a3', ebay: '#e53238', obi: '#e2001a', other: '#78716c' };
 const RETAILER_UNSET_LABEL = '🏷️ Pick retailer';
 const RETAILER_UNSET_COLOR = '#a8a29e';
 
@@ -216,6 +216,10 @@ function HomeApp() {
     update(ref(db, `${HOME_STATE_PATH}/retailers`), { [id]: retailer });
   }
 
+  function setUtilStatus(id, status) {
+    update(ref(db, `${HOME_STATE_PATH}/utilStatus`), { [id]: status });
+  }
+
   function addLink(id, url) {
     const current = (shared.links || {})[id] || [];
     if (current.includes(url)) return;
@@ -320,6 +324,7 @@ function HomeApp() {
   const priorities = shared.priorities || {};
   const order = shared.order || {};
   const retailers = shared.retailers || {};
+  const utilStatuses = shared.utilStatus || {};
   const links = shared.links || {};
 
   // Progress: only count non-owned items
@@ -372,6 +377,8 @@ function HomeApp() {
           onPriorityChange={handlePriorityChange}
           retailers={retailers}
           setRetailer={setRetailer}
+          utilStatuses={utilStatuses}
+          setUtilStatus={setUtilStatus}
           links={links}
           addLink={addLink}
           removeLink={removeLink}
@@ -407,9 +414,10 @@ function HomeApp() {
 
 const PRIORITY_CYCLE = { high: 'medium', medium: 'low', low: 'high' };
 
-function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, setOwnedOverride, priorities, onPriorityChange, retailers, setRetailer, links, addLink, removeLink, addItem, deleteCustomItem, moveItemToRoom, addCategory }) {
+function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, setOwnedOverride, priorities, onPriorityChange, retailers, setRetailer, utilStatuses, setUtilStatus, links, addLink, removeLink, addItem, deleteCustomItem, moveItemToRoom, addCategory }) {
   const [contextMenu, setContextMenu] = useState(null); // { id, label, type, roomId, isCustom, x, y }
   const [retailerCard, setRetailerCard] = useState(null); // { id, label, x, y }
+  const [utilStatusCard, setUtilStatusCard] = useState(null); // { id, label, x, y }
   const [linkCard, setLinkCard] = useState(null); // { id, label, x, y }
   const [categoryCard, setCategoryCard] = useState(null); // { item, label, currentRoomId, x, y }
   const [swipeDx, setSwipeDx] = useState({});
@@ -429,6 +437,13 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
     setTimeout(() => document.addEventListener('click', close), 0);
     return () => document.removeEventListener('click', close);
   }, [retailerCard]);
+
+  useEffect(() => {
+    if (!utilStatusCard) return;
+    const close = () => setUtilStatusCard(null);
+    setTimeout(() => document.addEventListener('click', close), 0);
+    return () => document.removeEventListener('click', close);
+  }, [utilStatusCard]);
 
   useEffect(() => {
     if (!linkCard) return;
@@ -618,13 +633,14 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
           <div>
             <h3 style={s.cardTitle}>Utilities</h3>
             <span style={s.cardProgress}>
-              {utilities.filter(u => u.status === 'included').length}/{utilities.length} sorted
+              {utilities.filter(u => (utilStatuses[u.id] || u.status) === 'included').length}/{utilities.length} sorted
             </span>
           </div>
         </div>
         <ul style={s.itemList}>
           {utilities.map(u => {
-            const st = UTIL_STATUS[u.status];
+            const effStatus = utilStatuses[u.id] || u.status;
+            const st = UTIL_STATUS[effStatus];
             return (
               <li key={u.id} style={{ ...s.itemRow, cursor: 'default' }}>
                 <div style={{ ...s.itemContent, pointerEvents: 'none' }}>
@@ -641,7 +657,11 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
                     → View report
                   </a>
                 )}
-                <span style={{ ...s.utilBadge, background: st.bg, color: st.color }}>
+                <span
+                  style={{ ...s.utilBadge, background: st.bg, color: st.color, cursor: 'pointer' }}
+                  title="Click to change status"
+                  onClick={e => { e.stopPropagation(); setUtilStatusCard({ id: u.id, label: u.label, x: e.clientX, y: e.clientY }); }}
+                >
                   {st.label}
                 </span>
               </li>
@@ -737,6 +757,27 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
         >
           <option value="" disabled>Pick retailer…</option>
           {RETAILERS.map(r => <option key={r} value={r}>{RETAILER_LABELS[r]}</option>)}
+        </select>
+      </div>
+    )}
+
+    {/* Utility status picker card */}
+    {utilStatusCard && (
+      <div
+        style={{ position: 'fixed', top: utilStatusCard.y, left: utilStatusCard.x, zIndex: 1000, background: '#fff', border: '1px solid #e7e5e4', borderRadius: 10, boxShadow: '0 4px 20px rgba(0,0,0,0.13)', padding: '10px 14px', minWidth: 200 }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div style={{ fontSize: 11, color: '#a8a29e', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 6 }}>
+          {utilStatusCard.label}
+        </div>
+        <select
+          value={utilStatuses[utilStatusCard.id] || ''}
+          onChange={e => { setUtilStatus(utilStatusCard.id, e.target.value); setUtilStatusCard(null); }}
+          style={s.retailerSelect}
+          autoFocus
+        >
+          <option value="" disabled>Pick status…</option>
+          {Object.keys(UTIL_STATUS).map(key => <option key={key} value={key}>{UTIL_STATUS[key].label}</option>)}
         </select>
       </div>
     )}
