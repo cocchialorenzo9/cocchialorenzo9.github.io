@@ -1,13 +1,76 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Layout from '@theme/Layout';
+import { formatPace, RecentSessionCard } from './projects/_vibeMarathonShared';
 
-const PACES = [
+const PLAN_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/training-plan.json';
+const COACH_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/coach.json';
+
+const FALLBACK_PACES = [
   { label: "Race Goal", pace: "4:16/km", color: "#e05c5c", desc: "Sub-3h marathon" },
   { label: "Marathon Pace (MP)", pace: "4:10–4:20/km", color: "#E8A838", desc: "Core of the plan" },
   { label: "Tempo run", pace: "4:30–4:40/km", color: "#7B68EE", desc: "Controlled effort" },
-  { label: "Easy run", pace: "5:00–5:20/km", color: "#4CAF93", desc: "Can hold a conversation" },
-  { label: "Long run", pace: "5:00–5:20/km", color: "#4CAF93", desc: "Never push hard" },
+  { label: "Easy run", pace: "~75-85% LT", color: "#4CAF93", desc: "Can hold a conversation" },
+  { label: "Long run", pace: "~75-85% LT", color: "#4CAF93", desc: "Never push hard" },
 ];
+
+const EMOJI_BY_TYPE = { swim: "🏊 ", race: "🏅 " };
+
+function extractLTBand(detail) {
+  const m = /~?\d+-\d+%\s*LT/.exec(detail || "");
+  return m ? `~${m[0].replace(/^~/, "")}` : null;
+}
+
+function findFirstDetailByType(planData, type) {
+  for (const w of planData?.weeks || []) {
+    for (const d of w.days || []) {
+      if (d.training?.type === type && /LT/.test(d.training.detail || "")) return d.training.detail;
+    }
+  }
+  return null;
+}
+
+function formatBpmRange(range) {
+  if (!Array.isArray(range) || range.length !== 2) return null;
+  return `${range[0]}–${range[1]} bpm`;
+}
+
+function mapPlanWeeks(planData) {
+  if (!Array.isArray(planData?.weeks)) return null;
+  return planData.weeks.map((w) => ({
+    week: w.week,
+    phase: w.phase,
+    label: w.label,
+    bikeNote: w.bikeNote,
+    swimNote: w.swimNote,
+    tip: w.tip,
+    estKm: w.estKm ?? null,
+    hasRace: (w.days || []).some((d) => d.training?.type === "race"),
+    sessions: (w.days || []).map((d) => ({
+      day: d.dayLabel,
+      type: d.training?.type ?? "rest",
+      title: `${EMOJI_BY_TYPE[d.training?.type] ?? ""}${d.training?.title ?? "Rest day"}`,
+      detail: d.training?.detail ?? "",
+    })),
+  }));
+}
+
+function computePaces(plan, coach) {
+  if (!plan) return FALLBACK_PACES;
+  const easyLT = extractLTBand(findFirstDetailByType(plan, "easy")) ?? "~75-85% LT";
+  const longLT = extractLTBand(findFirstDetailByType(plan, "long")) ?? "~75-85% LT";
+  const ltBpm = formatBpmRange(coach?.readiness?.lactateThreshold?.easyAerobic_bpm);
+  const realPace = coach?.volumeCheck?.realZone2Pace_min_km;
+  const paceEstimate = realPace != null
+    ? `≈${formatPace(realPace)} — estimated from limited data, will refine as more easy runs are logged`
+    : "Can hold a conversation";
+  return [
+    { label: "Race Goal", pace: plan.goalPace ?? "4:16/km", color: "#e05c5c", desc: "Sub-3h marathon" },
+    { label: "Marathon Pace (MP)", pace: "4:10–4:20/km", color: "#E8A838", desc: "Core of the plan" },
+    { label: "Tempo run", pace: "4:30–4:40/km", color: "#7B68EE", desc: "Controlled effort" },
+    { label: "Easy run", pace: ltBpm ? `${ltBpm} (${easyLT})` : easyLT, color: "#4CAF93", desc: paceEstimate },
+    { label: "Long run", pace: ltBpm ? `${ltBpm} (${longLT})` : longLT, color: "#4CAF93", desc: "Never push hard" },
+  ];
+}
 
 const PHASES = [
   {
@@ -89,185 +152,6 @@ const PHASES = [
         "Avoid: alcohol, fatty foods, excess fiber in the 2 days before the race",
       ],
     },
-  },
-];
-
-const WEEKS = [
-  {
-    week: 1, phase: "base", label: "Jul 5–11",
-    sessions: [
-      { day: "Mon 7", type: "swim", title: "🏊 Swim class", detail: "Swim class as scheduled — counts as aerobic cross-training. Don't add a run today." },
-      { day: "Tue 8", type: "easy", title: "Adaptation run", detail: "30 min at easy pace (5:10–5:20/km) — calibrate how you feel, first session of the plan" },
-      { day: "Thu 10", type: "easy", title: "Easy run + strides", detail: "35 min easy + 4×80m progressive accelerations at the end (not sprints, just smooth pick-ups)" },
-      { day: "Sat 12", type: "long", title: "Long run", detail: "45 min continuous, easy pace (5:10–5:20/km) — ~8 km" },
-    ],
-    bikeNote: "Bike every day is fine — but 14km/day (7km each way) is already real aerobic load, treat it as extra zone 1. The day after the long run (Sun) take the U-Bahn if your legs are heavy.",
-    swimNote: "Monday: active swim class. Use it as your weekly warm-up — improves shoulder mobility and breathing.",
-    tip: "Week 1 with Monday swim: your first run shifts to Tuesday. You have 4 total sessions — that's the maximum load for this phase.",
-  },
-  {
-    week: 2, phase: "base", label: "Jul 12–18",
-    sessions: [
-      { day: "Mon 14", type: "swim", title: "🏊 Swim class", detail: "Swim class — aerobic pace, technique focus. Don't push: it's active recovery from last week." },
-      { day: "Tue 15", type: "easy", title: "Easy run", detail: "35 min at aerobic pace (5:00–5:15/km)" },
-      { day: "Thu 17", type: "tempo", title: "First contact with MP", detail: "40 min: 10' wu + 3×5' at marathon pace (4:15–4:20/km) + 90'' walking rec + 10' cd" },
-      { day: "Sat 19", type: "long", title: "Long run", detail: "55 min continuous, easy pace (~9–10 km)" },
-    ],
-    bikeNote: "Thursday (intervals): ride to the office as usual, but EASY. Don't warm up your legs before the intervals — save energy for the session.",
-    swimNote: "Monday swim: perfect as active recovery after Saturday's long run. Do laps at moderate pace, no sprinting.",
-    tip: "Marathon pace (4:15–4:20/km) should feel challenging but manageable. If you're gasping, slow down — fitness comes from consistency.",
-  },
-  {
-    week: 3, phase: "base", label: "Jul 19–25",
-    sessions: [
-      { day: "Mon 21", type: "swim", title: "🏊 Swim class", detail: "Swim class — last or second-to-last week. Enjoy the technical work." },
-      { day: "Tue 22", type: "easy", title: "Easy run", detail: "35 min (5:00–5:15/km)" },
-      { day: "Thu 24", type: "tempo", title: "1km repeats", detail: "45 min: 10' wu + 4×1km at 4:20/km + 90'' rec + 10' cd — first real quality session" },
-      { day: "Sat 26", type: "long", title: "Long run", detail: "60 min (~11 km), easy pace" },
-    ],
-    bikeNote: "Thursday morning: easy bike to the office. Evening after intervals: bike home is fine, helps active leg recovery.",
-    swimNote: "Monday swim: Thursday's intervals may leave your legs heavy. The water loosens them up — easy crawl.",
-    tip: "1km repeats build muscular memory at marathon pace. Take the full recovery: it's not weakness, it's correctness.",
-  },
-  {
-    week: 4, phase: "base", label: "Jul 26 – Aug 1",
-    sessions: [
-      { day: "Mon 28", type: "swim", title: "🏊 Swim class (last?)", detail: "Probably the last week of the class — enjoy it and consider signing up for open swim." },
-      { day: "Tue 29", type: "easy", title: "Recovery run", detail: "25 min very slow (5:20–5:30/km) — recovery week" },
-      { day: "Thu 31", type: "easy", title: "Easy run + strides", detail: "30 min + 4×80m accelerations" },
-      { day: "Sat 2", type: "long", title: "Reduced long run", detail: "45 min — let the body absorb the last 3 weeks of load" },
-    ],
-    bikeNote: "Recovery week: daily bike is fine, actually helpful. But no efforts on the bike — no hills, no fast pace. Take the U-Bahn if it rains.",
-    swimNote: "Swim class ends. From August switch to open swim 1x/week — ideally Wednesday (see next phase).",
-    tip: "Recovery week: never skip it. The body adapts during rest. Higdon calls it the 'invisible' week — the most important one.",
-  },
-  {
-    week: 5, phase: "build", label: "Aug 2–8",
-    sessions: [
-      { day: "Tue 5", type: "easy", title: "Easy run", detail: "38 min (5:00–5:10/km) — Monday is now full rest" },
-      { day: "Wed 6", type: "swim", title: "🏊 Open swim", detail: "30–35 min in the pool, aerobic pace. Continuous crawl with focus on breathing. No interval training." },
-      { day: "Sat 9", type: "long", title: "Long run with MP", detail: "70 min: first 50 at easy pace, last 15 at 4:20/km (~13–14 km total)" },
-    ],
-    bikeNote: "From this week Monday = rest. Bike all other days is fine. Friday evening (before long run): easy bike, or U-Bahn if your legs are tired.",
-    swimNote: "Swim moved to Wednesday — between Tuesday's run and Saturday's long run. Perfect: active recovery mid-week. 30–35 min of moderate crawl, no sprints. Note: if today you bike to work (14km) + bike to pool (11km) = 25km total — drink and eat well, and keep it in mind for Thursday.",
-    tip: "Swim class is over — now you manage Wednesday at the pool yourself. Goal: active recovery and aerobic capacity, not performance in the water.",
-  },
-  {
-    week: 6, phase: "build", label: "Aug 9–15",
-    sessions: [
-      { day: "Tue 11", type: "easy", title: "Easy run", detail: "40 min" },
-      { day: "Wed 13", type: "swim", title: "🏊 Open swim", detail: "35 min, aerobic crawl. You can add 4×50m slightly faster at the end if you feel good." },
-      { day: "Thu 14", type: "tempo", title: "1.5km repeats", detail: "55 min: 10' wu + 4×1.5km at 4:20/km + 2' walking rec + cd" },
-      { day: "Sat 16", type: "long", title: "Long run", detail: "80 min (~15 km), easy pace (5:00–5:15/km)" },
-    ],
-    bikeNote: "Thursday: bike TO work (7km, fresh legs), U-Bahn BACK after intervals — 14km extra on post-session legs is too much. Friday: bike fine, but don't push.",
-    swimNote: "Wednesday in the pool: between Tuesday's run and Thursday's intervals. The ideal time for water — recover from Tuesday and prepare legs for Thursday. If today you do 25km on the bike (work + pool), bike there and U-Bahn back from work — fresh legs needed for the intervals.",
-    tip: "15 km long run: bring gels or dates. Your gut needs training just as much as your legs — testing race nutrition in training is part of the plan.",
-  },
-  {
-    week: 7, phase: "build", label: "Aug 16–22",
-    sessions: [
-      { day: "Tue 18", type: "easy", title: "Easy run", detail: "40 min" },
-      { day: "Wed 20", type: "swim", title: "🏊 Open swim", detail: "35 min aerobic. Try 200m crawl / 1' rest × 4–5 sets — builds endurance with no leg impact." },
-      { day: "Thu 21", type: "tempo", title: "MP progression", detail: "55 min: 15' wu + 20' at 4:30/km then 10' at 4:15/km (real MP) + cd" },
-      { day: "Sat 23", type: "long", title: "Long run", detail: "90 min (~17 km), easy pace" },
-    ],
-    bikeNote: "17 km long run = legs engaged. Sunday after: U-Bahn or VERY slow bike. Monday return to normal cycling.",
-    swimNote: "Wednesday: legs recovering from Tuesday, preparing for Thursday. Swimming is the perfect tool — no impact, heart working. With 25km on the bike (work + pool), this is your aerobically heaviest day of the week — manage it consciously.",
-    tip: "The progression teaches your body to accelerate when already tired — exactly what happens at km 30 of a marathon.",
-  },
-  {
-    week: 8, phase: "build", label: "Aug 23–29",
-    sessions: [
-      { day: "Tue 25", type: "easy", title: "Recovery run", detail: "30 min very slow — mid-block recovery" },
-      { day: "Wed 27", type: "swim", title: "🏊 Swim (optional)", detail: "Recovery week: 25 min of light swimming is fine, or skip if the body feels tired. Nothing forced." },
-      { day: "Thu 28", type: "easy", title: "Easy run + strides", detail: "35 min + 5×80m progressive" },
-      { day: "Sat 30", type: "long", title: "Reduced long run", detail: "60 min — active recovery" },
-    ],
-    bikeNote: "Recovery week: daily bike is fine and beneficial. Helps move the legs without stressing them. No restrictions.",
-    swimNote: "Optional swim this week. If you're tired, skip it — rest is worth more than a pool session. Recovery week: if you do go, take the U-Bahn to work that day (save your legs).",
-    tip: "Second recovery week. Don't add km to compensate. The last 3 weeks have packed adaptation into your legs — let it consolidate.",
-  },
-  {
-    week: 9, phase: "build", label: "Aug 30 – Sep 5",
-    sessions: [
-      { day: "Tue 1", type: "easy", title: "Easy run", detail: "42 min" },
-      { day: "Wed 3", type: "swim", title: "🏊 Open swim", detail: "35–40 min. This week add 6×50m fast at the end — simulates the effort you'll do in Thursday's intervals." },
-      { day: "Thu 4", type: "tempo", title: "2km repeats", detail: "60 min: 10' wu + 3×2km at 4:15–4:20/km + 2'30'' rec + cd — race section simulation" },
-      { day: "Sat 6", type: "long", title: "Long run with MP finish", detail: "100 min: first 60 easy, last 30 at 4:20/km — first 'quality long run'" },
-    ],
-    bikeNote: "Thursday: hardest session of the block. Bike TO work (easy), U-Bahn BACK after intervals — don't add 7km on already-stressed muscles. Friday: U-Bahn — save legs for the 100 min long run.",
-    swimNote: "Wednesday in the pool before Thursday's hard intervals. Don't fatigue yourself — it's preparation, not training. With 25km on the bike Wednesday (work + pool), take the U-Bahn Thursday morning — fresh legs for the 3×2km.",
-    tip: "The long run with 30 min at MP is the key session for sub-3h. You learn to run fast when already tired — exactly km 30–42.",
-  },
-  {
-    week: 10, phase: "peak", label: "Sep 6–12",
-    sessions: [
-      { day: "Tue 8", type: "easy", title: "Easy run", detail: "45 min" },
-      { day: "Wed 10", type: "swim", title: "🏊 Swim — active recovery", detail: "35 min aerobic crawl. Peak phase: swimming is now primarily recovery, not additional training." },
-      { day: "Thu 11", type: "tempo", title: "Long tempo run", detail: "65 min: 10' wu + 40' at 4:20–4:25/km + cd" },
-      { day: "Sat 13", type: "long", title: "Long run", detail: "110 min (~20–21 km), easy pace" },
-    ],
-    bikeNote: "Peak phase: daily bike fine but ONLY easy pace. Thursday morning: U-Bahn or very easy bike — legs are needed for the intervals. Sunday post-long run: U-Bahn strongly recommended.",
-    swimNote: "Wednesday: swimming as active recovery between Tuesday and Thursday. 35 min max, nothing fast. Goal: loosen legs, don't add fatigue. Peak Phase: 25km on the bike (work + pool) is too much before Thursday's intervals — choose one trip by bike, U-Bahn for the other.",
-    tip: "Peak phase: if you feel unusual pain, don't ignore it. One rest day now is worth 2 weeks of downtime later. Sub-3h is built by staying healthy.",
-  },
-  {
-    week: 11, phase: "peak", label: "Sep 13–19",
-    sessions: [
-      { day: "Tue 15", type: "easy", title: "Easy run", detail: "45 min" },
-      { day: "Wed 17", type: "swim", title: "🏊 Swim — active recovery", detail: "30–35 min light swim. Legs heavy from Tuesday? Water is your best friend today." },
-      { day: "Thu 18", type: "tempo", title: "3km repeats", detail: "65 min: 10' wu + 3×3km at 4:15/km + 3' rec + cd — hardest session of the plan" },
-      { day: "Sat 20", type: "long", title: "Peak long run", detail: "120 min (~22–23 km) with last 20 min at 4:20/km — your longest run ever" },
-    ],
-    bikeNote: "Hardest week of the plan. Thursday: U-Bahn BOTH ways — the 3×3km needs completely fresh legs, no bike today. Sunday post-22km: U-Bahn. Monday: easy bike to loosen up.",
-    swimNote: "Wednesday between the hardest sessions. LIGHT swim — 30 min max, easy crawl. No extra efforts in the water this week. Hardest week of the plan: take the U-Bahn for work Wednesday and bike only to the pool (or vice versa) — don't do 25km today.",
-    tip: "22–23 km is your training maximum. You don't need more: the marathon is completed through 15 weeks of work, not one single session.",
-  },
-  {
-    week: 12, phase: "peak", label: "Sep 20–26",
-    sessions: [
-      { day: "Tue 22", type: "easy", title: "Recovery run", detail: "35 min very slow — mandatory unload after peak week" },
-      { day: "Wed 24", type: "swim", title: "🏊 Swim — unload", detail: "30 min relaxed swimming. Backstroke, floating, whatever feels good. Pure recovery." },
-      { day: "Thu 25", type: "easy", title: "Easy run", detail: "35 min, free pace without watching the watch" },
-      { day: "Sat 27", type: "long", title: "Reduced long run", detail: "70 min — recovery from peak" },
-    ],
-    bikeNote: "Post-peak recovery week: daily bike is fine and very beneficial. Helps keep circulation going and loosen legs after the 22 km.",
-    swimNote: "Wednesday: swimming as therapy. You can spend just 20 min in the water. The goal is to come out feeling lighter than when you went in. Post-peak recovery week: 25km on the bike today is ok — running load is reduced.",
-    tip: "Third recovery week. The body is consolidating the 22 km and 3km repeats. You may feel 'out of shape' — it's a feeling, not reality.",
-  },
-  {
-    week: 13, phase: "peak", label: "Sep 27 – Oct 3",
-    sessions: [
-      { day: "Tue 29", type: "easy", title: "Easy run", detail: "40 min" },
-      { day: "Wed 1", type: "swim", title: "🏊 Swim — last serious session", detail: "35 min. Last time swimming counts as training. After this, recovery only." },
-      { day: "Thu 2", type: "tempo", title: "Final race simulation", detail: "55 min: 10' wu + 3×10' at 4:16/km (EXACT sub-3h pace) + cd — last hard session" },
-      { day: "Sat 4", type: "long", title: "Moderate long run", detail: "90 min (~17 km) at easy pace — last real long run" },
-    ],
-    bikeNote: "Thursday (3×10' at 4:16/km): U-Bahn BOTH ways — this is the definitive proof you can run sub-3h, legs fresh at 100%. Friday: bike fine (7km one way). Saturday before long run: U-Bahn.",
-    swimNote: "Wednesday: last 'serious' swim session. From here on, swim only if you feel like it — taper starts in a few days. Thursday you have 3×10' at 4:16/km: don't do 25km on the bike Wednesday — U-Bahn to work, bike only to pool (11km).",
-    tip: "The 3×10' at exactly 4:16/km give you definitive proof: you have the fitness for sub-3h. From here, protect the work you've done.",
-  },
-  {
-    week: 14, phase: "taper", label: "Oct 4–10",
-    sessions: [
-      { day: "Tue 7", type: "easy", title: "Easy run", detail: "30 min, free pace — enjoy the lightness" },
-      { day: "Wed 8", type: "swim", title: "🏊 Swim (optional)", detail: "20–25 min light swim if you feel good. If you're tired, skip without guilt." },
-      { day: "Thu 9", type: "tempo", title: "Last quality session", detail: "35 min: 10' wu + 3×1km at 4:16/km + 90'' rec + cd — short but at race pace" },
-      { day: "Sat 11", type: "easy", title: "Pre-race jog", detail: "15 min very easy — move the legs, don't tire them" },
-    ],
-    bikeNote: "Tapering: easy bike fine Monday–Wednesday. Thursday (quality session): U-Bahn in the morning. Friday–Saturday: U-Bahn or walk — legs to preserve for Sunday.",
-    swimNote: "Wednesday swim optional — only if you feel good and not tired. 20 min of easy arm work is enough. Don't add water kilometers.",
-    tip: "Tapering: legs feel heavy or strange? That's normal — the body is 'loading up'. Eat well, sleep a lot, avoid standing for long periods.",
-  },
-  {
-    week: 15, phase: "taper", label: "Oct 11 — RACE",
-    sessions: [
-      { day: "Sun Oct 11", type: "race", title: "🏅 MUNICH MARATHON — SUB 3H", detail: "Start at 4:20/km for the first 5 km (even if it feels slow). Hold 4:16 to km 35. Then give everything. No bike, no pool today — just run." },
-    ],
-    bikeNote: "Saturday before race: U-Bahn or taxi. No bike. Sunday post-race: whatever gets you home — just don't run.",
-    swimNote: "No pool from Thursday onwards. Final recovery is rest, carbo-loading, and sleep only.",
-    tip: "Sub-3h strategy: do NOT start fast. Runners who finish sub-3h run the second half faster than the first. Control the ego at km 1–10.",
   },
 ];
 
@@ -362,6 +246,34 @@ export default function MarathonPage() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
+  const [plan, setPlan] = useState(null);
+  const [coach, setCoach] = useState(null);
+  const [dataLoading, setDataLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      fetch(PLAN_URL).then((r) => r.json()).catch(() => null),
+      fetch(COACH_URL).then((r) => r.json()).catch(() => null),
+    ]).then(([planData, coachData]) => {
+      setPlan(planData);
+      setCoach(coachData);
+      setDataLoading(false);
+    });
+  }, []);
+
+  const weeks = useMemo(() => mapPlanWeeks(plan), [plan]);
+  const paces = useMemo(() => computePaces(plan, coach), [plan, coach]);
+  const recentActivity = coach?.recentActivity;
+  const volumeCheck = coach?.volumeCheck;
+  const weekKmRange = useMemo(() => {
+    if (!weeks) return null;
+    const withKm = weeks.filter((w) => w.estKm != null);
+    if (!withKm.length) return null;
+    const min = withKm.reduce((a, b) => (a.estKm < b.estKm ? a : b));
+    const max = withKm.reduce((a, b) => (a.estKm > b.estKm ? a : b));
+    return { min, max };
+  }, [weeks]);
+
   const TABS = [
     { id: "weeks", label: "📅 Plan" },
     { id: "nutrition", label: "🥗 Nutrition" },
@@ -389,12 +301,22 @@ export default function MarathonPage() {
             <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 16, padding: "4px 10px", fontSize: 11 }}>📍 Jul 5, 2026</div>
             <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 16, padding: "4px 10px", fontSize: 11 }}>⏱ 5km in 22min</div>
             <div style={{ background: "rgba(0,188,212,0.2)", borderRadius: 16, padding: "4px 10px", fontSize: 11, color: "#80deea" }}>🏊 Swim Mon (→Jul) then Wed</div>
-            <div style={{ background: "rgba(76,175,80,0.2)", borderRadius: 16, padding: "4px 10px", fontSize: 11, color: "#a5d6a7" }}>🚲 Bike 14km/day (7km each way)</div>
-            <div style={{ background: "rgba(76,175,80,0.15)", borderRadius: 16, padding: "4px 10px", fontSize: 11, color: "#a5d6a7" }}>🏊🚲 Wed: up to 25km (work + pool)</div>
+            <div style={{ background: "rgba(76,175,80,0.2)", borderRadius: 16, padding: "4px 10px", fontSize: 11, color: "#a5d6a7" }}>🚲 Bike 9km/day (4.5km each way)</div>
+            <div style={{ background: "rgba(76,175,80,0.15)", borderRadius: 16, padding: "4px 10px", fontSize: 11, color: "#a5d6a7" }}>🏊🚲 Wed: up to 20km (work + pool)</div>
+            {coach?.readiness?.lactateThreshold?.estimate_bpm != null && (
+              <div style={{ background: "rgba(224,92,92,0.15)", borderRadius: 16, padding: "4px 10px", fontSize: 11, color: "#ff9a9a" }}>
+                🫀 LT ~{coach.readiness.lactateThreshold.estimate_bpm} bpm
+              </div>
+            )}
+            {coach?.readiness?.vo2max?.value != null && (
+              <div style={{ background: "rgba(224,92,92,0.15)", borderRadius: 16, padding: "4px 10px", fontSize: 11, color: "#ff9a9a" }}>
+                📈 VO2max {coach.readiness.vo2max.value} (est.)
+              </div>
+            )}
           </div>
 
           <div style={{ marginTop: 12, display: "flex", gap: 5, overflowX: "auto", paddingBottom: 2 }}>
-            {PACES.map((p, i) => (
+            {paces.map((p, i) => (
               <div key={i} style={{ flexShrink: 0, background: "rgba(255,255,255,0.07)", borderRadius: 7, padding: "5px 9px", textAlign: "left", minWidth: isMobile ? 82 : 100 }}>
                 <div style={{ fontSize: 9, opacity: 0.55, marginBottom: 1 }}>{p.label}</div>
                 <div style={{ fontSize: 12, fontWeight: 800, color: p.color }}>{p.pace}</div>
@@ -410,9 +332,9 @@ export default function MarathonPage() {
             {[
               { icon: "🏊", text: "Jul: swim MON (class) → run moved to TUE", color: "#00695c" },
               { icon: "🏊", text: "Aug–Oct: open swim WED (active recovery)", color: "#00695c" },
-              { icon: "🚲", text: "14km/day = real load (zone 1) — EASY on pre-quality days", color: "#2e7d32" },
+              { icon: "🚲", text: "9km/day = real load (zone 1) — EASY on pre-quality days", color: "#2e7d32" },
               { icon: "🚇", text: "U-Bahn: before long run, after hard intervals, one leg in Peak", color: "#1565c0" },
-              { icon: "🏊🚲", text: "Wed: 14km work + 11km pool = 25km — ok in Base, cut to one in Peak", color: "#7B68EE" },
+              { icon: "🏊🚲", text: "Wed: 9km work + 11km pool = 20km — ok in Base, cut to one in Peak", color: "#7B68EE" },
             ].map((r, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 4, background: "white", borderRadius: 12, padding: "4px 9px", fontSize: isMobile ? 10 : 11, color: r.color, border: "1px solid #f0e0a0" }}>
                 <span>{r.icon}</span><span>{r.text}</span>
@@ -436,6 +358,29 @@ export default function MarathonPage() {
 
         {view === "weeks" && (
           <div style={{ padding: pad }}>
+            {recentActivity?.sessions?.length > 0 && (
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#1a1a2e", marginBottom: 6 }}>📈 Recent Activity</div>
+                {recentActivity.analysis && (
+                  <div style={{ fontSize: 11, color: "#888", marginBottom: 8, lineHeight: 1.4 }}>
+                    {recentActivity.analysis}
+                  </div>
+                )}
+                {recentActivity.sessions.map((s) => (
+                  <RecentSessionCard key={s.date + s.type} session={s} />
+                ))}
+              </div>
+            )}
+            {(weekKmRange || volumeCheck) && (
+              <div style={{ background: "#f0faf6", border: "1.5px solid #b2ddd1", borderRadius: 11, padding: "10px 13px", marginBottom: 14 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#2e7d32", marginBottom: 4 }}>📐 How pace, HR zones & volume work here</div>
+                <div style={{ fontSize: 11, color: "#555", lineHeight: 1.5 }}>
+                  Easy/long runs are prescribed by heart-rate zone{paces[3]?.pace ? ` (${paces[3].pace})` : ""}, not fixed pace — pace shown is only an estimate.
+                  {weekKmRange && ` Weekly running volume ranges from ~${Math.round(weekKmRange.min.estKm)}km (week ${weekKmRange.min.week}) to ~${Math.round(weekKmRange.max.estKm)}km at peak (week ${weekKmRange.max.week}).`}
+                  {volumeCheck?.referenceNote && ` ${volumeCheck.referenceNote}`}
+                </div>
+              </div>
+            )}
             <div style={{ display: "flex", gap: 5, marginBottom: 14, flexWrap: "wrap" }}>
               {PHASES.map((p) => (
                 <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 4, background: p.bg, border: `1px solid ${p.border}`, borderRadius: 16, padding: "3px 9px", fontSize: 10, fontWeight: 600, color: p.color }}>
@@ -445,7 +390,13 @@ export default function MarathonPage() {
               ))}
             </div>
 
-            {WEEKS.map((w) => {
+            {dataLoading ? (
+              <div style={{ textAlign: "center", color: "#999", fontSize: 12, padding: "24px 0" }}>Loading plan…</div>
+            ) : !weeks ? (
+              <div style={{ textAlign: "center", color: "#E05C5C", fontSize: 12, padding: "24px 0" }}>
+                Couldn't load the live plan right now — check back soon.
+              </div>
+            ) : weeks.map((w) => {
               const phase = phaseMap[w.phase];
               const isOpen = activeWeek === w.week;
               return (
@@ -462,7 +413,18 @@ export default function MarathonPage() {
                       <div style={{ fontSize: 13, fontWeight: 700, color: "#1a1a2e" }}>
                         Wk. {w.week} <span style={{ fontWeight: 400, color: "#888", fontSize: 11 }}>· {w.label}</span>
                       </div>
-                      <div style={{ fontSize: 10, color: phase.color, fontWeight: 600 }}>{phase.name}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <div style={{ fontSize: 10, color: phase.color, fontWeight: 600 }}>{phase.name}</div>
+                        {w.hasRace ? (
+                          <div style={{ fontSize: 10, color: "#888", background: "#f0f0f0", borderRadius: 8, padding: "1px 7px", fontWeight: 600 }}>
+                            🏃 42.2 km (race day)
+                          </div>
+                        ) : w.estKm != null && (
+                          <div style={{ fontSize: 10, color: "#888", background: "#f0f0f0", borderRadius: 8, padding: "1px 7px", fontWeight: 600 }}>
+                            🏃 ~{Math.round(w.estKm)} km
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <div style={{ fontSize: 11, color: "#bbb", transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>▼</div>
                   </button>
@@ -510,7 +472,7 @@ export default function MarathonPage() {
             <div style={{ background: "linear-gradient(135deg, #1a1a2e, #0f3460)", borderRadius: 11, padding: "13px", marginBottom: 13, color: "white" }}>
               <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 5 }}>⚡ Nutrition for sub-3h</div>
               <div style={{ fontSize: 11, opacity: 0.8, lineHeight: 1.5 }}>
-                A sub-3h marathon burns ~2,500–2,800 kcal during the race. Strategy: gel every 5–6 km from km 15 (every ~25 min). Train your gut in training — never try anything new on race day. Daily cycling (14km/day) adds ~500 kcal: eat accordingly. Wednesday with pool (25km bike total) → ~800 kcal extra vs a no-bike day.
+                A sub-3h marathon burns ~2,500–2,800 kcal during the race. Strategy: gel every 5–6 km from km 15 (every ~25 min). Train your gut in training — never try anything new on race day. Daily cycling (9km/day) adds ~300 kcal: eat accordingly. Wednesday with pool (20km bike total) → ~600 kcal extra vs a no-bike day.
               </div>
             </div>
 
@@ -554,7 +516,7 @@ export default function MarathonPage() {
                 "Don't change nutrition or gear within 2 weeks of the race",
                 "Weigh pasta/rice uncooked to calculate grams correctly",
                 "Strategic caffeine: coffee or caffeine gels tested in training, used at km 25–30 on race day",
-                "Daily bike = 500–600 kcal extra (14km/day): don't undereat on run days. Wednesday with pool = ~800 kcal extra",
+                "Daily bike = ~300 kcal extra (9km/day): don't undereat on run days. Wednesday with pool = ~600 kcal extra",
                 "Alcohol: minimize during Peak weeks. One drink on the weekend is ok in Base/Build",
                 "If you're hungry at night, eat — your body in intense training needs constant fuel",
               ].map((tip, i) => (
@@ -673,7 +635,7 @@ export default function MarathonPage() {
         )}
 
         <div style={{ padding: "12px", textAlign: "center", fontSize: 10, color: "#bbb" }}>
-          5km in 22min → Sub-3h · Bike 14km/day · Wed: up to 25km (work + pool) · Swim Mon (Jul) then Wed · Plan based on Hal Higdon &amp; r/running
+          5km in 22min → Sub-3h · Bike 9km/day · Wed: up to 20km (work + pool) · Swim Mon (Jul) then Wed · Plan based on Hal Higdon &amp; r/running
         </div>
       </div>
     </Layout>

@@ -6,7 +6,7 @@ import {
   Line, Bar, Area, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceArea, ResponsiveContainer,
 } from 'recharts';
-import { typeColors, typeLabels, activityLabel, formatPace, useIsMobile } from './_vibeMarathonShared';
+import { typeColors, typeLabels, activityLabel, formatPace, useIsMobile, RecentSessionCard } from './_vibeMarathonShared';
 
 const COACH_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/coach.json';
 const HISTORY_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/chart-data.json';
@@ -181,49 +181,6 @@ function UpcomingDayCard({ day, isMobile }) {
               </div>
             )}
           </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function RecentSessionCard({ session }) {
-  const d = new Date(session.date + 'T00:00:00');
-  const dateStr = d.toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric' });
-
-  return (
-    <div style={{
-      border: "1.5px solid #e0e0e0",
-      borderRadius: 12,
-      background: "#fff",
-      padding: "12px 14px",
-      marginBottom: 8,
-    }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
-        <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1a2e" }}>{dateStr}</span>
-        <span style={{ fontSize: 12, fontWeight: 600, color: "#666" }}>{activityLabel(session.type)}</span>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginLeft: "auto" }}>
-          {session.distance_km != null && (
-            <span style={{ background: "#f5f5f5", borderRadius: 6, padding: "2px 8px", fontSize: 11, color: "#555" }}>
-              {session.distance_km.toFixed(1)} km
-            </span>
-          )}
-          {session.avg_pace_min_km != null && (
-            <span style={{ background: "#f5f5f5", borderRadius: 6, padding: "2px 8px", fontSize: 11, color: "#555" }}>
-              {formatPace(session.avg_pace_min_km)}
-            </span>
-          )}
-          <span style={{ background: "#f5f5f5", borderRadius: 6, padding: "2px 8px", fontSize: 11, color: "#555" }}>
-            {session.avg_hr ?? "—"}{session.max_hr != null ? ` / ${session.max_hr}` : ""} bpm
-          </span>
-        </div>
-      </div>
-      {session.lesson && (
-        <div style={{
-          fontSize: 12, color: "#444", lineHeight: 1.5,
-          borderLeft: "3px solid #7B68EE", paddingLeft: 10,
-        }}>
-          💡 {session.lesson}
         </div>
       )}
     </div>
