@@ -45,6 +45,89 @@ function MetricCard({ label, value, sub, color }) {
   );
 }
 
+const METRIC_GLOSSARY = [
+  {
+    term: "Readiness",
+    what: "A 0-100 blend of today's HRV, sleep score, and resting HR, each compared against your own rolling baseline.",
+    read: "Higher = more recovered. It's a same-weight blend of the three signals, not a single dominant one.",
+    move: "Sleep, easy days, and HRV recovering toward baseline all raise it; a hard session or short night lowers it.",
+  },
+  {
+    term: "HRV",
+    what: "Night-to-night heart-rate variability, compared to your own rolling baseline (averaged in log-space, since raw HRV is naturally skewed rather than evenly distributed).",
+    read: "A meaningful drop below your personal normal range is the real signal — not the raw millisecond number on its own.",
+    move: "Suppressed by poor sleep, alcohol, illness, and accumulated training load; recovers with consistent sleep and easy days.",
+  },
+  {
+    term: "Sleep Score",
+    what: "Your tracked sleep quality and duration from the night before.",
+    read: "Below 60 is the threshold this dashboard treats as a reason to ease off tomorrow's session.",
+    move: "Consistent bedtimes and enough total hours matter more than any single habit.",
+  },
+  {
+    term: "Resting HR",
+    what: "The lowest sustained 30-minute average heart rate overnight — not just the single lowest reading, which is too easily thrown off by one noisy sensor blip.",
+    read: "Trending down over months = fitness improving. A one-day spike often means illness, heat, or incomplete recovery.",
+    move: "Drops slowly with consistent aerobic training; spikes quickly (and temporarily) from poor sleep, heat, illness, or alcohol.",
+  },
+  {
+    term: "TSB (Form)",
+    what: "Training Stress Balance = CTL − ATL — are you carrying more fitness than fatigue right now, or the reverse?",
+    read: "-10 to +10 is roughly neutral. -10 to -30 is where productive training actually happens. Below -30 is a real caution zone. +15 to +25 is race-ready fresh.",
+    move: "Moves automatically as CTL/ATL do — managed by choosing when to push and when to back off, not targeted directly.",
+  },
+  {
+    term: "CTL (Fitness)",
+    what: "A 42-day rolling average of daily training stress (TSS) — a slow-moving proxy for fitness built up over roughly six weeks.",
+    read: "Higher = more built-up aerobic fitness. It moves slowly on purpose — one big week barely shifts it.",
+    move: "Consistent weeks over months. A safe ceiling is roughly 5-8 points/week — pushing faster for weeks on end raises injury/illness risk rather than fitness.",
+  },
+  {
+    term: "ATL (Fatigue)",
+    what: "The same rolling-average idea as CTL, but over just 7 days — how much you've asked of your body recently.",
+    read: "Higher = more short-term fatigue on board. Unlike CTL, it's supposed to swing — up after a hard week, down after an easy one.",
+    move: "A hard week raises it fast; a rest day or easy week brings it down fast. Normal, not a warning sign by itself.",
+  },
+  {
+    term: "TSS (bars in the chart below)",
+    what: "One number per day combining how long you went and how hard, so a short brutal session and a long easy run can both be measured on the same scale. 100 ≈ one hour at your lactate-threshold effort.",
+    read: "Higher = more taxing. A run that didn't feel hard can still score high if heart rate sat above the easy zone for a long time.",
+    move: "Run longer, run harder, or both — duration counts linearly, intensity counts squared, so a small pace increase costs disproportionately more.",
+  },
+];
+
+function MetricGlossary() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ marginBottom: 28 }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: "100%", textAlign: "left", border: "1.5px solid #e0e0e0",
+          borderRadius: open ? "12px 12px 0 0" : 12, background: open ? "#f8f9fa" : "#fff",
+          padding: "12px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8,
+        }}
+      >
+        <span style={{ fontSize: 14 }}>❓</span>
+        <span style={{ flex: 1, fontSize: 13, fontWeight: 700, color: "#1a1a2e" }}>What do these numbers mean?</span>
+        <span style={{ fontSize: 11, color: "#ccc", transform: open ? "rotate(180deg)" : "none", transition: "transform 0.15s" }}>▼</span>
+      </button>
+      {open && (
+        <div style={{ border: "1.5px solid #e0e0e0", borderTop: "none", borderRadius: "0 0 12px 12px", background: "#fff", padding: "14px 16px" }}>
+          {METRIC_GLOSSARY.map((m, i) => (
+            <div key={m.term} style={{ marginBottom: i < METRIC_GLOSSARY.length - 1 ? 14 : 0, paddingBottom: i < METRIC_GLOSSARY.length - 1 ? 14 : 0, borderBottom: i < METRIC_GLOSSARY.length - 1 ? "1px solid #f0f0f0" : "none" }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#1a1a2e", marginBottom: 4 }}>{m.term}</div>
+              <div style={{ fontSize: 12, color: "#555", lineHeight: 1.5, marginBottom: 4 }}>{m.what}</div>
+              <div style={{ fontSize: 12, color: "#555", lineHeight: 1.5, marginBottom: 4 }}><strong style={{ color: "#1a1a2e" }}>Reading it: </strong>{m.read}</div>
+              <div style={{ fontSize: 12, color: "#555", lineHeight: 1.5 }}><strong style={{ color: "#1a1a2e" }}>Moving it: </strong>{m.move}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function groupByType(history) {
   const counts = {};
   for (const entry of history) {
@@ -518,6 +601,8 @@ export default function VibeDashboard() {
                 />
               </div>
             )}
+
+            <MetricGlossary />
 
             {/* Performance Management Chart (PMC) */}
             {hasCharts && last90.length > 0 && (

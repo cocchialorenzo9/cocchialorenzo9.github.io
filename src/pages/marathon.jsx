@@ -240,6 +240,7 @@ export default function MarathonPage() {
   const [activeRes, setActiveRes] = useState(null);
   const [view, setView] = useState("weeks");
   const [isMobile, setIsMobile] = useState(false);
+  const [showZoneGlossary, setShowZoneGlossary] = useState(false);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 480);
@@ -381,6 +382,39 @@ export default function MarathonPage() {
                   {weekKmRange && ` Weekly running volume ranges from ~${Math.round(weekKmRange.min.estKm)}km (week ${weekKmRange.min.week}) to ~${Math.round(weekKmRange.max.estKm)}km at peak (week ${weekKmRange.max.week}).`}
                   {volumeCheck?.referenceNote && ` ${volumeCheck.referenceNote}`}
                 </div>
+                <button
+                  onClick={() => setShowZoneGlossary(v => !v)}
+                  style={{
+                    marginTop: 7, background: "none", border: "none", cursor: "pointer", padding: 0,
+                    fontSize: 10, fontWeight: 700, color: "#2e7d32", textDecoration: "underline",
+                  }}
+                >
+                  {showZoneGlossary ? "Hide" : "What are LT and VO2max?"}
+                </button>
+                {showZoneGlossary && (
+                  <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid #b2ddd1" }}>
+                    <div style={{ marginBottom: 8 }}>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "#2e7d32" }}>Lactate Threshold (LT)</div>
+                      <div style={{ fontSize: 11, color: "#555", lineHeight: 1.5 }}>
+                        The effort level where your body crosses from "sustainable for a long time" to
+                        "burning through your matches" — the heart rate at which lactate starts building up
+                        faster than you can clear it. All the zone bands above are set as a percentage of
+                        this one number. It rises slowly with months of threshold/tempo training and is
+                        re-measured every 6-10 weeks, not something a single workout changes.
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 11, fontWeight: 700, color: "#2e7d32" }}>VO2max</div>
+                      <div style={{ fontSize: 11, color: "#555", lineHeight: 1.5 }}>
+                        The maximum rate your body can take in and use oxygen — a ceiling on your aerobic
+                        engine size. A higher number means a bigger ceiling to work with, but it's a
+                        talent-plus-training combination and doesn't by itself predict race performance the
+                        way LT and training load do, since it doesn't account for how much of that ceiling
+                        you can actually sustain. It moves slowly (months, not weeks).
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
             <div style={{ display: "flex", gap: 5, marginBottom: 14, flexWrap: "wrap" }}>
