@@ -159,8 +159,10 @@ const typeStyle = {
   easy: { label: "Easy", bg: "#e8f5e9", color: "#2e7d32", dot: "#4caf50" },
   tempo: { label: "Quality", bg: "#fff3e0", color: "#e65100", dot: "#ff9800" },
   long: { label: "Long Run", bg: "#e3f2fd", color: "#1565c0", dot: "#2196f3" },
+  "medium-long": { label: "Medium-Long", bg: "#e3f2fd", color: "#1565c0", dot: "#2196f3" },
   race: { label: "RACE", bg: "#f3e5f5", color: "#6a1b9a", dot: "#9c27b0" },
   swim: { label: "Swim", bg: "#e0f7fa", color: "#00695c", dot: "#00bcd4" },
+  rest: { label: "Rest", bg: "#f5f5f5", color: "#757575", dot: "#9e9e9e" },
 };
 
 const phaseMap = Object.fromEntries(PHASES.map((p) => [p.id, p]));
