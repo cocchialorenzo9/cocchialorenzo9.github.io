@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export const typeColors = {
   easy: "#4CAF93",
   tempo: "#E8A838",
   long: "#7B68EE",
+  "medium-long": "#7B68EE",
   race: "#E05C5C",
   swim: "#4FC3F7",
   rest: "#9E9E9E",
@@ -13,6 +14,7 @@ export const typeLabels = {
   easy: "Easy",
   tempo: "Quality",
   long: "Long Run",
+  "medium-long": "Medium-Long",
   race: "RACE",
   swim: "Swim",
   rest: "Rest",
