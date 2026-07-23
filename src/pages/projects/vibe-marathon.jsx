@@ -143,10 +143,12 @@ function groupByType(history) {
   }));
 }
 
+const RUNNING_TYPES = new Set(['easy', 'tempo', 'long', 'medium-long', 'race']);
+
 function groupByWeek(history) {
   const weeks = {};
   for (const entry of history) {
-    if (entry.recommendation_type === 'rest') continue;
+    if (!RUNNING_TYPES.has(entry.recommendation_type)) continue;
     const d = new Date(entry.date + 'T00:00:00');
     const startOfYear = new Date(d.getFullYear(), 0, 1);
     const weekNum = Math.ceil(((d - startOfYear) / 86400000 + startOfYear.getDay() + 1) / 7);
