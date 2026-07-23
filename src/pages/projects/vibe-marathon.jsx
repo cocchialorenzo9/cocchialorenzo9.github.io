@@ -146,6 +146,7 @@ function groupByType(history) {
 function groupByWeek(history) {
   const weeks = {};
   for (const entry of history) {
+    if (entry.recommendation_type === 'rest') continue;
     const d = new Date(entry.date + 'T00:00:00');
     const startOfYear = new Date(d.getFullYear(), 0, 1);
     const weekNum = Math.ceil(((d - startOfYear) / 86400000 + startOfYear.getDay() + 1) / 7);
