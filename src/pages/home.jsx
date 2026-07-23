@@ -3,6 +3,9 @@ import Layout from '@theme/Layout';
 import { ref, onValue, update, set } from 'firebase/database';
 import { db, HOME_STATE_PATH } from '../lib/firebase';
 
+const PIN_STORAGE_KEY = 'homePinMode';
+const PINS = { '1234': 'readonly', '2680': 'edit' };
+
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
 const PRIORITY_LABELS = { high: '🔴 Must', medium: '🟡 Soon', low: '🟢 Nice to have' };
 const PRIORITY_COLORS = { high: '#dc2626', medium: '#d97706', low: '#16a34a' };
@@ -50,7 +53,7 @@ function normalizeUrl(input) {
 
 // ── Link chips (shared by Rooms and Shopping tabs) ─────────────────────────────
 
-function LinkChips({ urls, onRemove }) {
+function LinkChips({ urls, onRemove, canEdit = true }) {
   if (!urls.length) return null;
   return (
     <div style={s.linksRow}>
@@ -69,11 +72,13 @@ function LinkChips({ urls, onRemove }) {
               <span style={s.linkChipHost}>{host}</span>
               {path && <span style={s.linkChipPath}>{path}</span>}
             </a>
-            <button
-              style={s.linkChipRemove}
-              title="Remove link"
-              onClick={e => { e.stopPropagation(); onRemove(url); }}
-            >×</button>
+            {canEdit && (
+              <button
+                style={s.linkChipRemove}
+                title="Remove link"
+                onClick={e => { e.stopPropagation(); onRemove(url); }}
+              >×</button>
+            )}
           </span>
         );
       })}
@@ -141,9 +146,85 @@ function CategoryPickerCard({ card, rooms, onMove, onClose }) {
   );
 }
 
+// ── PIN gate (full-screen) ──────────────────────────────────────────────────────
+
+function PinGate({ onUnlock }) {
+  const [value, setValue] = useState('');
+  const [error, setError] = useState(false);
+
+  function submit() {
+    if (onUnlock(value.trim())) return;
+    setError(true);
+    setValue('');
+  }
+
+  return (
+    <div style={s.pinGateWrap}>
+      <div style={s.pinGateCard}>
+        <span style={{ fontSize: 40 }}>🔒</span>
+        <h2 style={s.pinGateTitle}>Enter PIN</h2>
+        <input
+          autoFocus
+          type="password"
+          inputMode="numeric"
+          value={value}
+          onChange={e => { setValue(e.target.value); setError(false); }}
+          onKeyDown={e => { if (e.key === 'Enter') submit(); }}
+          placeholder="••••"
+          style={s.pinInput}
+        />
+        {error && <div style={s.pinError}>Incorrect PIN.</div>}
+        <button style={s.wizardBtnPrimary} onClick={submit}>Unlock</button>
+      </div>
+    </div>
+  );
+}
+
+// ── Unlock-editing control (header) ─────────────────────────────────────────────
+
+function UnlockEditingControl({ onUnlockEdit }) {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState('');
+  const [error, setError] = useState(false);
+
+  function submit() {
+    if (onUnlockEdit(value.trim())) { setOpen(false); setValue(''); return; }
+    setError(true);
+    setValue('');
+  }
+
+  if (!open) {
+    return (
+      <button style={s.lockControlBtn} onClick={() => setOpen(true)}>
+        🔓 Unlock editing
+      </button>
+    );
+  }
+
+  return (
+    <div style={s.unlockPopover} onClick={e => e.stopPropagation()}>
+      <input
+        autoFocus
+        type="password"
+        inputMode="numeric"
+        value={value}
+        onChange={e => { setValue(e.target.value); setError(false); }}
+        onKeyDown={e => { if (e.key === 'Enter') submit(); if (e.key === 'Escape') setOpen(false); }}
+        placeholder="PIN"
+        style={s.pinInput}
+      />
+      {error && <div style={s.pinError}>Incorrect PIN.</div>}
+      <div style={s.linkAddActions}>
+        <button style={s.wizardBtnGhost} onClick={() => setOpen(false)}>Cancel</button>
+        <button style={s.wizardBtnPrimary} onClick={submit}>Unlock</button>
+      </div>
+    </div>
+  );
+}
+
 // ── Timeline (always visible) ─────────────────────────────────────────────────
 
-function Timeline({ items, state, toggle }) {
+function Timeline({ items, state, toggle, canEdit }) {
   const today = new Date().toISOString().slice(0, 10);
   return (
     <div style={s.tlWrap}>
@@ -151,8 +232,26 @@ function Timeline({ items, state, toggle }) {
         const isPast = item.date < today;
         const isDone = state[item.id];
         const dotBg = isDone ? '#16a34a' : isPast ? '#d97706' : '#9ca3af';
-        return (
+        return canEdit ? (
           <div key={item.id} style={s.tlCard} onClick={() => toggle(item.id)} role="button" tabIndex={0}>
+            <div style={{ ...s.tlDot, background: dotBg }}>
+              {isDone ? '✓' : item.emoji}
+            </div>
+            <div style={s.tlMeta}>
+              <span style={s.tlDate}>
+                {item.date}{item.time ? ` · ${item.time}` : ''}
+              </span>
+              <span style={{
+                ...s.tlLabel,
+                textDecoration: isDone ? 'line-through' : 'none',
+                color: isDone ? '#a8a29e' : '#1c1917',
+              }}>
+                {item.label}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div key={item.id} style={{ ...s.tlCard, cursor: 'default' }}>
             <div style={{ ...s.tlDot, background: dotBg }}>
               {isDone ? '✓' : item.emoji}
             </div>
@@ -177,7 +276,7 @@ function Timeline({ items, state, toggle }) {
 
 // ── Main app ──────────────────────────────────────────────────────────────────
 
-function HomeApp() {
+function HomeApp({ canEdit, onLock, onUnlockEdit }) {
   const [data, setData] = useState(null);
   const [shared, setShared] = useState(null);
   const [tab, setTab] = useState('rooms');
@@ -198,45 +297,57 @@ function HomeApp() {
   }, []);
 
   // Each mutation targets a single sub-path so two people editing different
-  // items concurrently never clobber each other's unrelated writes.
+  // items concurrently never clobber each other's unrelated writes. Every
+  // mutation also no-ops when the page is in read-only mode — the header
+  // controls already hide the UI that would call these, but this guard is
+  // the actual enforcement, not just cosmetic.
   function toggleChecked(id) {
+    if (!canEdit) return;
     const current = (shared.checked || {})[id];
     update(ref(db, `${HOME_STATE_PATH}/checked`), { [id]: !current });
   }
 
   function setOwnedOverride(id, isOwned) {
+    if (!canEdit) return;
     update(ref(db, `${HOME_STATE_PATH}/ownedOverride`), { [id]: isOwned });
   }
 
   function handlePriorityChange(id, priority) {
+    if (!canEdit) return;
     update(ref(db, `${HOME_STATE_PATH}/priorities`), { [id]: priority });
   }
 
   function setRetailer(id, retailer) {
+    if (!canEdit) return;
     update(ref(db, `${HOME_STATE_PATH}/retailers`), { [id]: retailer });
   }
 
   function setUtilStatus(id, status) {
+    if (!canEdit) return;
     update(ref(db, `${HOME_STATE_PATH}/utilStatus`), { [id]: status });
   }
 
   function addLink(id, url) {
+    if (!canEdit) return;
     const current = (shared.links || {})[id] || [];
     if (current.includes(url)) return;
     set(ref(db, `${HOME_STATE_PATH}/links/${id}`), [...current, url]);
   }
 
   function removeLink(id, url) {
+    if (!canEdit) return;
     const current = (shared.links || {})[id] || [];
     set(ref(db, `${HOME_STATE_PATH}/links/${id}`), current.filter(u => u !== url));
   }
 
   function addCategory({ name, emoji }) {
+    if (!canEdit) return;
     const id = `category_${crypto.randomUUID()}`;
     update(ref(db, `${HOME_STATE_PATH}/customRooms`), { [id]: { name, emoji, createdAt: Date.now() } });
   }
 
   function moveItemToRoom(item, roomId) {
+    if (!canEdit) return;
     if (item.isCustom) {
       update(ref(db, `${HOME_STATE_PATH}/customItems/${item.id}`), { roomId });
     } else {
@@ -245,6 +356,7 @@ function HomeApp() {
   }
 
   function reorderShoppingGroup(priority, orderedIds) {
+    if (!canEdit) return;
     set(ref(db, `${HOME_STATE_PATH}/order/${priority}`), orderedIds);
   }
 
@@ -254,6 +366,7 @@ function HomeApp() {
   // with no matching priorities entry) would break rendering, not just
   // leave things untidy.
   function addItem({ label, roomId, priority, retailer }) {
+    if (!canEdit) return;
     const id = `custom_${crypto.randomUUID()}`;
     const updates = {
       [`customItems/${id}`]: { label, roomId, createdAt: Date.now() },
@@ -264,6 +377,7 @@ function HomeApp() {
   }
 
   function deleteCustomItem(id) {
+    if (!canEdit) return;
     const currentOrder = shared.order || {};
     const updates = {
       [`customItems/${id}`]: null,
@@ -340,6 +454,15 @@ function HomeApp() {
 
   return (
     <div style={s.app}>
+      {/* Lock control */}
+      <div style={s.lockControlWrap}>
+        {canEdit ? (
+          <button style={s.lockControlBtn} onClick={onLock}>🔒 Lock</button>
+        ) : (
+          <UnlockEditingControl onUnlockEdit={onUnlockEdit} />
+        )}
+      </div>
+
       {/* Header */}
       <div style={s.header}>
         <h1 style={s.headerTitle}>🏠 Our New Home</h1>
@@ -350,7 +473,7 @@ function HomeApp() {
       </div>
 
       {/* Timeline — always visible */}
-      <Timeline items={data.timeline} state={checked} toggle={toggleChecked} />
+      <Timeline items={data.timeline} state={checked} toggle={toggleChecked} canEdit={canEdit} />
 
       {/* Tabs */}
       <div style={s.tabs}>
@@ -386,6 +509,7 @@ function HomeApp() {
           deleteCustomItem={deleteCustomItem}
           moveItemToRoom={moveItemToRoom}
           addCategory={addCategory}
+          canEdit={canEdit}
         />
       )}
       {tab === 'shopping' && (
@@ -404,6 +528,7 @@ function HomeApp() {
           deleteCustomItem={deleteCustomItem}
           rooms={mergedRooms}
           moveItemToRoom={moveItemToRoom}
+          canEdit={canEdit}
         />
       )}
     </div>
@@ -414,7 +539,7 @@ function HomeApp() {
 
 const PRIORITY_CYCLE = { high: 'medium', medium: 'low', low: 'high' };
 
-function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, setOwnedOverride, priorities, onPriorityChange, retailers, setRetailer, utilStatuses, setUtilStatus, links, addLink, removeLink, addItem, deleteCustomItem, moveItemToRoom, addCategory }) {
+function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, setOwnedOverride, priorities, onPriorityChange, retailers, setRetailer, utilStatuses, setUtilStatus, links, addLink, removeLink, addItem, deleteCustomItem, moveItemToRoom, addCategory, canEdit }) {
   const [contextMenu, setContextMenu] = useState(null); // { id, label, type, roomId, isCustom, x, y }
   const [retailerCard, setRetailerCard] = useState(null); // { id, label, x, y }
   const [utilStatusCard, setUtilStatusCard] = useState(null); // { id, label, x, y }
@@ -465,10 +590,12 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
   }
 
   function handleTouchStart(e, id) {
+    if (!canEdit) return;
     touchRef.current[id] = e.touches[0].clientX;
   }
 
   function handleTouchMove(e, id) {
+    if (!canEdit) return;
     const startX = touchRef.current[id];
     if (startX == null) return;
     const dx = Math.max(-72, Math.min(0, e.touches[0].clientX - startX));
@@ -476,6 +603,7 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
   }
 
   function handleTouchEnd(id) {
+    if (!canEdit) return;
     const dx = swipeDx[id] || 0;
     if (dx < -50) unownItem(id);
     setSwipeDx(prev => ({ ...prev, [id]: 0 }));
@@ -517,12 +645,12 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
                       onMouseLeave={() => setHoverItemId(null)}
                     >
                       <span
-                        style={{ ...s.checkbox, ...(checked[item.id] ? s.checkboxDone : {}) }}
+                        style={{ ...s.checkbox, ...(checked[item.id] ? s.checkboxDone : {}), cursor: canEdit ? 'pointer' : 'default' }}
                         onClick={() => toggleChecked(item.id)}
                       >
                         {checked[item.id] ? '✓' : ''}
                       </span>
-                      <div style={s.itemContent} onClick={() => toggleChecked(item.id)}>
+                      <div style={{ ...s.itemContent, cursor: canEdit ? 'pointer' : 'default' }} onClick={() => toggleChecked(item.id)}>
                         <span style={{ ...s.itemLabel, ...(checked[item.id] ? s.itemLabelDone : {}) }}>
                           {item.label}
                         </span>
@@ -544,26 +672,27 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
                           <LinkChips
                             urls={links[item.id] || []}
                             onRemove={url => removeLink(item.id, url)}
+                            canEdit={canEdit}
                           />
                         )}
                       </div>
                       {!checked[item.id] && (
                         <>
                           <span
-                            style={{ ...s.badge, color: PRIORITY_COLORS[effP], borderColor: PRIORITY_COLORS[effP], cursor: 'pointer' }}
-                            title="Click to change priority"
-                            onClick={e => { e.stopPropagation(); onPriorityChange(item.id, PRIORITY_CYCLE[effP]); }}
+                            style={{ ...s.badge, color: PRIORITY_COLORS[effP], borderColor: PRIORITY_COLORS[effP], cursor: canEdit ? 'pointer' : 'default' }}
+                            title={canEdit ? 'Click to change priority' : undefined}
+                            onClick={canEdit ? (e => { e.stopPropagation(); onPriorityChange(item.id, PRIORITY_CYCLE[effP]); }) : undefined}
                           >
                             {PRIORITY_LABELS[effP]}
                           </span>
                           <span
-                            style={{ ...s.retailerBadge, ...retailerStyle(effR) }}
-                            title="Click to set retailer"
-                            onClick={e => { e.stopPropagation(); setRetailerCard({ id: item.id, label: item.label, x: e.clientX, y: e.clientY }); }}
+                            style={{ ...s.retailerBadge, ...retailerStyle(effR), cursor: canEdit ? 'pointer' : 'default' }}
+                            title={canEdit ? 'Click to set retailer' : undefined}
+                            onClick={canEdit ? (e => { e.stopPropagation(); setRetailerCard({ id: item.id, label: item.label, x: e.clientX, y: e.clientY }); }) : undefined}
                           >
                             {retailerLabel(effR)}
                           </span>
-                          {hoverItemId === item.id && (
+                          {canEdit && hoverItemId === item.id && (
                             <button
                               style={s.dotMenuBtn}
                               onClick={e => { e.stopPropagation(); setContextMenu({ id: item.id, label: item.label, type: 'moveToOwned', isCustom: !!item.isCustom, roomId: room.id, x: e.clientX, y: e.clientY }); }}
@@ -582,7 +711,7 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
               <div style={s.ownedSection}>
                 <span style={s.ownedLabel}>
                   Already have
-                  <span style={s.ownedHint}> · swipe ← or tap ⋯ to move back</span>
+                  {canEdit && <span style={s.ownedHint}> · swipe ← or tap ⋯ to move back</span>}
                 </span>
                 <ul style={s.ownedList}>
                   {ownedItems.map(item => {
@@ -606,7 +735,7 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#faf8f3', position: 'relative', zIndex: 1, transform: `translateX(${dx}px)`, transition: isSwiping ? 'none' : 'transform 0.2s ease', width: '100%' }}>
                           <span style={s.ownedCheck}>✓</span>
                           <span style={{ ...s.ownedItemLabel, flex: 1 }}>{item.label}</span>
-                          {hoverItemId === item.id && (
+                          {canEdit && hoverItemId === item.id && (
                             <button
                               style={s.dotMenuBtn}
                               onClick={e => { e.stopPropagation(); setContextMenu({ id: item.id, label: item.label, type: 'moveToList', isCustom: !!item.isCustom, roomId: room.id, x: e.clientX, y: e.clientY }); }}
@@ -621,7 +750,7 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
             )}
 
             {/* Add a new item to this category — inline step-by-step flow, no modal */}
-            <AddItemCard roomId={room.id} addItem={addItem} />
+            {canEdit && <AddItemCard roomId={room.id} addItem={addItem} />}
           </div>
         );
       })}
@@ -658,9 +787,9 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
                   </a>
                 )}
                 <span
-                  style={{ ...s.utilBadge, background: st.bg, color: st.color, cursor: 'pointer' }}
-                  title="Click to change status"
-                  onClick={e => { e.stopPropagation(); setUtilStatusCard({ id: u.id, label: u.label, x: e.clientX, y: e.clientY }); }}
+                  style={{ ...s.utilBadge, background: st.bg, color: st.color, cursor: canEdit ? 'pointer' : 'default' }}
+                  title={canEdit ? 'Click to change status' : undefined}
+                  onClick={canEdit ? (e => { e.stopPropagation(); setUtilStatusCard({ id: u.id, label: u.label, x: e.clientX, y: e.clientY }); }) : undefined}
                 >
                   {st.label}
                 </span>
@@ -671,7 +800,7 @@ function RoomsTab({ rooms, utilities, checked, ownedOverride, toggleChecked, set
       </div>
 
       {/* Add a new category — inline step-by-step flow, no modal */}
-      <AddCategoryCard addCategory={addCategory} />
+      {canEdit && <AddCategoryCard addCategory={addCategory} />}
     </div>
 
     {/* Context menu */}
@@ -1001,7 +1130,7 @@ function AddCategoryCard({ addCategory }) {
 
 // ── Shopping tab ──────────────────────────────────────────────────────────────
 
-function ShoppingTab({ items, priorities, order, onPriorityChange, reorderShoppingGroup, setOwnedOverride, retailers, setRetailer, links, addLink, removeLink, deleteCustomItem, rooms, moveItemToRoom }) {
+function ShoppingTab({ items, priorities, order, onPriorityChange, reorderShoppingGroup, setOwnedOverride, retailers, setRetailer, links, addLink, removeLink, deleteCustomItem, rooms, moveItemToRoom, canEdit }) {
   const dragId = useRef(null);
   const dragPriority = useRef(null);
   const [dragOver, setDragOver] = useState(null);
@@ -1049,10 +1178,12 @@ function ShoppingTab({ items, priorities, order, onPriorityChange, reorderShoppi
   }
 
   function handleShopTouchStart(e, id) {
+    if (!canEdit) return;
     shopTouchRef.current[id] = e.touches[0].clientX;
   }
 
   function handleShopTouchMove(e, id) {
+    if (!canEdit) return;
     const startX = shopTouchRef.current[id];
     if (startX == null) return;
     const dx = Math.max(-72, Math.min(0, e.touches[0].clientX - startX));
@@ -1060,6 +1191,7 @@ function ShoppingTab({ items, priorities, order, onPriorityChange, reorderShoppi
   }
 
   function handleShopTouchEnd(item) {
+    if (!canEdit) return;
     const dx = shopSwipe[item.id] || 0;
     if (dx < -50) moveToAlreadyHave(item);
     setShopSwipe(prev => ({ ...prev, [item.id]: 0 }));
@@ -1097,12 +1229,14 @@ function ShoppingTab({ items, priorities, order, onPriorityChange, reorderShoppi
   filteredItems.forEach(i => grouped[effPriority(i)].push(i));
 
   function handleDragStart(e, item) {
+    if (!canEdit) return;
     dragId.current = item.id;
     dragPriority.current = effPriority(item);
     e.dataTransfer.effectAllowed = 'move';
   }
 
   function handleDragOver(e, item) {
+    if (!canEdit) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     const rect = e.currentTarget.getBoundingClientRect();
@@ -1111,6 +1245,7 @@ function ShoppingTab({ items, priorities, order, onPriorityChange, reorderShoppi
   }
 
   function handleDrop(e, targetItem) {
+    if (!canEdit) return;
     e.preventDefault();
     const over = dragOver;
     setDragOver(null);
@@ -1214,7 +1349,7 @@ function ShoppingTab({ items, priorities, order, onPriorityChange, reorderShoppi
               return (
                 <li
                   key={item.id}
-                  draggable
+                  draggable={canEdit}
                   onDragStart={e => handleDragStart(e, item)}
                   onDragOver={e => handleDragOver(e, item)}
                   onDragLeave={() => setDragOver(null)}
@@ -1239,8 +1374,8 @@ function ShoppingTab({ items, priorities, order, onPriorityChange, reorderShoppi
                     ✓ Already have
                   </div>
                   {/* Sliding content */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', background: '#fff', position: 'relative', zIndex: 1, transform: `translateX(${dx}px)`, transition: isSwiping ? 'none' : 'transform 0.2s ease', cursor: 'grab' }}>
-                    <span style={s.dragHandle}>⠿</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', background: '#fff', position: 'relative', zIndex: 1, transform: `translateX(${dx}px)`, transition: isSwiping ? 'none' : 'transform 0.2s ease', cursor: canEdit ? 'grab' : 'default' }}>
+                    {canEdit && <span style={s.dragHandle}>⠿</span>}
                     <div style={s.shopItemLeft}>
                       <span style={s.shopItemLabel}>{item.label}</span>
                       {item.reportUrl && (
@@ -1254,17 +1389,18 @@ function ShoppingTab({ items, priorities, order, onPriorityChange, reorderShoppi
                       <LinkChips
                         urls={links[item.id] || []}
                         onRemove={url => removeLink(item.id, url)}
+                        canEdit={canEdit}
                       />
                     </div>
                     <span
-                      style={{ ...s.retailerBadge, ...retailerStyle(effR), marginLeft: 'auto' }}
-                      title="Click to set retailer"
-                      onClick={e => { e.stopPropagation(); setRetailerCard({ id: item.id, label: item.label, x: e.clientX, y: e.clientY }); }}
+                      style={{ ...s.retailerBadge, ...retailerStyle(effR), marginLeft: 'auto', cursor: canEdit ? 'pointer' : 'default' }}
+                      title={canEdit ? 'Click to set retailer' : undefined}
+                      onClick={canEdit ? (e => { e.stopPropagation(); setRetailerCard({ id: item.id, label: item.label, x: e.clientX, y: e.clientY }); }) : undefined}
                     >
                       {retailerLabel(effR)}
                     </span>
                     <span style={s.shopItemRoom}>{item.room}</span>
-                    {hoverShopId === item.id && (
+                    {canEdit && hoverShopId === item.id && (
                       <button
                         style={s.dotMenuBtn}
                         onClick={e => { e.stopPropagation(); setShopCtx({ id: item.id, label: item.label, owned: item.owned, isCustom: !!item.isCustom, roomId: item.roomId, x: e.clientX, y: e.clientY }); }}
@@ -1399,6 +1535,16 @@ function UtilitiesTab({ utilities }) {
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const s = {
+  // PIN gate
+  pinGateWrap: { minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' },
+  pinGateCard: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, background: '#fff', border: '1px solid #f0ebe3', borderRadius: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.06)', padding: '32px 28px', minWidth: 240 },
+  pinGateTitle: { margin: 0, fontSize: 18, fontWeight: 700, color: '#1c1917' },
+  pinInput: { fontSize: 18, letterSpacing: '0.3em', textAlign: 'center', border: '1px solid #e7e5e4', borderRadius: 10, padding: '10px 14px', width: 140 },
+  pinError: { fontSize: 12, color: '#dc2626' },
+  // Lock / unlock-editing control
+  lockControlWrap: { display: 'flex', justifyContent: 'flex-end', marginBottom: 8, position: 'relative' },
+  lockControlBtn: { fontSize: 12, fontWeight: 600, color: '#78716c', background: '#fff', border: '1px solid #e7e5e4', borderRadius: 99, padding: '6px 12px', cursor: 'pointer' },
+  unlockPopover: { position: 'absolute', top: '100%', right: 0, zIndex: 1000, marginTop: 6, display: 'flex', flexDirection: 'column', gap: 8, background: '#fff', border: '1px solid #e7e5e4', borderRadius: 10, boxShadow: '0 4px 20px rgba(0,0,0,0.13)', padding: '10px 14px' },
   // App shell
   app: { maxWidth: 1280, margin: '0 auto', padding: '32px 16px' },
   header: { textAlign: 'center', marginBottom: 20 },
@@ -1510,9 +1656,30 @@ const s = {
 // ── Page root ─────────────────────────────────────────────────────────────────
 
 export default function Home() {
+  const [mode, setMode] = useState(() => (
+    typeof window !== 'undefined' ? localStorage.getItem(PIN_STORAGE_KEY) : null
+  ));
+
+  function unlock(pin) {
+    const resolved = PINS[pin];
+    if (!resolved) return false;
+    localStorage.setItem(PIN_STORAGE_KEY, resolved);
+    setMode(resolved);
+    return true;
+  }
+
+  function lock() {
+    localStorage.removeItem(PIN_STORAGE_KEY);
+    setMode(null);
+  }
+
   return (
     <Layout title="Our Home" description="">
-      <HomeApp />
+      {mode ? (
+        <HomeApp canEdit={mode === 'edit'} onLock={lock} onUnlockEdit={unlock} />
+      ) : (
+        <PinGate onUnlock={unlock} />
+      )}
     </Layout>
   );
 }
