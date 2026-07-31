@@ -25,14 +25,27 @@ const BAND_DEFS = [
   { key: 5, label: "167+bpm (100%+ LT)", color: "#E05C5C" },
 ];
 
+// A run counts as touching a band if that band holds at least this share of
+// its classified minutes — filters out incidental warmup/cooldown minutes in
+// a band while still surfacing runs that genuinely spanned more than one.
+const BAND_SHARE_THRESHOLD = 0.10;
+
 function BandPaceTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
-  const entry = payload.find(p => p.value != null);
-  if (!entry) return null;
+  const bandEntries = payload.filter(p => p.dataKey !== "distance_km" && p.value != null);
+  const volumeEntry = payload.find(p => p.dataKey === "distance_km");
+  if (!bandEntries.length && volumeEntry?.value == null) return null;
   return (
     <div style={{ background: "#fff", border: "1px solid #e0e0e0", borderRadius: 8, padding: "8px 10px", fontSize: 12 }}>
-      <div style={{ color: "#666", marginBottom: 2 }}>{label}</div>
-      <div style={{ color: entry.stroke, fontWeight: 700 }}>{entry.name}: {formatPace(entry.value)}</div>
+      <div style={{ color: "#666", marginBottom: 4 }}>{label}</div>
+      {bandEntries.map(entry => (
+        <div key={entry.dataKey} style={{ color: entry.color || entry.stroke, fontWeight: 700 }}>
+          {entry.name}: {formatPace(entry.value)}
+        </div>
+      ))}
+      {volumeEntry?.value != null && (
+        <div style={{ color: "#888", marginTop: 4 }}>Volume: {volumeEntry.value}km</div>
+      )}
     </div>
   );
 }
@@ -122,13 +135,13 @@ const METRIC_GLOSSARY = [
   {
     term: "HR bands",
     what: "5 fixed heart-rate bands used to classify each run's minutes: <130bpm, 130-140, 140-155, 155-167, 167+ (the top edge is your lactate threshold, LT2, 167bpm device-reported). These are plain round bpm numbers, not derived from an estimated aerobic threshold — %LT is shown for context only, it doesn't define the boundaries. Running sessions only — analysis of what actually happened, separate from this plan's own easy/recovery/long HR targets.",
-    read: "A run's dominant band is whichever one has the most minutes — that's the closest thing to \"what kind of run was this\" available without a per-second GPS pace track.",
+    read: "A run \"touches\" a band once that band holds at least 10% of its classified minutes — most runs span 1-2 bands; a mixed-effort run (warmup, tempo push, cooldown) can span 3+.",
     move: "There's no prescription tied to these bands (unlike the easy/recovery/long HR targets elsewhere) — they're purely descriptive, for comparing pace across runs.",
   },
   {
     term: "Pace by band / Pace vs. effort",
-    what: "Each run's average pace (min/km) against the HR band it was mostly in (\"Pace by band\") or against its average %LT (\"Pace vs. effort\"). There's no GPS distance recorded minute-by-minute, so pace can't be split within a single run — these compare whole runs to each other instead.",
-    read: "If recent runs sit at a faster pace for the same (or lower) band/%LT than older runs, that's a real efficiency gain — the heart is doing less work for the same speed.",
+    what: "Each run's average pace (min/km) against the HR band(s) it spent meaningful time in (\"Pace by band\" — one dot per touched band, all at the same pace, since there's no GPS distance recorded minute-by-minute to split pace within a single run) or against its average %LT (\"Pace vs. effort\"). The grey bars on \"Pace by band\" are that run's distance — a fast pace on a short run reads differently than the same pace on a long one.",
+    read: "If recent runs sit at a faster pace for the same (or lower) band/%LT than older runs, that's a real efficiency gain — the heart is doing less work for the same speed. Weigh it against the volume bar: a fast day on low volume is a smaller signal than the same pace sustained over a long run.",
     move: "Track this over months, not days — week-to-week noise (heat, fatigue, terrain) swamps small efficiency gains in the short term.",
   },
 ];
@@ -354,9 +367,11 @@ export default function VibeDashboard() {
   const paceEarlier = paceRuns.slice(0, paceHalf);
   const paceRecent = paceRuns.slice(paceHalf);
   const bandPaceData = paceRuns.map(e => {
-    const row = { date: e.date };
+    const row = { date: e.date, distance_km: e.distance_km };
+    const totalMin = BAND_DEFS.reduce((sum, b) => sum + (e[`band${b.key}_min`] || 0), 0);
     BAND_DEFS.forEach(b => {
-      row[`band${b.key}_pace`] = e.dominant_band === b.key ? e.avg_pace_min_km : null;
+      const share = totalMin > 0 ? (e[`band${b.key}_min`] || 0) / totalMin : 0;
+      row[`band${b.key}_pace`] = share >= BAND_SHARE_THRESHOLD ? e.avg_pace_min_km : null;
     });
     return row;
   });
@@ -705,27 +720,32 @@ export default function VibeDashboard() {
               </div>
             )}
 
-            {/* Pace by HR band — one line per band, dots = runs dominated by that band */}
+            {/* Pace by HR band — one line per band; a run can touch more than one */}
             {paceRuns.length > 0 && (
               <div style={{ marginBottom: 32 }}>
                 <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 4 }}>
                   Pace by HR band
                 </h3>
                 <p style={{ fontSize: 12, color: "#888", margin: "0 0 12px 0", lineHeight: 1.5 }}>
-                  Each run's pace, plotted on the line for whichever HR band it was mostly in (see
-                  glossary above). Lower = faster. Dots on the same band are connected across runs;
-                  hover a dot to see just that band's value.
+                  Each run's pace, plotted on every HR band it spent a meaningful share of time in
+                  (see glossary above) — a run spanning two bands gets two dots at the same pace.
+                  Lower = faster. The grey bars are that run's distance (km), so a high dot that's
+                  also a tall bar was both hard and long. Dots on the same band are connected across
+                  runs; hover to see just that point's band(s) and volume.
                 </p>
                 <ResponsiveContainer width="100%" height={240}>
-                  <LineChart data={bandPaceData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                  <ComposedChart data={bandPaceData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
                     <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={Math.floor(bandPaceData.length / 8)} />
-                    <YAxis tick={{ fontSize: 10 }} label={{ value: 'min/km', angle: -90, position: 'insideLeft', fontSize: 10 }} domain={['dataMin - 0.3', 'dataMax + 0.3']} />
+                    <YAxis yAxisId="left" tick={{ fontSize: 10 }} label={{ value: 'min/km', angle: -90, position: 'insideLeft', fontSize: 10 }} domain={['dataMin - 0.3', 'dataMax + 0.3']} />
+                    <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10 }} domain={[0, 'auto']} label={{ value: 'km', angle: 90, position: 'insideRight', fontSize: 10 }} />
                     <Tooltip content={<BandPaceTooltip />} />
                     <Legend iconSize={10} wrapperStyle={{ fontSize: 12 }} />
+                    <Bar yAxisId="right" dataKey="distance_km" fill="#B0BEC5" name="Volume (km)" barSize={6} radius={[2, 2, 0, 0]} />
                     {BAND_DEFS.map(b => (
                       <Line
                         key={b.key}
+                        yAxisId="left"
                         type="monotone"
                         dataKey={`band${b.key}_pace`}
                         name={b.label}
@@ -735,7 +755,7 @@ export default function VibeDashboard() {
                         connectNulls
                       />
                     ))}
-                  </LineChart>
+                  </ComposedChart>
                 </ResponsiveContainer>
               </div>
             )}
