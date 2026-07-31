@@ -25,11 +25,6 @@ const BAND_DEFS = [
   { key: 5, label: "167+bpm (100%+ LT)", color: "#E05C5C" },
 ];
 
-// A run counts as touching a band if that band holds at least this share of
-// its classified minutes — filters out incidental warmup/cooldown minutes in
-// a band while still surfacing runs that genuinely spanned more than one.
-const BAND_SHARE_THRESHOLD = 0.10;
-
 function BandPaceTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   const bandEntries = payload.filter(p => p.dataKey !== "distance_km" && p.value != null);
@@ -135,12 +130,12 @@ const METRIC_GLOSSARY = [
   {
     term: "HR bands",
     what: "5 fixed heart-rate bands used to classify each run's minutes: <130bpm, 130-140, 140-155, 155-167, 167+ (the top edge is your lactate threshold, LT2, 167bpm device-reported). These are plain round bpm numbers, not derived from an estimated aerobic threshold — %LT is shown for context only, it doesn't define the boundaries. Running sessions only — analysis of what actually happened, separate from this plan's own easy/recovery/long HR targets.",
-    read: "A run \"touches\" a band once that band holds at least 10% of its classified minutes — most runs span 1-2 bands; a mixed-effort run (warmup, tempo push, cooldown) can span 3+.",
+    read: "Each run is categorized into a single band by its average heart rate — not the band it spent the most minutes in, so a run with a hard mid-run push can average into a higher band than most of its minutes were actually in.",
     move: "There's no prescription tied to these bands (unlike the easy/recovery/long HR targets elsewhere) — they're purely descriptive, for comparing pace across runs.",
   },
   {
     term: "Pace by band / Pace vs. effort",
-    what: "Each run's average pace (min/km) against the HR band(s) it spent meaningful time in (\"Pace by band\" — one dot per touched band, all at the same pace, since there's no GPS distance recorded minute-by-minute to split pace within a single run) or against its average %LT (\"Pace vs. effort\"). The grey bars on \"Pace by band\" are that run's distance — a fast pace on a short run reads differently than the same pace on a long one.",
+    what: "Each run's average pace (min/km) against the HR band its average heart rate falls into (\"Pace by band\" — one dot per run) or against its average %LT (\"Pace vs. effort\"). The grey bars on \"Pace by band\" are that run's distance — a fast pace on a short run reads differently than the same pace on a long one.",
     read: "If recent runs sit at a faster pace for the same (or lower) band/%LT than older runs, that's a real efficiency gain — the heart is doing less work for the same speed. Weigh it against the volume bar: a fast day on low volume is a smaller signal than the same pace sustained over a long run.",
     move: "Track this over months, not days — week-to-week noise (heat, fatigue, terrain) swamps small efficiency gains in the short term.",
   },
@@ -368,10 +363,8 @@ export default function VibeDashboard() {
   const paceRecent = paceRuns.slice(paceHalf);
   const bandPaceData = paceRuns.map(e => {
     const row = { date: e.date, distance_km: e.distance_km };
-    const totalMin = BAND_DEFS.reduce((sum, b) => sum + (e[`band${b.key}_min`] || 0), 0);
     BAND_DEFS.forEach(b => {
-      const share = totalMin > 0 ? (e[`band${b.key}_min`] || 0) / totalMin : 0;
-      row[`band${b.key}_pace`] = share >= BAND_SHARE_THRESHOLD ? e.avg_pace_min_km : null;
+      row[`band${b.key}_pace`] = e.avg_band === b.key ? e.avg_pace_min_km : null;
     });
     return row;
   });
@@ -720,18 +713,17 @@ export default function VibeDashboard() {
               </div>
             )}
 
-            {/* Pace by HR band — one line per band; a run can touch more than one */}
+            {/* Pace by HR band — one dot per run, categorized by its average HR */}
             {paceRuns.length > 0 && (
               <div style={{ marginBottom: 32 }}>
                 <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 4 }}>
                   Pace by HR band
                 </h3>
                 <p style={{ fontSize: 12, color: "#888", margin: "0 0 12px 0", lineHeight: 1.5 }}>
-                  Each run's pace, plotted on every HR band it spent a meaningful share of time in
-                  (see glossary above) — a run spanning two bands gets two dots at the same pace.
+                  Each run's pace, plotted on the HR band its average heart rate falls into.
                   Lower = faster. The grey bars are that run's distance (km), so a high dot that's
                   also a tall bar was both hard and long. Dots on the same band are connected across
-                  runs; hover to see just that point's band(s) and volume.
+                  runs; hover to see just that run's band and volume.
                 </p>
                 <ResponsiveContainer width="100%" height={240}>
                   <ComposedChart data={bandPaceData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
