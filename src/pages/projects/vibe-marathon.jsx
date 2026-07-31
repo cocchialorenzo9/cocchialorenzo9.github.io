@@ -4,7 +4,7 @@ import Link from '@docusaurus/Link';
 import {
   ComposedChart, LineChart, BarChart, PieChart, ScatterChart,
   Line, Bar, Area, Pie, Cell, Scatter,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceArea, ReferenceLine, ResponsiveContainer,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceArea, ResponsiveContainer,
 } from 'recharts';
 import { typeColors, typeLabels, activityLabel, formatPace, useIsMobile, RecentSessionCard } from './_vibeMarathonShared';
 
@@ -13,16 +13,29 @@ const HISTORY_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-mara
 const PLAN_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/training-plan.json';
 const ZONE_HISTORY_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/zone-history.json';
 
-// Seiler Zone 1/2/3, anchored on LT1 (~125bpm, provisional heuristic) and LT2
-// (167bpm, device-reported) — analysis-only, separate from the Recovery/
-// Easy-Aerobic/Threshold prescription bands used elsewhere. See vibe-marathon's
-// CONTEXT.md "Zone history" section and docs/adr/0002-zone-history-analysis-only.md.
-const zoneColors = {
-  zone1_min: "#4CAF93",
-  zone2_min: "#E8A838",
-  zone3_min: "#E05C5C",
-};
-const dominantZoneColor = (zone) => zoneColors[`zone${zone}_min`] || "#999";
+// 5 fixed-bpm HR bands (not LT1/LT2-anchored Seiler zones — see
+// vibe-marathon's docs/adr/0003-hr-bands-replace-seiler-zones.md). %LT shown
+// for context only, computed against LT2=167bpm (device-reported); update if
+// that number changes.
+const BAND_DEFS = [
+  { key: 1, label: "<130bpm (<78% LT)", color: "#4CAF93" },
+  { key: 2, label: "130–140bpm (78–84% LT)", color: "#8BC34A" },
+  { key: 3, label: "140–155bpm (84–93% LT)", color: "#E8A838" },
+  { key: 4, label: "155–167bpm (93–100% LT)", color: "#E8894A" },
+  { key: 5, label: "167+bpm (100%+ LT)", color: "#E05C5C" },
+];
+
+function BandPaceTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+  const entry = payload.find(p => p.value != null);
+  if (!entry) return null;
+  return (
+    <div style={{ background: "#fff", border: "1px solid #e0e0e0", borderRadius: 8, padding: "8px 10px", fontSize: 12 }}>
+      <div style={{ color: "#666", marginBottom: 2 }}>{label}</div>
+      <div style={{ color: entry.stroke, fontWeight: 700 }}>{entry.name}: {formatPace(entry.value)}</div>
+    </div>
+  );
+}
 
 const phaseColors = {
   base: "#4CAF93",
@@ -107,15 +120,15 @@ const METRIC_GLOSSARY = [
     move: "Run longer, run harder, or both — duration counts linearly, intensity counts squared, so a small pace increase costs disproportionately more.",
   },
   {
-    term: "Training Zones (1/2/3)",
-    what: "How each run's minutes split across the research-standard Seiler zones: Zone 1 below your aerobic threshold (LT1, ~125bpm, a provisional estimate — no direct test yet), Zone 2 between LT1 and your lactate threshold (LT2, 167bpm, device-reported), Zone 3 above LT2. Running sessions only — analysis of what actually happened, separate from this plan's own easy/recovery/long HR targets.",
-    read: "Zone 2 dominating easy/long runs isn't automatically bad, but research on marathon and Ironman athletes links a Zone-2-heavy mix with worse race outcomes versus a more polarized (mostly Zone 1, some Zone 3) split.",
-    move: "Slowing down on easy days shifts minutes from Zone 2 toward Zone 1. LT1 is a heuristic, not measured — treat the Zone 1/2 boundary as approximate until a real test exists.",
+    term: "HR bands",
+    what: "5 fixed heart-rate bands used to classify each run's minutes: <130bpm, 130-140, 140-155, 155-167, 167+ (the top edge is your lactate threshold, LT2, 167bpm device-reported). These are plain round bpm numbers, not derived from an estimated aerobic threshold — %LT is shown for context only, it doesn't define the boundaries. Running sessions only — analysis of what actually happened, separate from this plan's own easy/recovery/long HR targets.",
+    read: "A run's dominant band is whichever one has the most minutes — that's the closest thing to \"what kind of run was this\" available without a per-second GPS pace track.",
+    move: "There's no prescription tied to these bands (unlike the easy/recovery/long HR targets elsewhere) — they're purely descriptive, for comparing pace across runs.",
   },
   {
-    term: "Pace vs. zone",
-    what: "Each run's average pace (min/km) against the zone it was dominated by (the zone with the most minutes) and its average %LT. There's no GPS distance recorded minute-by-minute, so pace can't be split by zone within a single run — this compares whole runs to each other instead.",
-    read: "If recent runs sit at a faster pace for the same (or lower) %LT than older runs, that's a real efficiency gain — the heart is doing less work for the same speed.",
+    term: "Pace by band / Pace vs. effort",
+    what: "Each run's average pace (min/km) against the HR band it was mostly in (\"Pace by band\") or against its average %LT (\"Pace vs. effort\"). There's no GPS distance recorded minute-by-minute, so pace can't be split within a single run — these compare whole runs to each other instead.",
+    read: "If recent runs sit at a faster pace for the same (or lower) band/%LT than older runs, that's a real efficiency gain — the heart is doing less work for the same speed.",
     move: "Track this over months, not days — week-to-week noise (heat, fatigue, terrain) swamps small efficiency gains in the short term.",
   },
 ];
@@ -340,6 +353,13 @@ export default function VibeDashboard() {
   const paceHalf = Math.ceil(paceRuns.length / 2);
   const paceEarlier = paceRuns.slice(0, paceHalf);
   const paceRecent = paceRuns.slice(paceHalf);
+  const bandPaceData = paceRuns.map(e => {
+    const row = { date: e.date };
+    BAND_DEFS.forEach(b => {
+      row[`band${b.key}_pace`] = e.dominant_band === b.key ? e.avg_pace_min_km : null;
+    });
+    return row;
+  });
   const weeklyVol = groupByWeek(history);
   const trainingMix = groupByType(history);
   const hasCharts = history.length > 0;
@@ -685,61 +705,37 @@ export default function VibeDashboard() {
               </div>
             )}
 
-            {/* Training Zones (Zone 1/2/3) — running sessions only */}
-            {zoneLast60.length > 0 && (
-              <div style={{ marginBottom: 32 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 4 }}>
-                  Training Zones — running sessions
-                </h3>
-                <p style={{ fontSize: 12, color: "#888", margin: "0 0 12px 0", lineHeight: 1.5 }}>
-                  Minutes per run in Zone 1/2/3 (see the glossary above) plus average %LT.
-                  Running days only — gaps are non-running or rest days, not zero effort.
-                </p>
-                <ResponsiveContainer width="100%" height={220}>
-                  <ComposedChart data={zoneLast60} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-                    <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={Math.floor(zoneLast60.length / 8)} />
-                    <YAxis yAxisId="left" tick={{ fontSize: 10 }} label={{ value: 'min', angle: -90, position: 'insideLeft', fontSize: 10 }} />
-                    <YAxis yAxisId="right" orientation="right" domain={[50, 110]} tick={{ fontSize: 10 }} label={{ value: '%LT', angle: 90, position: 'insideRight', fontSize: 10 }} />
-                    <Tooltip />
-                    <Legend iconSize={10} wrapperStyle={{ fontSize: 12 }} />
-                    <ReferenceLine yAxisId="right" y={75} stroke="#4CAF93" strokeDasharray="3 3" label={{ value: 'LT1', fontSize: 10, fill: '#4CAF93', position: 'insideTopLeft' }} />
-                    <ReferenceLine yAxisId="right" y={100} stroke="#E05C5C" strokeDasharray="3 3" label={{ value: 'LT2', fontSize: 10, fill: '#E05C5C', position: 'insideTopLeft' }} />
-                    <Bar yAxisId="left" dataKey="zone1_min" stackId="zones" fill={zoneColors.zone1_min} name="Zone 1 (min)" />
-                    <Bar yAxisId="left" dataKey="zone2_min" stackId="zones" fill={zoneColors.zone2_min} name="Zone 2 (min)" />
-                    <Bar yAxisId="left" dataKey="zone3_min" stackId="zones" fill={zoneColors.zone3_min} name="Zone 3 (min)" radius={[3, 3, 0, 0]} />
-                    <Line yAxisId="right" type="monotone" dataKey="avg_pct_lt" stroke="#1a1a2e" dot={{ r: 2 }} name="Avg %LT" strokeWidth={1.5} />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-
-            {/* Pace per run, colored by dominant zone */}
+            {/* Pace by HR band — one line per band, dots = runs dominated by that band */}
             {paceRuns.length > 0 && (
               <div style={{ marginBottom: 32 }}>
                 <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 4 }}>
-                  Pace per run
+                  Pace by HR band
                 </h3>
                 <p style={{ fontSize: 12, color: "#888", margin: "0 0 12px 0", lineHeight: 1.5 }}>
-                  Average pace per run, bar color = dominant zone (see glossary above). Lower bars = faster.
+                  Each run's pace, plotted on the line for whichever HR band it was mostly in (see
+                  glossary above). Lower = faster. Dots on the same band are connected across runs;
+                  hover a dot to see just that band's value.
                 </p>
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={paceRuns} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                <ResponsiveContainer width="100%" height={240}>
+                  <LineChart data={bandPaceData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-                    <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={Math.floor(paceRuns.length / 8)} />
+                    <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={Math.floor(bandPaceData.length / 8)} />
                     <YAxis tick={{ fontSize: 10 }} label={{ value: 'min/km', angle: -90, position: 'insideLeft', fontSize: 10 }} domain={['dataMin - 0.3', 'dataMax + 0.3']} />
-                    <Tooltip formatter={(value, name) => name === "avg_pace_min_km" ? [formatPace(value), "Pace"] : [value, name]} />
-                    <Legend
-                      iconSize={10}
-                      wrapperStyle={{ fontSize: 12 }}
-                      payload={[1, 2, 3].map(z => ({ value: `Zone ${z}`, type: "square", color: dominantZoneColor(z) }))}
-                    />
-                    <Bar dataKey="avg_pace_min_km" name="avg_pace_min_km" radius={[3, 3, 0, 0]}>
-                      {paceRuns.map((e, i) => (
-                        <Cell key={i} fill={dominantZoneColor(e.dominant_zone)} />
-                      ))}
-                    </Bar>
-                  </BarChart>
+                    <Tooltip content={<BandPaceTooltip />} />
+                    <Legend iconSize={10} wrapperStyle={{ fontSize: 12 }} />
+                    {BAND_DEFS.map(b => (
+                      <Line
+                        key={b.key}
+                        type="monotone"
+                        dataKey={`band${b.key}_pace`}
+                        name={b.label}
+                        stroke={b.color}
+                        strokeWidth={2}
+                        dot={{ r: 4 }}
+                        connectNulls
+                      />
+                    ))}
+                  </LineChart>
                 </ResponsiveContainer>
               </div>
             )}
