@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import {
-  ComposedChart, LineChart, BarChart, PieChart,
-  Line, Bar, Area, Pie, Cell,
+  ComposedChart, LineChart, BarChart, PieChart, ScatterChart,
+  Line, Bar, Area, Pie, Cell, Scatter,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceArea, ReferenceLine, ResponsiveContainer,
 } from 'recharts';
 import { typeColors, typeLabels, activityLabel, formatPace, useIsMobile, RecentSessionCard } from './_vibeMarathonShared';
@@ -22,6 +22,7 @@ const zoneColors = {
   zone2_min: "#E8A838",
   zone3_min: "#E05C5C",
 };
+const dominantZoneColor = (zone) => zoneColors[`zone${zone}_min`] || "#999";
 
 const phaseColors = {
   base: "#4CAF93",
@@ -110,6 +111,12 @@ const METRIC_GLOSSARY = [
     what: "How each run's minutes split across the research-standard Seiler zones: Zone 1 below your aerobic threshold (LT1, ~125bpm, a provisional estimate — no direct test yet), Zone 2 between LT1 and your lactate threshold (LT2, 167bpm, device-reported), Zone 3 above LT2. Running sessions only — analysis of what actually happened, separate from this plan's own easy/recovery/long HR targets.",
     read: "Zone 2 dominating easy/long runs isn't automatically bad, but research on marathon and Ironman athletes links a Zone-2-heavy mix with worse race outcomes versus a more polarized (mostly Zone 1, some Zone 3) split.",
     move: "Slowing down on easy days shifts minutes from Zone 2 toward Zone 1. LT1 is a heuristic, not measured — treat the Zone 1/2 boundary as approximate until a real test exists.",
+  },
+  {
+    term: "Pace vs. zone",
+    what: "Each run's average pace (min/km) against the zone it was dominated by (the zone with the most minutes) and its average %LT. There's no GPS distance recorded minute-by-minute, so pace can't be split by zone within a single run — this compares whole runs to each other instead.",
+    read: "If recent runs sit at a faster pace for the same (or lower) %LT than older runs, that's a real efficiency gain — the heart is doing less work for the same speed.",
+    move: "Track this over months, not days — week-to-week noise (heat, fatigue, terrain) swamps small efficiency gains in the short term.",
   },
 ];
 
@@ -329,6 +336,10 @@ export default function VibeDashboard() {
 
   const last90 = history.slice(-90).map(e => ({ ...e, date: e.date?.slice(5) }));
   const zoneLast60 = zoneHistory.slice(-60).map(e => ({ ...e, date: e.date?.slice(5) }));
+  const paceRuns = zoneLast60.filter(e => e.avg_pace_min_km != null);
+  const paceHalf = Math.ceil(paceRuns.length / 2);
+  const paceEarlier = paceRuns.slice(0, paceHalf);
+  const paceRecent = paceRuns.slice(paceHalf);
   const weeklyVol = groupByWeek(history);
   const trainingMix = groupByType(history);
   const hasCharts = history.length > 0;
@@ -699,6 +710,64 @@ export default function VibeDashboard() {
                     <Bar yAxisId="left" dataKey="zone3_min" stackId="zones" fill={zoneColors.zone3_min} name="Zone 3 (min)" radius={[3, 3, 0, 0]} />
                     <Line yAxisId="right" type="monotone" dataKey="avg_pct_lt" stroke="#1a1a2e" dot={{ r: 2 }} name="Avg %LT" strokeWidth={1.5} />
                   </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {/* Pace per run, colored by dominant zone */}
+            {paceRuns.length > 0 && (
+              <div style={{ marginBottom: 32 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 4 }}>
+                  Pace per run
+                </h3>
+                <p style={{ fontSize: 12, color: "#888", margin: "0 0 12px 0", lineHeight: 1.5 }}>
+                  Average pace per run, bar color = dominant zone (see glossary above). Lower bars = faster.
+                </p>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={paceRuns} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                    <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={Math.floor(paceRuns.length / 8)} />
+                    <YAxis tick={{ fontSize: 10 }} label={{ value: 'min/km', angle: -90, position: 'insideLeft', fontSize: 10 }} domain={['dataMin - 0.3', 'dataMax + 0.3']} />
+                    <Tooltip formatter={(value, name) => name === "avg_pace_min_km" ? [formatPace(value), "Pace"] : [value, name]} />
+                    <Legend
+                      iconSize={10}
+                      wrapperStyle={{ fontSize: 12 }}
+                      payload={[1, 2, 3].map(z => ({ value: `Zone ${z}`, type: "square", color: dominantZoneColor(z) }))}
+                    />
+                    <Bar dataKey="avg_pace_min_km" name="avg_pace_min_km" radius={[3, 3, 0, 0]}>
+                      {paceRuns.map((e, i) => (
+                        <Cell key={i} fill={dominantZoneColor(e.dominant_zone)} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {/* Pace vs. effort (%LT) — earlier vs. recent runs */}
+            {paceRuns.length > 0 && (
+              <div style={{ marginBottom: 32 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 4 }}>
+                  Pace vs. effort
+                </h3>
+                <p style={{ fontSize: 12, color: "#888", margin: "0 0 12px 0", lineHeight: 1.5 }}>
+                  Each dot is one run: effort (avg %LT) vs. pace. "Recent" dots sitting lower/left of
+                  "Earlier" dots (faster pace at the same or lower effort) would signal real efficiency gains.
+                </p>
+                <ResponsiveContainer width="100%" height={220}>
+                  <ScatterChart margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                    <XAxis type="number" dataKey="avg_pct_lt" name="Avg %LT" unit="%" tick={{ fontSize: 10 }} domain={['dataMin - 5', 'dataMax + 5']} label={{ value: '%LT', position: 'insideBottom', offset: -5, fontSize: 10 }} />
+                    <YAxis type="number" dataKey="avg_pace_min_km" name="Pace" tick={{ fontSize: 10 }} domain={['dataMin - 0.3', 'dataMax + 0.3']} label={{ value: 'min/km', angle: -90, position: 'insideLeft', fontSize: 10 }} />
+                    <Tooltip
+                      cursor={{ strokeDasharray: '3 3' }}
+                      formatter={(value, name) => name === "Pace" ? [formatPace(value), name] : [`${value}%`, name]}
+                      labelFormatter={() => ""}
+                    />
+                    <Legend iconSize={10} wrapperStyle={{ fontSize: 12 }} />
+                    <Scatter name="Earlier" data={paceEarlier} fill="#bbb" />
+                    <Scatter name="Recent" data={paceRecent} fill="#1a1a2e" />
+                  </ScatterChart>
                 </ResponsiveContainer>
               </div>
             )}
