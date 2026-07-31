@@ -4,13 +4,24 @@ import Link from '@docusaurus/Link';
 import {
   ComposedChart, LineChart, BarChart, PieChart,
   Line, Bar, Area, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceArea, ResponsiveContainer,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceArea, ReferenceLine, ResponsiveContainer,
 } from 'recharts';
 import { typeColors, typeLabels, activityLabel, formatPace, useIsMobile, RecentSessionCard } from './_vibeMarathonShared';
 
 const COACH_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/coach.json';
 const HISTORY_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/chart-data.json';
 const PLAN_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/training-plan.json';
+const ZONE_HISTORY_URL = 'https://raw.githubusercontent.com/cocchialorenzo9/vibe-marathon/main/data/zone-history.json';
+
+// Seiler Zone 1/2/3, anchored on LT1 (~125bpm, provisional heuristic) and LT2
+// (167bpm, device-reported) — analysis-only, separate from the Recovery/
+// Easy-Aerobic/Threshold prescription bands used elsewhere. See vibe-marathon's
+// CONTEXT.md "Zone history" section and docs/adr/0002-zone-history-analysis-only.md.
+const zoneColors = {
+  zone1_min: "#4CAF93",
+  zone2_min: "#E8A838",
+  zone3_min: "#E05C5C",
+};
 
 const phaseColors = {
   base: "#4CAF93",
@@ -93,6 +104,12 @@ const METRIC_GLOSSARY = [
     what: "One number per day combining how long you went and how hard, so a short brutal session and a long easy run can both be measured on the same scale. 100 ≈ one hour at your lactate-threshold effort.",
     read: "Higher = more taxing. A run that didn't feel hard can still score high if heart rate sat above the easy zone for a long time.",
     move: "Run longer, run harder, or both — duration counts linearly, intensity counts squared, so a small pace increase costs disproportionately more.",
+  },
+  {
+    term: "Training Zones (1/2/3)",
+    what: "How each run's minutes split across the research-standard Seiler zones: Zone 1 below your aerobic threshold (LT1, ~125bpm, a provisional estimate — no direct test yet), Zone 2 between LT1 and your lactate threshold (LT2, 167bpm, device-reported), Zone 3 above LT2. Running sessions only — analysis of what actually happened, separate from this plan's own easy/recovery/long HR targets.",
+    read: "Zone 2 dominating easy/long runs isn't automatically bad, but research on marathon and Ironman athletes links a Zone-2-heavy mix with worse race outcomes versus a more polarized (mostly Zone 1, some Zone 3) split.",
+    move: "Slowing down on easy days shifts minutes from Zone 2 toward Zone 1. LT1 is a heuristic, not measured — treat the Zone 1/2 boundary as approximate until a real test exists.",
   },
 ];
 
@@ -277,6 +294,7 @@ export default function VibeDashboard() {
   const [coach, setCoach] = useState(null);
   const [history, setHistory] = useState([]);
   const [plan, setPlan] = useState(null);
+  const [zoneHistory, setZoneHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
 
@@ -285,10 +303,12 @@ export default function VibeDashboard() {
       fetch(COACH_URL).then(r => r.json()).catch(() => null),
       fetch(HISTORY_URL).then(r => r.json()).catch(() => []),
       fetch(PLAN_URL).then(r => r.json()).catch(() => null),
-    ]).then(([coachData, histData, planData]) => {
+      fetch(ZONE_HISTORY_URL).then(r => r.json()).catch(() => []),
+    ]).then(([coachData, histData, planData, zoneData]) => {
       setCoach(coachData);
       setHistory(Array.isArray(histData) ? histData : []);
       setPlan(planData);
+      setZoneHistory(Array.isArray(zoneData) ? zoneData : []);
       setLoading(false);
     });
   }, []);
@@ -308,6 +328,7 @@ export default function VibeDashboard() {
   const noHistory = readiness?.score != null && history.length === 0;
 
   const last90 = history.slice(-90).map(e => ({ ...e, date: e.date?.slice(5) }));
+  const zoneLast60 = zoneHistory.slice(-60).map(e => ({ ...e, date: e.date?.slice(5) }));
   const weeklyVol = groupByWeek(history);
   const trainingMix = groupByType(history);
   const hasCharts = history.length > 0;
@@ -649,6 +670,35 @@ export default function VibeDashboard() {
                     <ReferenceArea y1={70} y2={100} fill="#4CAF93" fillOpacity={0.08} />
                     <Line type="monotone" dataKey="readiness_score" stroke="#1a1a2e" dot={false} name="Readiness" strokeWidth={2} />
                   </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {/* Training Zones (Zone 1/2/3) — running sessions only */}
+            {zoneLast60.length > 0 && (
+              <div style={{ marginBottom: 32 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 4 }}>
+                  Training Zones — running sessions
+                </h3>
+                <p style={{ fontSize: 12, color: "#888", margin: "0 0 12px 0", lineHeight: 1.5 }}>
+                  Minutes per run in Zone 1/2/3 (see the glossary above) plus average %LT.
+                  Running days only — gaps are non-running or rest days, not zero effort.
+                </p>
+                <ResponsiveContainer width="100%" height={220}>
+                  <ComposedChart data={zoneLast60} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+                    <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={Math.floor(zoneLast60.length / 8)} />
+                    <YAxis yAxisId="left" tick={{ fontSize: 10 }} label={{ value: 'min', angle: -90, position: 'insideLeft', fontSize: 10 }} />
+                    <YAxis yAxisId="right" orientation="right" domain={[50, 110]} tick={{ fontSize: 10 }} label={{ value: '%LT', angle: 90, position: 'insideRight', fontSize: 10 }} />
+                    <Tooltip />
+                    <Legend iconSize={10} wrapperStyle={{ fontSize: 12 }} />
+                    <ReferenceLine yAxisId="right" y={75} stroke="#4CAF93" strokeDasharray="3 3" label={{ value: 'LT1', fontSize: 10, fill: '#4CAF93', position: 'insideTopLeft' }} />
+                    <ReferenceLine yAxisId="right" y={100} stroke="#E05C5C" strokeDasharray="3 3" label={{ value: 'LT2', fontSize: 10, fill: '#E05C5C', position: 'insideTopLeft' }} />
+                    <Bar yAxisId="left" dataKey="zone1_min" stackId="zones" fill={zoneColors.zone1_min} name="Zone 1 (min)" />
+                    <Bar yAxisId="left" dataKey="zone2_min" stackId="zones" fill={zoneColors.zone2_min} name="Zone 2 (min)" />
+                    <Bar yAxisId="left" dataKey="zone3_min" stackId="zones" fill={zoneColors.zone3_min} name="Zone 3 (min)" radius={[3, 3, 0, 0]} />
+                    <Line yAxisId="right" type="monotone" dataKey="avg_pct_lt" stroke="#1a1a2e" dot={{ r: 2 }} name="Avg %LT" strokeWidth={1.5} />
+                  </ComposedChart>
                 </ResponsiveContainer>
               </div>
             )}
