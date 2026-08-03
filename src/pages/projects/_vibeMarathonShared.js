@@ -33,7 +33,7 @@ const activityLabels = {
 
 export function activityLabel(type) {
   if (activityLabels[type]) return activityLabels[type];
-  if (!type) return "Session";
+  if (typeof type !== "string" || !type) return "Session";
   return type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
@@ -58,7 +58,7 @@ export function RecentSessionCard({ session }) {
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
         <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1a2e" }}>{dateStr}</span>
-        <span style={{ fontSize: 12, fontWeight: 600, color: "#666" }}>{activityLabel(session.type)}</span>
+        <span style={{ fontSize: 12, fontWeight: 600, color: "#666" }}>{activityLabel(session.type_name)}</span>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginLeft: "auto" }}>
           {session.distance_km != null && (
             <span style={{ background: "#f5f5f5", borderRadius: 6, padding: "2px 8px", fontSize: 11, color: "#555" }}>
