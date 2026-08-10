@@ -188,12 +188,12 @@ function groupByType(history) {
   }));
 }
 
-const RUNNING_TYPES = new Set(['easy', 'tempo', 'long', 'medium-long', 'race']);
-
-function groupByWeek(history) {
+// Takes zoneHistory (not the plan-driven `history`) — every entry there is
+// already a device-registered running session (see build_zone_history.py in
+// the vibe-marathon repo), so no recommendation_type filtering is needed.
+function groupByWeek(runs) {
   const weeks = {};
-  for (const entry of history) {
-    if (!RUNNING_TYPES.has(entry.recommendation_type)) continue;
+  for (const entry of runs) {
     const d = new Date(entry.date + 'T00:00:00');
     const startOfYear = new Date(d.getFullYear(), 0, 1);
     const weekNum = Math.ceil(((d - startOfYear) / 86400000 + startOfYear.getDay() + 1) / 7);
@@ -368,7 +368,7 @@ export default function VibeDashboard() {
     });
     return row;
   });
-  const weeklyVol = groupByWeek(history);
+  const weeklyVol = groupByWeek(zoneHistory);
   const trainingMix = groupByType(history);
   const hasCharts = history.length > 0;
 
@@ -789,13 +789,13 @@ export default function VibeDashboard() {
                       Weekly Volume (km)
                     </h3>
                     <ResponsiveContainer width="100%" height={160}>
-                      <BarChart data={weeklyVol} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                      <LineChart data={weeklyVol} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
                         <XAxis dataKey="week" tick={{ fontSize: 10 }} />
                         <YAxis tick={{ fontSize: 10 }} />
                         <Tooltip />
-                        <Bar dataKey="distance_km" fill="#4CAF93" name="km" radius={[4, 4, 0, 0]} />
-                      </BarChart>
+                        <Line type="monotone" dataKey="distance_km" name="km" stroke="#4CAF93" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                      </LineChart>
                     </ResponsiveContainer>
                   </div>
                 )}
