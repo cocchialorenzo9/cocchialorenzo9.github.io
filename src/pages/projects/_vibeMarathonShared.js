@@ -60,11 +60,9 @@ export function RecentSessionCard({ session }) {
         <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1a2e" }}>{dateStr}</span>
         <span style={{ fontSize: 12, fontWeight: 600, color: "#666" }}>{activityLabel(session.type_name)}</span>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginLeft: "auto" }}>
-          {session.distance_km != null && (
-            <span style={{ background: "#f5f5f5", borderRadius: 6, padding: "2px 8px", fontSize: 11, color: "#555" }}>
-              {session.distance_km.toFixed(1)} km
-            </span>
-          )}
+          <span style={{ background: "#f5f5f5", borderRadius: 6, padding: "2px 8px", fontSize: 11, color: "#555" }}>
+            {session.distance_km != null ? `${session.distance_km.toFixed(1)} km` : "— km"}
+          </span>
           {session.avg_pace_min_km != null && (
             <span style={{ background: "#f5f5f5", borderRadius: 6, padding: "2px 8px", fontSize: 11, color: "#555" }}>
               {formatPace(session.avg_pace_min_km)}

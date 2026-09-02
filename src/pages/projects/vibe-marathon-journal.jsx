@@ -34,11 +34,9 @@ function JournalEntryCard({ entry }) {
           </span>
         )}
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginLeft: "auto" }}>
-          {entry.distance_km != null && (
-            <span style={{ background: "#f5f5f5", borderRadius: 6, padding: "2px 8px", fontSize: 11, color: "#555" }}>
-              {entry.distance_km.toFixed(1)} km
-            </span>
-          )}
+          <span style={{ background: "#f5f5f5", borderRadius: 6, padding: "2px 8px", fontSize: 11, color: "#555" }}>
+            {entry.distance_km != null ? `${entry.distance_km.toFixed(1)} km` : "— km"}
+          </span>
           {entry.avg_pace_min_km != null && (
             <span style={{ background: "#f5f5f5", borderRadius: 6, padding: "2px 8px", fontSize: 11, color: "#555" }}>
               {formatPace(entry.avg_pace_min_km)}
