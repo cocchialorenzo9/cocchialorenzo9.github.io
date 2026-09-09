@@ -3,8 +3,9 @@ import Layout from '@theme/Layout';
 import { ref, onValue, update, set } from 'firebase/database';
 import { db, HOME_STATE_PATH } from '../lib/firebase';
 
-const PIN_STORAGE_KEY = 'homePinMode';
-const PINS = { '1234': 'readonly', '2680': 'edit' };
+// Legacy key from the old two-PIN scheme; cleared on mount, no longer read.
+const LEGACY_PIN_STORAGE_KEY = 'homePinMode';
+const EDIT_PIN = '2690';
 
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2 };
 const PRIORITY_LABELS = { high: '🔴 Must', medium: '🟡 Soon', low: '🟢 Nice to have' };
@@ -141,40 +142,6 @@ function CategoryPickerCard({ card, rooms, onMove, onClose }) {
             {room.emoji} {room.name}
           </button>
         ))}
-      </div>
-    </div>
-  );
-}
-
-// ── PIN gate (full-screen) ──────────────────────────────────────────────────────
-
-function PinGate({ onUnlock }) {
-  const [value, setValue] = useState('');
-  const [error, setError] = useState(false);
-
-  function submit() {
-    if (onUnlock(value.trim())) return;
-    setError(true);
-    setValue('');
-  }
-
-  return (
-    <div style={s.pinGateWrap}>
-      <div style={s.pinGateCard}>
-        <span style={{ fontSize: 40 }}>🔒</span>
-        <h2 style={s.pinGateTitle}>Enter PIN</h2>
-        <input
-          autoFocus
-          type="password"
-          inputMode="numeric"
-          value={value}
-          onChange={e => { setValue(e.target.value); setError(false); }}
-          onKeyDown={e => { if (e.key === 'Enter') submit(); }}
-          placeholder="••••"
-          style={s.pinInput}
-        />
-        {error && <div style={s.pinError}>Incorrect PIN.</div>}
-        <button style={s.wizardBtnPrimary} onClick={submit}>Unlock</button>
       </div>
     </div>
   );
@@ -1535,10 +1502,7 @@ function UtilitiesTab({ utilities }) {
 // ── Styles ────────────────────────────────────────────────────────────────────
 
 const s = {
-  // PIN gate
-  pinGateWrap: { minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' },
-  pinGateCard: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, background: '#fff', border: '1px solid #f0ebe3', borderRadius: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.06)', padding: '32px 28px', minWidth: 240 },
-  pinGateTitle: { margin: 0, fontSize: 18, fontWeight: 700, color: '#1c1917' },
+  // PIN input (unlock-editing popover)
   pinInput: { fontSize: 18, letterSpacing: '0.3em', textAlign: 'center', border: '1px solid #e7e5e4', borderRadius: 10, padding: '10px 14px', width: 140 },
   pinError: { fontSize: 12, color: '#dc2626' },
   // Lock / unlock-editing control
@@ -1656,30 +1620,30 @@ const s = {
 // ── Page root ─────────────────────────────────────────────────────────────────
 
 export default function Home() {
-  const [mode, setMode] = useState(() => (
-    typeof window !== 'undefined' ? localStorage.getItem(PIN_STORAGE_KEY) : null
-  ));
+  // Read-only for everyone by default. Entering the edit PIN flips this on for
+  // the session only — it is never persisted, so a reload returns to read-only.
+  const [canEdit, setCanEdit] = useState(false);
+
+  // One-time cleanup of the old two-PIN scheme's localStorage value.
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(LEGACY_PIN_STORAGE_KEY);
+    }
+  }, []);
 
   function unlock(pin) {
-    const resolved = PINS[pin];
-    if (!resolved) return false;
-    localStorage.setItem(PIN_STORAGE_KEY, resolved);
-    setMode(resolved);
+    if (pin !== EDIT_PIN) return false;
+    setCanEdit(true);
     return true;
   }
 
   function lock() {
-    localStorage.removeItem(PIN_STORAGE_KEY);
-    setMode(null);
+    setCanEdit(false);
   }
 
   return (
     <Layout title="Our Home" description="">
-      {mode ? (
-        <HomeApp canEdit={mode === 'edit'} onLock={lock} onUnlockEdit={unlock} />
-      ) : (
-        <PinGate onUnlock={unlock} />
-      )}
+      <HomeApp canEdit={canEdit} onLock={lock} onUnlockEdit={unlock} />
     </Layout>
   );
 }
