@@ -12,6 +12,15 @@ const PROJECTS = [
     emoji: "🏃",
   },
   {
+    slug: "vibe-plant-watering",
+    path: "https://cocchialorenzo9.github.io/vibe-plant-watering",
+    name: "Vibe Plant Watering",
+    description: "Plant care tracker — watering schedules and reminders for every plant.",
+    status: "Active",
+    statusColor: "#4CAF93",
+    emoji: "🪴",
+  },
+  {
     slug: "home",
     path: "/home",
     name: "Our Home",
