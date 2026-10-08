@@ -36,7 +36,7 @@ const PROJECTS: Project[] = [
     description:
       'My own marathon coach. Every day it pulls my training data from Garmin, computes fitness and fatigue (ATL, CTL, TSB) and writes a coaching tip for the day. The dashboard shows readiness, training load and charts.',
     status: 'live',
-    img: '/img/site/project-vibe-marathon.jpg',
+    img: '/img/site/project-vibe-marathon.webp',
     alt: 'Abstract dashboard with a heart-rate line and training bars',
     featured: true,
     tags: ['Python', 'Garmin data', 'React', 'GitHub Pages'],
@@ -52,7 +52,7 @@ const PROJECTS: Project[] = [
     emojiLabel: 'Plant',
     description: 'A plant care tracker with watering schedules and reminders for every plant at home. No more sad leaves.',
     status: 'live',
-    img: '/img/site/project-plant-watering.jpg',
+    img: '/img/site/project-plant-watering.webp',
     alt: 'Illustration of a potted plant with water drops',
     href: 'https://cocchialorenzo9.github.io/vibe-plant-watering',
   },
@@ -63,7 +63,7 @@ const PROJECTS: Project[] = [
     description:
       'A shared move-in checklist and shopping list, synced live: rooms, priorities and where to buy each item — plus research reports for the big buys.',
     status: 'live',
-    img: '/img/site/project-our-home.jpg',
+    img: '/img/site/project-our-home.webp',
     alt: 'Illustration of a small house next to a checklist',
     href: '/home',
     passwordProtected: true,
@@ -75,7 +75,7 @@ const PROJECTS: Project[] = [
     description:
       'Job hunting like a dating app. An AI agent finds roles that fit, I swipe, and it learns from every like. Next step: sharing it with friends as a Claude plugin.',
     status: 'in-progress',
-    img: '/img/site/project-job-swipe.jpg',
+    img: '/img/site/project-job-swipe.webp',
     alt: 'Illustration of swipeable job cards with a like and a pass button',
   },
 ];
@@ -116,7 +116,7 @@ function Featured({ p }: { p: Project }) {
   return (
     <section aria-label="Featured project" className={clsx(site.container, styles.featuredSection)}>
       <article className={styles.featured}>
-        <img src={p.img} alt={p.alt} className={styles.featuredImg} />
+        <img src={p.img} alt={p.alt} className={styles.featuredImg} width={1200} height={900} />
         <div className={styles.featuredBody}>
           <div className={styles.badgeRow}>
             <StatusBadge status={p.status} dark />

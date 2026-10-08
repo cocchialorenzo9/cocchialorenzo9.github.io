@@ -225,6 +225,13 @@
   border-radius: 999px;
   font-weight: 700;
   font-size: clamp(17px, 1.6vw, 22px);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+/* Ink fill instead of the global blue hover, which is unreadable on orange. */
+.footerBtnOutline:hover {
+  background: #141414;
+  color: #ff5b2e;
 }
 
 .footerBottom {
@@ -275,7 +282,8 @@
   }
 
   .lift,
-  .navLink::after {
+  .navLink::after,
+  .footerBtnOutline {
     transition: none;
   }
 

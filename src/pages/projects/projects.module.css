@@ -210,7 +210,8 @@
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.card:hover {
+/* Only clickable cards lift, so "Coming soon" ones don't look like links. */
+.card.cardLink:hover {
   transform: translateY(-6px);
   box-shadow: 6px 6px 0 #141414;
 }
@@ -262,7 +263,7 @@
   transition: transform 0.2s ease;
 }
 
-.card:hover .arrow {
+.cardLink:hover .arrow {
   transform: translateX(4px);
 }
 
@@ -278,7 +279,7 @@
     transition: none;
   }
 
-  .card:hover {
+  .card.cardLink:hover {
     transform: none;
   }
 }

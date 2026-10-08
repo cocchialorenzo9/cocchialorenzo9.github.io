@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import SitePage from '@site/src/components/site/SitePage';
 import SiteNav, { NavLink } from '@site/src/components/site/SiteNav';
 import SiteFooter from '@site/src/components/site/SiteFooter';
+import SmartLink from '@site/src/components/site/SmartLink';
 import { C } from '@site/src/components/site/tokens';
 import site from '@site/src/components/site/site.module.css';
 import styles from './index.module.css';
@@ -95,25 +96,25 @@ const STRENGTHS = [
   {
     title: 'Engineering that ships',
     text: 'Full-stack in Java, Spring Boot, React and GraphQL. I design services from zero and deploy them on AWS with Terraform and Docker.',
-    img: '/img/site/strength-engineering.jpg',
+    img: '/img/site/strength-engineering.webp',
     alt: 'Abstract illustration of colorful stacked building blocks',
   },
   {
     title: 'Product ownership',
     text: "PSPO certified. I set priorities with leadership, run Scrum teams, and say “no” to the features that don't move the needle.",
-    img: '/img/site/strength-product.jpg',
+    img: '/img/site/strength-product.webp',
     alt: 'Abstract illustration of a target with an arrow in the center',
   },
   {
     title: 'Listening to users',
     text: 'Interviews, focus groups, usability tests with UEQ scores, and prototypes in Figma. I bring developers into the room too.',
-    img: '/img/site/strength-users.jpg',
+    img: '/img/site/strength-users.webp',
     alt: 'Abstract halftone illustration with speech bubbles',
   },
   {
     title: 'AI, made useful',
     text: "I've owned an AI assistant product and use AI every day to prototype and code faster. Simple for non-technical users is the goal.",
-    img: '/img/site/strength-ai.jpg',
+    img: '/img/site/strength-ai.webp',
     alt: 'Abstract illustration of colorful flowing lines on black',
   },
 ];
@@ -125,6 +126,7 @@ type WorkItem = {
   img?: string;
   alt?: string;
   quote?: string;
+  link?: { label: string; href: string };
 };
 
 const WORK: WorkItem[] = [
@@ -132,14 +134,14 @@ const WORK: WorkItem[] = [
     title: 'An AI assistant, from idea to customers',
     text: 'I owned the roadmap of an in-house AI assistant built for external sale. I led a Scrum team of four, ran usability tests with real users, and pitched it in customer demos.',
     tags: ['Product Owner', 'GenAI', 'UX research'],
-    img: '/img/site/work-ai-assistant.jpg',
+    img: '/img/site/work-ai-assistant.webp',
     alt: 'Abstract illustration of a chat conversation',
   },
   {
     title: 'An order history that helped win a €20M+ deal',
     text: 'For a B2B procurement platform, I built a key feature end to end — React and Apollo on top, a GraphQL layer over many REST services, Spring Boot below — in short loops with the UX team.',
     tags: ['Full-stack', 'React + GraphQL', 'Spring Boot'],
-    img: '/img/site/work-order-history.jpg',
+    img: '/img/site/work-order-history.webp',
     alt: 'Abstract illustration of stacked order cards',
   },
   {
@@ -152,7 +154,8 @@ const WORK: WorkItem[] = [
     title: 'How people feel playing AR in public',
     text: 'My master thesis became a paper. I presented it at QoMEX 2024 in Sweden and was nominated for the Best Student Award.',
     tags: ['Research', 'Augmented reality', 'Unity'],
-    img: '/img/site/work-ar-research.jpg',
+    link: { label: 'Read the paper on arXiv →', href: 'https://arxiv.org/abs/2404.16479' },
+    img: '/img/site/work-ar-research.webp',
     alt: 'Abstract illustration of figures standing on an isometric grid',
   },
 ];
@@ -236,7 +239,7 @@ function Hero() {
       <div className={styles.portrait}>
         <div className={styles.portraitBack} />
         <img
-          src="/img/site/portrait.jpg"
+          src="/img/site/portrait.webp"
           alt="Portrait of Lorenzo Cocchia, smiling with arms crossed"
           className={styles.portraitImg}
           width={1120}
@@ -261,18 +264,23 @@ function Hero() {
 }
 
 function Marquee() {
-  const items = (copy: number) =>
-    MARQUEE.map((m) => (
-      <React.Fragment key={`${copy}-${m.label}`}>
-        <span>{m.label}</span>
-        <span style={{ color: m.star }}>✦</span>
-      </React.Fragment>
-    ));
+  // Two identical copies, each with its own trailing gap, so translating the
+  // track by -50% lands exactly on the start of the second copy.
+  const copy = (
+    <div className={styles.marqueeCopy}>
+      {MARQUEE.map((m) => (
+        <React.Fragment key={m.label}>
+          <span>{m.label}</span>
+          <span style={{ color: m.star }}>✦</span>
+        </React.Fragment>
+      ))}
+    </div>
+  );
   return (
     <div aria-hidden="true" className={styles.marquee}>
       <div className={styles.marqueeTrack}>
-        {items(0)}
-        {items(1)}
+        {copy}
+        {copy}
       </div>
     </div>
   );
@@ -407,6 +415,11 @@ function Work() {
               </div>
               <h3 className={styles.workTitle}>{w.title}</h3>
               <p className={styles.workText}>{w.text}</p>
+              {w.link && (
+                <SmartLink href={w.link.href} className={styles.workLink}>
+                  {w.link.label}
+                </SmartLink>
+              )}
             </article>
           ))}
         </div>
@@ -448,7 +461,7 @@ function Life() {
     <section id="life" className={clsx(site.container, styles.life)}>
       <div className={styles.lifeVisual}>
         <img
-          src="/img/site/life-route.jpg"
+          src="/img/site/life-route.webp"
           alt="Abstract topographic map with a running route"
           className={styles.lifeImg}
           loading="lazy"
