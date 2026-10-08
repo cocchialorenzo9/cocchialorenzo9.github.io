@@ -38,7 +38,7 @@ The home page (`/`) and projects page (`/projects`) use a standalone design (lig
 
 ### How to update content
 
-Home content lives in arrays near the top of `src/pages/index.tsx` (`ROLES`, `BITS`, `MARQUEE`, `TIMELINE`, `LOGOS`, `NUMBERS`, `STRENGTHS`, `WORK`, `STEPS`, `LIFE`, `CONTACT`). Projects live in `PROJECTS` in `src/pages/projects/index.tsx`; set `featured: true` for the big card and `status` to `'live'` or `'in-progress'`.
+Home content lives in arrays near the top of `src/pages/index.tsx` (`ROLES`, `BITS`, `MARQUEE`, `TIMELINE`, `LOGOS`, `NUMBERS`, `STRENGTHS`, `WORK`, `STEPS`, `LIFE`, `CONTACT`). Projects live in `PROJECTS` in `src/pages/projects/index.tsx`; set `featured: true` for the big card `status` to `'live'` or `'in-progress'` (a zero counter is hidden), and `cta` to override the card's "Open app" label.
 
 ### Color palette
 

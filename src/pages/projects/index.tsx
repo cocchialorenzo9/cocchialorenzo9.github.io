@@ -22,6 +22,8 @@ type Project = {
   alt: string;
   // Card link; omit for projects that aren't public yet.
   href?: string;
+  // Card link label; defaults to "Open app".
+  cta?: string;
   passwordProtected?: boolean;
   featured?: boolean;
   tags?: string[];
@@ -74,9 +76,11 @@ const PROJECTS: Project[] = [
     emojiLabel: 'Heart',
     description:
       'Job hunting like a dating app. An AI agent finds roles that fit, I swipe, and it learns from every like. Next step: sharing it with friends as a Claude plugin.',
-    status: 'in-progress',
+    status: 'live',
     img: '/img/site/project-job-swipe.webp',
     alt: 'Illustration of swipeable job cards with a like and a pass button',
+    href: 'https://github.com/cocchialorenzo9/job-swipe',
+    cta: 'View on GitHub',
   },
 ];
 
@@ -175,7 +179,7 @@ function ProjectCard({ p }: { p: Project }) {
         <p className={styles.cardText}>{p.description}</p>
         {p.href ? (
           <span className={styles.cardCta}>
-            Open app <span className={styles.arrow}>→</span>
+            {p.cta ?? 'Open app'} <span className={styles.arrow}>→</span>
           </span>
         ) : (
           <span className={styles.cardSoon}>Coming soon</span>
@@ -201,7 +205,7 @@ export default function Projects(): JSX.Element {
     { value: PROJECTS.length, label: PROJECTS.length === 1 ? 'project' : 'projects', color: C.ink },
     { value: live, label: 'live now', color: C.green },
     { value: PROJECTS.length - live, label: 'in progress', color: C.rust },
-  ];
+  ].filter((s) => s.value > 0);
 
   return (
     <SitePage
