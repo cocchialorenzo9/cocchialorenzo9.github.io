@@ -1,0 +1,293 @@
+/* Shared styles for the redesigned home and projects pages.
+   These pages render without @theme/Layout; Infima variables are reset on
+   .root so its global link/heading/paragraph rules match the design. */
+
+:global(html):has(.root) {
+  scroll-behavior: smooth;
+  background: #f6f5f1;
+  color-scheme: light;
+}
+
+:global(html):has(.root) body {
+  background: #f6f5f1;
+}
+
+.root {
+  --ifm-font-family-base: 'Bricolage Grotesque', system-ui, sans-serif;
+  --ifm-heading-font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+  --ifm-heading-color: currentColor;
+  --ifm-heading-margin-top: 0;
+  --ifm-heading-margin-bottom: 0;
+  --ifm-heading-line-height: 1.2;
+  --ifm-paragraph-margin-bottom: 0;
+  --ifm-link-color: #141414;
+  --ifm-link-hover-color: #2d46f5;
+  --ifm-link-decoration: none;
+  --ifm-link-hover-decoration: none;
+  --ifm-font-color-base: #141414;
+
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: normal;
+  color: #141414;
+  background: #f6f5f1;
+  overflow-x: clip;
+  color-scheme: light;
+}
+
+.root section[id],
+.root footer[id] {
+  scroll-margin-top: 88px;
+}
+
+.root img {
+  max-width: 100%;
+}
+
+/* ─── Shared primitives ──────────────────────────────────────────────────── */
+
+.container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding-inline: clamp(16px, 4vw, 48px);
+}
+
+.serif {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.eyebrow {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #5a5a5a;
+}
+
+.chip {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.chipRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.lift {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.lift:hover {
+  transform: translateY(-6px) rotate(-0.4deg);
+}
+
+/* ─── Nav ────────────────────────────────────────────────────────────────── */
+
+.navBar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(246, 245, 241, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(20, 20, 20, 0.08);
+}
+
+.navInner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 16px clamp(16px, 4vw, 48px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.logo {
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+}
+
+.logoDot {
+  color: #2d46f5;
+}
+
+.navLinks {
+  display: flex;
+  gap: clamp(14px, 2.4vw, 32px);
+  font-size: 16px;
+  font-weight: 500;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.navLink {
+  position: relative;
+  padding: 8px 0;
+}
+
+.navLink::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+
+.navLink:hover::after,
+.navLink.navLinkOn::after {
+  transform: scaleX(1);
+}
+
+.navCta,
+.navCta:hover {
+  background: #141414;
+  color: #f6f5f1;
+  padding: 12px 22px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* ─── Footer ─────────────────────────────────────────────────────────────── */
+
+.footer {
+  background: #ff5b2e;
+  color: #141414;
+}
+
+.footerInner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(80px, 10vw, 140px) clamp(16px, 4vw, 48px) 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+.footerEyebrow {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.footerTitle {
+  margin: 0;
+  font-size: clamp(52px, 9vw, 150px);
+  line-height: 0.92;
+  letter-spacing: -0.05em;
+  font-weight: 800;
+}
+
+.footerInner.footerCompact {
+  padding-top: clamp(72px, 9vw, 120px);
+  gap: 48px;
+}
+
+.footerCompact .footerTitle {
+  font-size: clamp(48px, 7.5vw, 120px);
+}
+
+.footerLinks {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.footerBtnSolid,
+.footerBtnSolid:hover {
+  background: #141414;
+  color: #f6f5f1;
+  padding: 18px 30px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: clamp(17px, 1.6vw, 22px);
+}
+
+.footerBtnOutline {
+  border: 2px solid #141414;
+  padding: 16px 28px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: clamp(17px, 1.6vw, 22px);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+/* Ink fill instead of the global blue hover, which is unreadable on orange. */
+.footerBtnOutline:hover {
+  background: #141414;
+  color: #ff5b2e;
+}
+
+.footerBottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 28px;
+  border-top: 2px solid #141414;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.footerBottomLink {
+  font-weight: 700;
+}
+
+/* ─── Responsive / motion ────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .navLinks {
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    gap: 20px;
+    padding-bottom: 4px;
+  }
+
+  .navLinks::-webkit-scrollbar {
+    display: none;
+  }
+
+  .navLinks a {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .root section[id],
+  .root footer[id] {
+    scroll-margin-top: 124px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(html):has(.root) {
+    scroll-behavior: auto;
+  }
+
+  .lift,
+  .navLink::after,
+  .footerBtnOutline {
+    transition: none;
+  }
+
+  .lift:hover {
+    transform: none;
+  }
+}
