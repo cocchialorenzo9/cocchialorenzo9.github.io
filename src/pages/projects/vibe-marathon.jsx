@@ -4,7 +4,7 @@ import Link from '@docusaurus/Link';
 import {
   ComposedChart, LineChart, BarChart, PieChart, ScatterChart,
   Line, Bar, Area, Pie, Cell, Scatter,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceArea, ResponsiveContainer,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
 import { typeColors, typeLabels, activityLabel, formatPace, useIsMobile, RecentSessionCard } from './_vibeMarathonShared';
 
@@ -52,13 +52,6 @@ const phaseColors = {
   taper: "#7B68EE",
 };
 
-function scoreColor(score) {
-  if (score == null) return "#9E9E9E";
-  if (score >= 70) return "#4CAF93";
-  if (score >= 50) return "#E8A838";
-  return "#E05C5C";
-}
-
 function MetricCard({ label, value, sub, color }) {
   return (
     <div style={{
@@ -80,21 +73,9 @@ function MetricCard({ label, value, sub, color }) {
 
 const METRIC_GLOSSARY = [
   {
-    term: "Readiness",
-    what: "A 0-100 blend of today's HRV, sleep score, and resting HR, each compared against your own rolling baseline.",
-    read: "Higher = more recovered. It's a same-weight blend of the three signals, not a single dominant one.",
-    move: "Sleep, easy days, and HRV recovering toward baseline all raise it; a hard session or short night lowers it.",
-  },
-  {
-    term: "HRV",
-    what: "Night-to-night heart-rate variability, compared to your own rolling baseline (averaged in log-space, since raw HRV is naturally skewed rather than evenly distributed).",
-    read: "A meaningful drop below your personal normal range is the real signal — not the raw millisecond number on its own.",
-    move: "Suppressed by poor sleep, alcohol, illness, and accumulated training load; recovers with consistent sleep and easy days.",
-  },
-  {
-    term: "Sleep Score",
-    what: "Your tracked sleep quality and duration from the night before.",
-    read: "Below 60 is the threshold this dashboard treats as a reason to ease off tomorrow's session.",
+    term: "Sleep",
+    what: "Hours slept the night before, from the watch's sleep tracking.",
+    read: "7h+ is green, 6-7h amber, under 6h red. Total duration matters more than the watch's own stage breakdown.",
     move: "Consistent bedtimes and enough total hours matter more than any single habit.",
   },
   {
@@ -345,15 +326,14 @@ export default function VibeDashboard() {
   const rec = coach?.recommendation;
   const recentActivity = coach?.recentActivity;
   const recColor = typeColors[rec?.type] || "#9E9E9E";
-  const scoreCol = scoreColor(readiness?.score);
 
   const todayDate = new Date().toISOString().slice(0, 10);
   const todayPlanDay = getPlanDay(plan, todayDate);
   const todayColor = typeColors[todayPlanDay?.training?.type] || "#9E9E9E";
   const todayLabel = typeLabels[todayPlanDay?.training?.type] || (todayPlanDay?.training ? todayPlanDay.training.type : "Rest");
 
-  const notStarted = readiness?.score == null && history.length === 0;
-  const noHistory = readiness?.score != null && history.length === 0;
+  const notStarted = coach?.date == null && history.length === 0;
+  const noHistory = coach?.date != null && history.length === 0;
 
   const last90 = history.slice(-90).map(e => ({ ...e, date: e.date?.slice(5) }));
   const zoneLast60 = zoneHistory.slice(-60).map(e => ({ ...e, date: e.date?.slice(5) }));
@@ -445,7 +425,7 @@ export default function VibeDashboard() {
               }}>
                 <p style={{ fontSize: 14, color: "#444", margin: "0 0 0 0", lineHeight: 1.6 }}>
                   Training hasn't started yet. This dashboard will come alive once daily coach
-                  updates begin — showing readiness scores, workout recommendations, and
+                  updates begin — showing workout recommendations, recovery signals, and
                   training load trends.
                 </p>
               </div>
@@ -604,40 +584,18 @@ export default function VibeDashboard() {
                 value={coach.phase ? coach.phase.charAt(0).toUpperCase() + coach.phase.slice(1) : "—"}
                 color={phaseColors[coach.phase] || "#1a1a2e"}
               />
-              <MetricCard
-                label="Readiness"
-                value={readiness?.score ?? "—"}
-                sub={readiness?.score != null
-                  ? readiness.score >= 70 ? "Good" : readiness.score >= 50 ? "Moderate" : "Low"
-                  : "No data yet"}
-                color={scoreCol}
-              />
             </div>
 
             {/* Key metrics */}
             {readiness && (
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 28 }}>
                 <MetricCard
-                  label="HRV"
-                  value={readiness.hrv?.value ?? "—"}
-                  sub={readiness.hrv?.delta_pct != null
-                    ? `${readiness.hrv.delta_pct > 0 ? "+" : ""}${readiness.hrv.delta_pct}% vs baseline`
-                    : null}
+                  label="Sleep"
+                  value={readiness.sleep?.hours != null ? `${readiness.sleep.hours}h` : "—"}
                   color={
-                    readiness.hrv?.delta_pct == null ? "#9E9E9E"
-                    : readiness.hrv.delta_pct >= 0 ? "#4CAF93"
-                    : readiness.hrv.delta_pct >= -10 ? "#E8A838"
-                    : "#E05C5C"
-                  }
-                />
-                <MetricCard
-                  label="Sleep Score"
-                  value={readiness.sleep?.score ?? "—"}
-                  sub={readiness.sleep?.hours != null ? `${readiness.sleep.hours}h` : null}
-                  color={
-                    readiness.sleep?.score == null ? "#9E9E9E"
-                    : readiness.sleep.score >= 70 ? "#4CAF93"
-                    : readiness.sleep.score >= 50 ? "#E8A838"
+                    readiness.sleep?.hours == null ? "#9E9E9E"
+                    : readiness.sleep.hours >= 7 ? "#4CAF93"
+                    : readiness.sleep.hours >= 6 ? "#E8A838"
                     : "#E05C5C"
                   }
                 />
@@ -688,27 +646,6 @@ export default function VibeDashboard() {
                     <Line yAxisId="left" type="monotone" dataKey="ctl" stroke="#4CAF93" dot={false} name="CTL (Fitness)" strokeWidth={2} />
                     <Line yAxisId="left" type="monotone" dataKey="atl" stroke="#E8A838" dot={false} name="ATL (Fatigue)" strokeWidth={2} />
                   </ComposedChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-
-            {/* Readiness Score Trend */}
-            {hasCharts && last90.length > 0 && (
-              <div style={{ marginBottom: 32 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a2e", marginBottom: 12 }}>
-                  Readiness Score Trend — last 90 days
-                </h3>
-                <ResponsiveContainer width="100%" height={180}>
-                  <LineChart data={last90} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-                    <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={Math.floor(last90.length / 6)} />
-                    <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
-                    <Tooltip />
-                    <ReferenceArea y1={0} y2={50} fill="#E05C5C" fillOpacity={0.08} />
-                    <ReferenceArea y1={50} y2={70} fill="#E8A838" fillOpacity={0.08} />
-                    <ReferenceArea y1={70} y2={100} fill="#4CAF93" fillOpacity={0.08} />
-                    <Line type="monotone" dataKey="readiness_score" stroke="#1a1a2e" dot={false} name="Readiness" strokeWidth={2} />
-                  </LineChart>
                 </ResponsiveContainer>
               </div>
             )}
