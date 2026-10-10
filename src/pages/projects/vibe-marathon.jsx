@@ -388,6 +388,20 @@ export default function VibeDashboard() {
           </p>
         </div>
 
+        {/* Race plan */}
+        <Link to="/projects/vibe-marathon-race-plan" style={{ textDecoration: "none" }}>
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+            background: "#1a1a2e", color: "#fff", borderRadius: 12, padding: "12px 16px", marginBottom: 24,
+          }}>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 800 }}>🏁 Race plan · Sun Oct 11</div>
+              <div style={{ fontSize: 12, color: "#c8c8d8" }}>Pacing lanes, checkpoint decisions, honey fueling</div>
+            </div>
+            <span style={{ fontSize: 18, fontWeight: 800, color: "#4ade80" }}>→</span>
+          </div>
+        </Link>
+
         {loading ? (
           <div style={{ color: "#888", textAlign: "center", padding: 64, fontSize: 15 }}>Loading…</div>
         ) : !coach ? (
