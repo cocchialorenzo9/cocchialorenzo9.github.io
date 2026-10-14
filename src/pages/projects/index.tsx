@@ -36,15 +36,15 @@ const PROJECTS: Project[] = [
     emoji: '🏃‍♂️',
     emojiLabel: 'Running',
     description:
-      'My own marathon coach. Every day it pulls my training data from Garmin, computes fitness and fatigue (ATL, CTL, TSB) and writes a coaching tip for the day. The dashboard shows readiness, training load and charts.',
+      'My own marathon coach, now chasing sub-3 in Rome. Watch data goes in, training load (ATL, CTL, TSB) is computed, and a session for every day of the 22-week plan comes out. Plus the full recap of my first marathon in Munich.',
     status: 'live',
     img: '/img/site/project-vibe-marathon.webp',
     alt: 'Abstract dashboard with a heart-rate line and training bars',
     featured: true,
     tags: ['Python', 'Garmin data', 'React', 'GitHub Pages'],
     actions: [
-      { label: 'Open dashboard →', href: '/projects/vibe-marathon' },
-      { label: 'Training plan', href: '/marathon' },
+      { label: 'Open app →', href: 'https://cocchialorenzo9.github.io/vibe-marathon/' },
+      { label: 'Munich 2026', href: 'https://cocchialorenzo9.github.io/vibe-marathon/#/munich-2026' },
       { label: 'Code', href: 'https://github.com/cocchialorenzo9/vibe-marathon' },
     ],
   },

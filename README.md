@@ -9,9 +9,10 @@ Live at [cocchialorenzo9.github.io](https://cocchialorenzo9.github.io).
 | Route | Description |
 |---|---|
 | `/` | Portfolio home |
-| `/marathon` | Munich Marathon 2026 training plan |
 | `/projects` | Live project dashboards |
-| `/projects/vibe-marathon` | Marathon preparation dashboard (readiness, training load, charts) |
+| `/home` | Our Home move-in checklist (password protected) |
+
+Vibe Marathon moved to its own repo and site: [cocchialorenzo9/vibe-marathon](https://github.com/cocchialorenzo9/vibe-marathon), live at [cocchialorenzo9.github.io/vibe-marathon](https://cocchialorenzo9.github.io/vibe-marathon/). The old routes (`/projects/vibe-marathon`, `/projects/vibe-marathon-journal`, `/projects/vibe-marathon-race-plan`, `/marathon`) redirect there.
 
 ## Development
 
@@ -27,6 +28,4 @@ Automatic. Any push to `main` triggers the GitHub Actions workflow (`.github/wor
 
 ## Adding a new project dashboard
 
-1. Create `src/pages/projects/<slug>.jsx` — follow `vibe-marathon.jsx` as a template.
-2. Add a card for it in `src/pages/projects/index.jsx` (the `PROJECTS` array).
-3. The route `/projects/<slug>` is live automatically — no routing config needed.
+Bigger apps get their own repo and GitHub Pages site (like `vibe-marathon` and `vibe-plant-watering`); add a card with an absolute `href` in the `PROJECTS` array of `src/pages/projects/index.tsx`. For a small page that lives here, create `src/pages/projects/<slug>.jsx`; the route `/projects/<slug>` is live automatically.
