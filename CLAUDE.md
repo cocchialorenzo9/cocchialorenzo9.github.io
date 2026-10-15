@@ -21,7 +21,9 @@ GIT_USER=cocchialorenzo9 yarn deploy
 
 This is a personal website built on **Docusaurus 2.2.0** (classic preset). Docs and blog features are disabled — the site is plain React pages.
 
-The home page (`/`) and projects page (`/projects`) use a standalone design (light only, Bricolage Grotesque + Instrument Serif) and deliberately render **without** `@theme/Layout`, so the Docusaurus navbar/footer never appear on them. The app pages (`/projects/vibe-marathon`, `/home`, `/marathon`, …) still use `Layout` and the Docusaurus navbar.
+The home page (`/`) and projects page (`/projects`) use a standalone design (light only, Bricolage Grotesque + Instrument Serif) and deliberately render **without** `@theme/Layout`, so the Docusaurus navbar/footer never appear on them. The app pages (`/home`, …) still use `Layout` and the Docusaurus navbar.
+
+Vibe Marathon lives in its own repo (`cocchialorenzo9/vibe-marathon`, app in `web/`, served at `/vibe-marathon/`). Its old routes here (`/projects/vibe-marathon*`, `/marathon`) are redirect stubs built on `src/components/site/Redirect.tsx`.
 
 ### Key files
 
@@ -31,7 +33,7 @@ The home page (`/`) and projects page (`/projects`) use a standalone design (lig
 | `src/pages/index.tsx` | Home page — Hero, Marquee, About, Numbers, Strengths, Work, How I work, Life, Contact — driven by data arrays at the top of the file |
 | `src/pages/index.module.css` | Home page section styles |
 | `src/pages/projects/index.tsx` | Projects page, driven by the `PROJECTS` array (stats counters are derived from it) |
-| `src/components/site/` | Shared shell for both pages: `SitePage` (head, fonts, Infima resets), `SiteNav`, `SiteFooter`, `SmartLink`, `tokens.ts` (palette), `site.module.css` |
+| `src/components/site/` | Shared shell for both pages: `SitePage` (head, fonts, Infima resets), `SiteNav`, `SiteFooter`, `SmartLink`, `Redirect` (moved-page stubs), `tokens.ts` (palette), `site.module.css` |
 | `src/css/custom.css` | Global Infima CSS variable overrides for the app pages (color palette, navbar always-dark) |
 | `static/img/site/` | Images for the home and projects pages |
 | `static/cv/Lorenzo_Cocchia_CV.pdf` | CV linked from the home page footer (public — keep personal phone number out of it) |
